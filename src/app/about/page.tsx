@@ -18,7 +18,8 @@ export default function AboutPage() {
       {/* 상단 소개 영역 */}
       <div className="border-b border-line bg-surface">
         <div className="mx-auto max-w-5xl px-4 py-16">
-          <h1 className="text-3xl font-black sm:text-5xl">체육관 소개</h1>
+          <p className="text-sm font-bold tracking-widest text-accent">SINCE {gym.foundedYear}</p>
+          <h1 className="mt-2 text-3xl font-black sm:text-5xl">체육관 소개</h1>
           <p className="mt-4 max-w-2xl text-muted">{gym.intro}</p>
         </div>
       </div>

@@ -9,7 +9,7 @@ export default function Footer() {
         <p>{gym.contact.address}</p>
         <p>문의 {gym.contact.phone}</p>
         <p className="pt-4 text-xs">
-          © {gym.copyrightYear} {gym.name}
+          © {gym.foundedYear} {gym.name}
         </p>
       </div>
     </footer>
