@@ -1,6 +1,6 @@
 // 체육관 정보는 이 파일 한 곳에서만 관리합니다.
 // 화면 컴포넌트는 여기 값을 읽어서 보여주기만 하므로, 가격이나 시간표가 바뀌면 이 파일만 고치면 됩니다.
-// TODO: 아래 값은 모두 예시입니다. 실제 체육관 정보로 바꿔 주세요.
+// TODO: 철학(philosophy), 시설(facilities) 문구와 박스 인스타그램, 카카오톡 채널은 아직 예시 값입니다.
 
 // type = 데이터의 모양 정의. Java의 DTO 클래스와 같은 역할입니다.
 // 정의와 다른 모양의 값을 넣으면 저장하는 순간 VS Code에 빨간 밑줄이 생깁니다.
@@ -12,8 +12,7 @@ export type InfoCard = {
 export type Coach = {
   name: string;
   role: string;
-  certifications: string[]; // string[] = 문자열 배열 (Java의 List<String>)
-  bio: string;
+  instagram: string; // 인스타그램 아이디 (@ 없이). 화면에서 프로필 링크로 바뀝니다.
 };
 
 export const gym = {
@@ -49,32 +48,26 @@ export const gym = {
   ] satisfies InfoCard[],
 
   coaches: [
-    {
-      name: "김코치",
-      role: "헤드 코치",
-      certifications: ["CrossFit Level 2 Trainer", "생활스포츠지도사 2급"],
-      bio: "10년 차 코치. 초보자 기초 동작 지도를 전문으로 합니다.",
-    },
-    {
-      name: "이코치",
-      role: "코치",
-      certifications: ["CrossFit Level 1 Trainer"],
-      bio: "HYROX 선수 출신. 체력과 지구력 향상 프로그램을 담당합니다.",
-    },
+    { name: "윤효용", role: "헤드 코치", instagram: "steel.yoon" },
+    { name: "김성희", role: "코치", instagram: "sjy_shee" },
+    { name: "이정인", role: "코치", instagram: "mambaleee" },
   ] satisfies Coach[],
 
   // 수업 시간표는 src/data/timetable.ts, 가격표는 src/data/pricing.ts로 분리했습니다.
 
   contact: {
-    phone: "010-0000-0000",
-    address: "서울특별시 OO구 OO로 123, 지하 1층",
+    phone: "0507-1333-6632",
+    address: "서울 마포구 독막로22길 9 B1층",
+    // TODO: 박스 인스타그램, 카카오톡 채널은 아직 예시 값입니다.
     instagram: "https://www.instagram.com/",
     kakaoChannel: "https://pf.kakao.com/",
+    // 네이버 지도 장소 페이지 (식스트레이닝, 장소 ID 1692057510)
+    naverPlace: "https://map.naver.com/p/entry/place/1692057510",
   },
 };
 
-// 지도 API 키 없이 쓸 수 있도록 네이버 지도 검색 링크를 만듭니다.
-// 주소에 한글과 공백이 있어서 encodeURIComponent로 URL 인코딩해야 합니다. (Java의 URLEncoder.encode)
-export function mapSearchUrl(address: string): string {
-  return `https://map.naver.com/p/search/${encodeURIComponent(address)}`;
+// 인스타그램 아이디로 프로필 주소를 만듭니다. 예: "steel.yoon" → "https://www.instagram.com/steel.yoon/"
+// encodeURIComponent = 아이디에 특수문자가 섞여도 안전한 URL이 되도록 인코딩 (Java의 URLEncoder.encode)
+export function instagramUrl(id: string): string {
+  return `https://www.instagram.com/${encodeURIComponent(id)}/`;
 }

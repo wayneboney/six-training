@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PriceList from "@/components/PriceList";
 import Section from "@/components/Section";
 import Timetable from "@/components/timetable/Timetable";
-import { gym, mapSearchUrl } from "@/data/gym";
+import { gym, instagramUrl } from "@/data/gym";
 
 // 탭 제목이 layout.tsx의 template 규칙에 따라 "체육관 소개 | SIX Training"이 됩니다.
 export const metadata: Metadata = {
@@ -47,20 +47,20 @@ export default function AboutPage() {
       </Section>
 
       <Section title="코치진">
-        <div className="grid gap-6 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-3">
           {gym.coaches.map((coach) => (
             <div key={coach.name} className="rounded-lg border border-line p-6">
-              <p className="text-sm text-accent">{coach.role}</p>
-              <h3 className="mt-1 text-xl font-bold">{coach.name}</h3>
-              <p className="mt-3 text-muted">{coach.bio}</p>
-              {/* 반복 안의 반복: 코치마다 자격증 목록을 다시 반복 (Java의 이중 for문) */}
-              <ul className="mt-4 flex flex-wrap gap-2">
-                {coach.certifications.map((cert) => (
-                  <li key={cert} className="rounded bg-surface px-2 py-1 text-xs text-muted">
-                    {cert}
-                  </li>
-                ))}
-              </ul>
+              <p className="text-sm font-bold text-accent">{coach.role}</p>
+              <h3 className="mt-1 text-xl font-black">{coach.name}</h3>
+              {/* 인스타그램 아이디를 프로필 링크로. 외부 사이트라 새 탭 + 보안 설정(rel) */}
+              <a
+                href={instagramUrl(coach.instagram)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-block text-sm text-muted hover:text-accent hover:underline"
+              >
+                @{coach.instagram}
+              </a>
             </div>
           ))}
         </div>
@@ -81,7 +81,7 @@ export default function AboutPage() {
           <div className="mt-4 flex flex-wrap gap-3">
             {/* 외부 사이트 링크: 새 탭 + 보안 설정(rel) */}
             <a
-              href={mapSearchUrl(gym.contact.address)}
+              href={gym.contact.naverPlace}
               target="_blank"
               rel="noopener noreferrer"
               className="rounded-md bg-accent px-4 py-2 text-sm font-bold text-white hover:opacity-90"
