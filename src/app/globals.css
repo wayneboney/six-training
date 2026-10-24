@@ -1,26 +1,30 @@
 @import "tailwindcss";
 
+/* 사이트 전체 색상. 색을 바꾸려면 여기 값만 고치면 됩니다. (Java의 상수 클래스 역할) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0a0a0a; /* 배경: 거의 검정 */
+  --foreground: #ededed; /* 기본 글자: 밝은 회색 */
+  --muted: #a3a3a3; /* 보조 글자: 중간 회색 */
+  --line: #262626; /* 테두리, 구분선 */
+  --surface: #171717; /* 카드 배경 */
+  --accent: #ef4444; /* 포인트 색: 빨강 */
 }
 
+/* 위 색상을 Tailwind 클래스 이름으로 등록합니다.
+   예: --color-accent → text-accent, bg-accent, border-accent 클래스를 쓸 수 있게 됩니다. */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-surface: var(--surface);
+  --color-accent: var(--accent);
+  --font-sans: var(--font-noto-sans-kr);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-noto-sans-kr), system-ui, sans-serif;
+  word-break: keep-all; /* 한글 문장이 단어 중간에서 줄바꿈되지 않게 */
 }

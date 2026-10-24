@@ -1,30 +1,28 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Noto_Sans_KR } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { gym } from "@/data/gym";
 import "./globals.css";
 
-// 폰트 설정 (영문용). 한글 폰트는 다음 단계에서 추가합니다.
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// 한글 폰트. 빌드할 때 폰트 파일을 내려받아 사이트에 함께 넣기 때문에
+// 방문자 브라우저가 구글 서버에 따로 요청하지 않습니다. (속도, 개인정보 측면에서 유리)
+const notoSansKr = Noto_Sans_KR({
+  variable: "--font-noto-sans-kr",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["400", "700", "900"],
 });
 
 // metadata = 브라우저 탭 제목, 검색 엔진에 보여줄 정보
 export const metadata: Metadata = {
   title: {
     // 메인 페이지 탭 제목
-    default: "SIX Training",
+    default: gym.name,
     // 하위 페이지 탭 제목 규칙. %s 자리에 각 페이지 제목이 들어갑니다.
     // 예: 소개 페이지 → "체육관 소개 | SIX Training"
-    template: "%s | SIX Training",
+    template: `%s | ${gym.name}`,
   },
-  description: "SIX Training - 어제보다 강한 오늘",
+  description: `${gym.name} - ${gym.slogan}`,
 };
 
 // RootLayout = 모든 페이지를 감싸는 최상위 틀 (JSP의 공통 템플릿 역할)
@@ -32,10 +30,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     // lang="ko": 이 페이지가 한국어라고 브라우저와 검색 엔진에 알려줍니다.
-    <html
-      lang="ko"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
+    <html lang="ko" className={`${notoSansKr.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         {/* 헤더는 모든 페이지 맨 위에 공통으로 나옵니다 */}
         <Header />

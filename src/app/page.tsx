@@ -1,19 +1,40 @@
-// page.tsx = "/" 주소에 보여줄 화면
-// 화면은 "HTML을 return하는 함수"로 만들고, 이 함수를 '컴포넌트'라고 부릅니다.
-// export default = 이 파일의 대표 함수를 외부(Next.js)에 공개한다는 뜻입니다.
-export default function Home() {
-  // const는 Java의 final 변수와 같습니다. 값을 다시 바꿀 수 없습니다.
-  const gymName = "SIX Training";
+import Link from "next/link";
+import { gym } from "@/data/gym";
 
+// page.tsx = "/" 주소에 보여줄 화면 (메인 페이지)
+export default function Home() {
   return (
-    // className은 HTML의 class 속성입니다. (JS에서 class는 예약어라 이름이 다릅니다)
-    // text-4xl = 큰 글씨, font-bold = 굵게 (Tailwind 문법)
-    // mx-auto max-w-5xl px-4 = 헤더와 같은 너비, 같은 좌우 여백으로 정렬
-    // <main>은 layout.tsx에서 이미 감싸고 있어서 여기서는 <div>를 씁니다.
-    <div className="mx-auto w-full max-w-5xl px-4 py-10">
-      {/* 중괄호 { } 안에는 JS 값을 넣습니다. JSP의 ${gymName}와 같습니다 */}
-      <h1 className="text-4xl font-bold">{gymName}</h1>
-      <p className="mt-4 text-lg">어제보다 강한 오늘</p>
+    <div className="mx-auto flex max-w-5xl flex-col items-start gap-6 px-4 py-28 sm:py-40">
+      <p className="text-sm font-bold uppercase tracking-widest text-accent">Functional Training</p>
+
+      {/* sm:text-6xl = 화면이 640px 이상일 때만 글자를 더 크게 (모바일 우선 설계) */}
+      <h1 className="text-4xl font-black leading-tight sm:text-6xl">{gym.slogan}</h1>
+
+      <p className="max-w-xl text-lg text-muted">
+        처음 오시는 분도 코치가 동작부터 차근차근 지도합니다. 체력에 상관없이 누구나 시작할 수
+        있습니다.
+      </p>
+
+      <div className="flex flex-wrap gap-3">
+        {/* 사이트 안의 페이지로 이동할 때는 <Link> */}
+        <Link
+          href="/about"
+          className="rounded-md bg-accent px-6 py-3 font-bold text-white hover:opacity-90"
+        >
+          체육관 둘러보기
+        </Link>
+
+        {/* 외부 사이트로 나갈 때는 <a> + 새 탭(target="_blank")
+            rel="noopener noreferrer" = 새 탭에서 열린 외부 사이트가 우리 페이지를 조작하지 못하게 막는 보안 설정 */}
+        <a
+          href={gym.contact.kakaoChannel}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-md border border-line px-6 py-3 font-bold hover:bg-surface"
+        >
+          카카오톡 문의
+        </a>
+      </div>
     </div>
   );
 }
