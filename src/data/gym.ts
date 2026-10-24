@@ -63,8 +63,16 @@ export const gym = {
     kakaoChannel: "https://pf.kakao.com/",
     // 네이버 지도 장소 페이지 (식스트레이닝, 장소 ID 1692057510)
     naverPlace: "https://map.naver.com/p/entry/place/1692057510",
+    // 지도에서 위치를 찾을 때 쓰는 검색어. 층수(B1층)는 지도 검색에 방해가 되어 뺐습니다.
+    mapQuery: "서울 마포구 독막로22길 9",
   },
 };
+
+// 구글 지도 임베드 주소. API 키 없이 무료로 쓸 수 있는 방식입니다.
+// z=17 = 확대 수준(숫자가 클수록 가까이), hl=ko = 한국어 표시
+export function googleMapEmbedUrl(query: string): string {
+  return `https://maps.google.com/maps?q=${encodeURIComponent(query)}&z=17&hl=ko&output=embed`;
+}
 
 // 인스타그램 아이디로 프로필 주소를 만듭니다. 예: "steel.yoon" → "https://www.instagram.com/steel.yoon/"
 // encodeURIComponent = 아이디에 특수문자가 섞여도 안전한 URL이 되도록 인코딩 (Java의 URLEncoder.encode)

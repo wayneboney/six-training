@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PriceList from "@/components/PriceList";
 import Section from "@/components/Section";
 import Timetable from "@/components/timetable/Timetable";
-import { gym, instagramUrl } from "@/data/gym";
+import { gym, googleMapEmbedUrl, instagramUrl } from "@/data/gym";
 
 // 탭 제목이 layout.tsx의 template 규칙에 따라 "체육관 소개 | SIX Training"이 됩니다.
 export const metadata: Metadata = {
@@ -75,6 +75,16 @@ export default function AboutPage() {
       </Section>
 
       <Section title="오시는 길">
+        {/* iframe = 다른 사이트(구글 지도)의 화면을 우리 페이지 안에 끼워 넣는 태그
+            title = 화면 낭독기가 읽어 주는 이름, loading="lazy" = 지도 근처까지 스크롤했을 때 불러와서 첫 화면이 빨라짐
+            aspect-[4/3] sm:aspect-[16/7] = 모바일은 4:3, PC는 가로로 넓게 */}
+        <iframe
+          title={`${gym.name} 위치 지도`}
+          src={googleMapEmbedUrl(gym.contact.mapQuery)}
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+          className="mb-4 aspect-[4/3] w-full rounded-lg border border-line sm:aspect-[16/7]"
+        />
         <div className="rounded-lg bg-surface p-6">
           <p>{gym.contact.address}</p>
           <p className="mt-1 text-muted">전화 {gym.contact.phone}</p>
