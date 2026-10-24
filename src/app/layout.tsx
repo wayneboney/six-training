@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import "./globals.css";
 
 // 폰트 설정 (영문용). 한글 폰트는 다음 단계에서 추가합니다.
@@ -38,7 +39,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         {/* 헤더는 모든 페이지 맨 위에 공통으로 나옵니다 */}
         <Header />
-        {children}
+        {/* flex-1 = 남는 높이를 본문이 차지해서, 내용이 짧아도 푸터가 화면 맨 아래에 붙습니다 */}
+        <main className="flex-1">{children}</main>
+        {/* 푸터는 모든 페이지 맨 아래에 공통으로 나옵니다 */}
+        <Footer />
       </body>
     </html>
   );
