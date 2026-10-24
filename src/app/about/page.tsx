@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import PriceList from "@/components/PriceList";
 import Section from "@/components/Section";
 import Timetable from "@/components/timetable/Timetable";
-import { gym, formatPrice, mapSearchUrl } from "@/data/gym";
+import { gym, mapSearchUrl } from "@/data/gym";
 
 // 탭 제목이 layout.tsx의 template 규칙에 따라 "체육관 소개 | SIX Training"이 됩니다.
 export const metadata: Metadata = {
@@ -70,22 +71,7 @@ export default function AboutPage() {
       </Section>
 
       <Section title="가격">
-        <div className="grid gap-4 sm:grid-cols-3">
-          {gym.pricing.map((plan) => (
-            <div
-              key={plan.name}
-              // 추천 상품(highlight)이면 빨간 테두리, 아니면 기본 테두리
-              className={`rounded-lg p-6 ${
-                plan.highlight ? "border-2 border-accent bg-surface" : "border border-line"
-              }`}
-            >
-              {plan.highlight && <p className="mb-2 text-xs font-bold text-accent">추천</p>}
-              <h3 className="font-bold">{plan.name}</h3>
-              <p className="mt-2 text-2xl font-black">{formatPrice(plan.price)}</p>
-              <p className="mt-2 text-sm text-muted">{plan.description}</p>
-            </div>
-          ))}
-        </div>
+        <PriceList />
       </Section>
 
       <Section title="오시는 길">

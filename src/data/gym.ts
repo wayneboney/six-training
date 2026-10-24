@@ -16,13 +16,6 @@ export type Coach = {
   bio: string;
 };
 
-export type PricePlan = {
-  name: string;
-  price: number; // 원 단위 정수. 화면에 보여줄 때 formatPrice로 "200,000원" 형태로 바꿉니다.
-  description: string;
-  highlight?: boolean; // ? = 생략 가능 (Java의 null 허용 필드). true면 추천 상품으로 강조
-};
-
 export const gym = {
   name: "SIX Training",
   slogan: "어제보다 강한 오늘",
@@ -70,13 +63,7 @@ export const gym = {
     },
   ] satisfies Coach[],
 
-  // 수업 시간표는 양이 많아서 src/data/timetable.ts로 분리했습니다.
-
-  pricing: [
-    { name: "1회 체험", price: 20000, description: "처음 오시는 분 대상 1회 수업" },
-    { name: "1개월", price: 200000, description: "주 횟수 제한 없음" },
-    { name: "3개월", price: 540000, description: "월 18만 원, 10% 할인", highlight: true },
-  ] satisfies PricePlan[],
+  // 수업 시간표는 src/data/timetable.ts, 가격표는 src/data/pricing.ts로 분리했습니다.
 
   contact: {
     phone: "010-0000-0000",
@@ -85,11 +72,6 @@ export const gym = {
     kakaoChannel: "https://pf.kakao.com/",
   },
 };
-
-// 가격을 "200,000원" 형태로 바꿉니다. (Java의 DecimalFormat("#,###")과 같은 역할)
-export function formatPrice(price: number): string {
-  return `${price.toLocaleString("ko-KR")}원`;
-}
 
 // 지도 API 키 없이 쓸 수 있도록 네이버 지도 검색 링크를 만듭니다.
 // 주소에 한글과 공백이 있어서 encodeURIComponent로 URL 인코딩해야 합니다. (Java의 URLEncoder.encode)
