@@ -16,11 +16,6 @@ export type Coach = {
   bio: string;
 };
 
-export type ClassSlot = {
-  label: string; // 예: "평일"
-  times: string[]; // 예: ["06:30", "07:30"]. 빈 배열이면 휴무로 표시
-};
-
 export type PricePlan = {
   name: string;
   price: number; // 원 단위 정수. 화면에 보여줄 때 formatPrice로 "200,000원" 형태로 바꿉니다.
@@ -41,31 +36,22 @@ export const gym = {
   philosophy: [
     {
       title: "안전이 먼저",
-      description:
-        "무게보다 정확한 자세가 우선입니다. 모든 수업에 코치가 함께합니다.",
+      description: "무게보다 정확한 자세가 우선입니다. 모든 수업에 코치가 함께합니다.",
     },
     {
       title: "누구나 시작",
-      description:
-        "운동 경험이 없어도 강도를 조절해서 같은 운동을 함께 수행합니다.",
+      description: "운동 경험이 없어도 강도를 조절해서 같은 운동을 함께 수행합니다.",
     },
     {
       title: "함께하는 커뮤니티",
-      description:
-        "혼자서는 못 할 것 같던 운동도 함께라면 끝까지 해낼 수 있습니다.",
+      description: "혼자서는 못 할 것 같던 운동도 함께라면 끝까지 해낼 수 있습니다.",
     },
   ] satisfies InfoCard[],
 
   facilities: [
     { title: "리그 & 풀업바", description: "8인 동시 사용 가능한 리그" },
-    {
-      title: "바벨 & 플레이트",
-      description: "올림픽 바벨, 범퍼 플레이트 완비",
-    },
-    {
-      title: "유산소 머신",
-      description: "로잉, 에어바이크, 스키에르그, 트레드밀",
-    },
+    { title: "바벨 & 플레이트", description: "올림픽 바벨, 범퍼 플레이트 완비" },
+    { title: "유산소 머신", description: "로잉, 에어바이크, 스키에르그, 트레드밀" },
     { title: "샤워실 & 락커", description: "남녀 분리 샤워실, 개인 락커" },
   ] satisfies InfoCard[],
 
@@ -84,28 +70,12 @@ export const gym = {
     },
   ] satisfies Coach[],
 
-  schedule: [
-    {
-      label: "평일",
-      times: ["06:30", "07:30", "12:00", "19:00", "20:00", "21:00"],
-    },
-    { label: "토요일", times: ["10:00", "11:00"] },
-    { label: "일요일·공휴일", times: [] },
-  ] satisfies ClassSlot[],
+  // 수업 시간표는 양이 많아서 src/data/timetable.ts로 분리했습니다.
 
   pricing: [
-    {
-      name: "1회 체험",
-      price: 20000,
-      description: "처음 오시는 분 대상 1회 수업",
-    },
+    { name: "1회 체험", price: 20000, description: "처음 오시는 분 대상 1회 수업" },
     { name: "1개월", price: 200000, description: "주 횟수 제한 없음" },
-    {
-      name: "3개월",
-      price: 540000,
-      description: "월 18만 원, 10% 할인",
-      highlight: true,
-    },
+    { name: "3개월", price: 540000, description: "월 18만 원, 10% 할인", highlight: true },
   ] satisfies PricePlan[],
 
   contact: {
