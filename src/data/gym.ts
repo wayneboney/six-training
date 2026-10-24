@@ -1,6 +1,6 @@
 // 체육관 정보는 이 파일 한 곳에서만 관리합니다.
 // 화면 컴포넌트는 여기 값을 읽어서 보여주기만 하므로, 가격이나 시간표가 바뀌면 이 파일만 고치면 됩니다.
-// TODO: 철학(philosophy), 시설(facilities) 문구와 박스 인스타그램, 카카오톡 채널은 아직 예시 값입니다.
+// TODO: 철학(philosophy), 시설(facilities) 문구와 카카오톡 채널은 아직 예시 값입니다.
 
 // type = 데이터의 모양 정의. Java의 DTO 클래스와 같은 역할입니다.
 // 정의와 다른 모양의 값을 넣으면 저장하는 순간 VS Code에 빨간 밑줄이 생깁니다.
@@ -58,8 +58,8 @@ export const gym = {
   contact: {
     phone: "0507-1333-6632",
     address: "서울 마포구 독막로22길 9 B1층",
-    // TODO: 박스 인스타그램, 카카오톡 채널은 아직 예시 값입니다.
-    instagram: "https://www.instagram.com/",
+    // TODO: 카카오톡 채널은 아직 예시 값입니다.
+    instagram: "https://www.instagram.com/six__training/",
     kakaoChannel: "https://pf.kakao.com/",
     // 네이버 지도 장소 페이지 (식스트레이닝, 장소 ID 1692057510)
     naverPlace: "https://map.naver.com/p/entry/place/1692057510",
