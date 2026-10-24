@@ -7,7 +7,7 @@ export default function Home() {
 
   return (
     // className은 HTML의 class 속성입니다. (JS에서 class는 예약어라 이름이 다릅니다)
-    // p-10 = 안쪽 여백, text-4xl = 큰 글씨, font-bold = 굵게 (Tailwind 문법)
+    // text-4xl = 큰 글씨, font-bold = 굵게 (Tailwind 문법)
     // mx-auto max-w-5xl px-4 = 헤더와 같은 너비, 같은 좌우 여백으로 정렬
     <main className="mx-auto w-full max-w-5xl px-4 py-10">
       {/* 중괄호 { } 안에는 JS 값을 넣습니다. JSP의 ${gymName}와 같습니다 */}
