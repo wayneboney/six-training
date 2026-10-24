@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Section from "@/components/Section";
+import Timetable from "@/components/timetable/Timetable";
 import { gym, formatPrice, mapSearchUrl } from "@/data/gym";
 
 // 탭 제목이 layout.tsx의 template 규칙에 따라 "체육관 소개 | SIX Training"이 됩니다.
@@ -64,29 +65,8 @@ export default function AboutPage() {
         </div>
       </Section>
 
-      <Section title="수업 시간표" subtitle="모든 수업은 60분, 시작 10분 전까지 도착해 주세요.">
-        <div className="space-y-3">
-          {gym.schedule.map((slot) => (
-            <div
-              key={slot.label}
-              className="flex flex-col gap-2 rounded-lg bg-surface p-5 sm:flex-row sm:items-center"
-            >
-              <p className="w-32 shrink-0 font-bold">{slot.label}</p>
-              {/* 조건 ? A : B = 삼항 연산자. 수업 시간이 있으면 목록, 없으면 "휴무" (Java와 같은 문법) */}
-              {slot.times.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {slot.times.map((time) => (
-                    <span key={time} className="rounded border border-line px-3 py-1 text-sm">
-                      {time}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted">휴무</p>
-              )}
-            </div>
-          ))}
-        </div>
+      <Section title="수업 시간표">
+        <Timetable />
       </Section>
 
       <Section title="가격">

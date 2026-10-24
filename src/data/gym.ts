@@ -16,11 +16,6 @@ export type Coach = {
   bio: string;
 };
 
-export type ClassSlot = {
-  label: string; // 예: "평일"
-  times: string[]; // 예: ["06:30", "07:30"]. 빈 배열이면 휴무로 표시
-};
-
 export type PricePlan = {
   name: string;
   price: number; // 원 단위 정수. 화면에 보여줄 때 formatPrice로 "200,000원" 형태로 바꿉니다.
@@ -75,11 +70,7 @@ export const gym = {
     },
   ] satisfies Coach[],
 
-  schedule: [
-    { label: "평일", times: ["06:30", "07:30", "12:00", "19:00", "20:00", "21:00"] },
-    { label: "토요일", times: ["10:00", "11:00"] },
-    { label: "일요일·공휴일", times: [] },
-  ] satisfies ClassSlot[],
+  // 수업 시간표는 양이 많아서 src/data/timetable.ts로 분리했습니다.
 
   pricing: [
     { name: "1회 체험", price: 20000, description: "처음 오시는 분 대상 1회 수업" },
