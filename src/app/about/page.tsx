@@ -1,0 +1,138 @@
+import type { Metadata } from "next";
+import Section from "@/components/Section";
+import { gym, formatPrice, mapSearchUrl } from "@/data/gym";
+
+// 탭 제목이 layout.tsx의 template 규칙에 따라 "체육관 소개 | SIX Training"이 됩니다.
+export const metadata: Metadata = {
+  title: "체육관 소개",
+};
+
+// /about 주소의 화면. app/about 폴더 이름이 곧 URL이 됩니다. (Spring의 @GetMapping("/about") 역할)
+// 데이터는 전부 src/data/gym.ts에서 가져오므로, 이 파일은 "어떻게 보여줄지"만 담당합니다.
+export default function AboutPage() {
+  return (
+    // <>...</> = 여러 요소를 감싸기만 하고 실제 HTML 태그는 만들지 않는 빈 묶음(Fragment)
+    <>
+      {/* 상단 소개 영역 */}
+      <div className="border-b border-line bg-surface">
+        <div className="mx-auto max-w-5xl px-4 py-16">
+          <h1 className="text-3xl font-black sm:text-5xl">체육관 소개</h1>
+          <p className="mt-4 max-w-2xl text-muted">{gym.intro}</p>
+        </div>
+      </div>
+
+      <Section title="우리의 철학">
+        {/* grid sm:grid-cols-3 = 모바일은 1열, PC는 3열 */}
+        <div className="grid gap-4 sm:grid-cols-3">
+          {gym.philosophy.map((item) => (
+            <div key={item.title} className="rounded-lg border border-line p-6">
+              <h3 className="text-lg font-bold text-accent">{item.title}</h3>
+              <p className="mt-2 text-muted">{item.description}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="시설">
+        <ul className="grid gap-4 sm:grid-cols-2">
+          {gym.facilities.map((item) => (
+            <li key={item.title} className="rounded-lg bg-surface p-5">
+              <p className="font-bold">{item.title}</p>
+              <p className="mt-1 text-sm text-muted">{item.description}</p>
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      <Section title="코치진">
+        <div className="grid gap-6 sm:grid-cols-2">
+          {gym.coaches.map((coach) => (
+            <div key={coach.name} className="rounded-lg border border-line p-6">
+              <p className="text-sm text-accent">{coach.role}</p>
+              <h3 className="mt-1 text-xl font-bold">{coach.name}</h3>
+              <p className="mt-3 text-muted">{coach.bio}</p>
+              {/* 반복 안의 반복: 코치마다 자격증 목록을 다시 반복 (Java의 이중 for문) */}
+              <ul className="mt-4 flex flex-wrap gap-2">
+                {coach.certifications.map((cert) => (
+                  <li key={cert} className="rounded bg-surface px-2 py-1 text-xs text-muted">
+                    {cert}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="수업 시간표" subtitle="모든 수업은 60분, 시작 10분 전까지 도착해 주세요.">
+        <div className="space-y-3">
+          {gym.schedule.map((slot) => (
+            <div
+              key={slot.label}
+              className="flex flex-col gap-2 rounded-lg bg-surface p-5 sm:flex-row sm:items-center"
+            >
+              <p className="w-32 shrink-0 font-bold">{slot.label}</p>
+              {/* 조건 ? A : B = 삼항 연산자. 수업 시간이 있으면 목록, 없으면 "휴무" (Java와 같은 문법) */}
+              {slot.times.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {slot.times.map((time) => (
+                    <span key={time} className="rounded border border-line px-3 py-1 text-sm">
+                      {time}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted">휴무</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="가격">
+        <div className="grid gap-4 sm:grid-cols-3">
+          {gym.pricing.map((plan) => (
+            <div
+              key={plan.name}
+              // 추천 상품(highlight)이면 빨간 테두리, 아니면 기본 테두리
+              className={`rounded-lg p-6 ${
+                plan.highlight ? "border-2 border-accent bg-surface" : "border border-line"
+              }`}
+            >
+              {plan.highlight && <p className="mb-2 text-xs font-bold text-accent">추천</p>}
+              <h3 className="font-bold">{plan.name}</h3>
+              <p className="mt-2 text-2xl font-black">{formatPrice(plan.price)}</p>
+              <p className="mt-2 text-sm text-muted">{plan.description}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="오시는 길">
+        <div className="rounded-lg bg-surface p-6">
+          <p>{gym.contact.address}</p>
+          <p className="mt-1 text-muted">전화 {gym.contact.phone}</p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            {/* 외부 사이트 링크: 새 탭 + 보안 설정(rel) */}
+            <a
+              href={mapSearchUrl(gym.contact.address)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-md bg-accent px-4 py-2 text-sm font-bold text-white hover:opacity-90"
+            >
+              네이버 지도에서 보기
+            </a>
+            <a
+              href={gym.contact.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-md border border-line px-4 py-2 text-sm font-bold hover:bg-background"
+            >
+              인스타그램
+            </a>
+          </div>
+        </div>
+      </Section>
+    </>
+  );
+}
