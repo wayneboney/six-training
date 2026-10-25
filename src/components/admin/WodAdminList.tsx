@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { deleteWodAction } from "@/app/admin/wods/actions";
+import DeleteWodButton from "@/components/admin/DeleteWodButton";
 import { wodTypeStyles } from "@/components/wod/wodTypeStyles";
 import { wodTypeLabels, type Wod } from "@/data/wods";
 import { formatDateKey } from "@/lib/date";
@@ -8,7 +10,7 @@ type WodAdminListProps = {
 };
 
 // 관리자용 WOD 목록. 날짜별로 묶어서 보여줍니다.
-// 삭제 버튼은 실수로 누르지 않도록 목록에 두지 않고, 수정 화면 맨 아래에 있습니다.
+// 각 줄에 수정/삭제 버튼이 있고, 삭제는 "정말 삭제할까요?" 확인을 한 번 더 거칩니다.
 export default function WodAdminList({ wods }: WodAdminListProps) {
   if (wods.length === 0) {
     return <p className="rounded-lg bg-surface p-8 text-center text-muted">이 달에 등록된 WOD가 없습니다.</p>;
@@ -46,12 +48,20 @@ export default function WodAdminList({ wods }: WodAdminListProps) {
 
                 {wod.note && <span className="shrink-0 text-xs text-muted">💬 메모 있음</span>}
 
-                <Link
-                  href={`/admin/wods/${wod.id}`}
-                  className="w-fit shrink-0 rounded-md border border-line px-3 py-1 text-sm font-bold hover:bg-surface"
-                >
-                  수정
-                </Link>
+                <div className="flex shrink-0 items-start gap-2">
+                  <Link
+                    href={`/admin/wods/${wod.id}`}
+                    className="rounded-md border border-line px-3 py-1 text-sm font-bold hover:bg-surface"
+                  >
+                    수정
+                  </Link>
+                  {/* 삭제: 수정 화면과 같은 서버 함수, 같은 확인 단계 (모양만 작게) */}
+                  <DeleteWodButton
+                    variant="inline"
+                    action={deleteWodAction.bind(null, wod.id)}
+                    wodLabel={`${formatDateKey(wod.date)} ${wodTypeLabels[wod.type]} · ${wod.title}`}
+                  />
+                </div>
               </li>
             ))}
           </ul>
