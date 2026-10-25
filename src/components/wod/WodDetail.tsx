@@ -26,7 +26,7 @@ export default function WodDetail({ date, wods }: WodDetailProps) {
         </p>
       ) : (
         wods.map((wod) => (
-          <article key={`${wod.date}-${wod.type}-${wod.title}`} className="rounded-lg border border-line p-5">
+          <article key={wod.id} className="rounded-lg border border-line p-5">
             <span
               className={`inline-block rounded px-2 py-0.5 text-xs font-bold text-white ${wodTypeStyles[wod.type].color}`}
             >

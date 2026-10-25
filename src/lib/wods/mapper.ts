@@ -24,6 +24,7 @@ export function toWod(row: WodRow): Wod | null {
     return null;
   }
   return {
+    id: row.id,
     date: row.wod_date,
     type: row.wod_type,
     title: row.title,

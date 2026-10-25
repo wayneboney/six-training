@@ -33,6 +33,34 @@ export function formatDateKey(key: string): string {
   return `${month + 1}월 ${day}일 (${weekday})`;
 }
 
+// ---------- 월(YYYY-MM) 단위 도우미: 관리자 화면의 월 이동에 씁니다 ----------
+
+// 연, 월(0~11) → "YYYY-MM"
+export function toMonthKey(year: number, month: number): string {
+  return `${year}-${String(month + 1).padStart(2, "0")}`;
+}
+
+// "YYYY-MM" → 연, 월(0~11). 형식이 틀리면 null (주소창에 이상한 값이 들어와도 안전하게 처리)
+export function parseMonthKey(key: string | undefined): { year: number; month: number } | null {
+  if (!key || !/^\d{4}-(0[1-9]|1[0-2])$/.test(key)) {
+    return null;
+  }
+  const [year, month] = key.split("-").map(Number);
+  return { year, month: month - 1 };
+}
+
+// 기준 달에서 diff개월 이동한 달 (diff = -1이면 이전 달, 1이면 다음 달)
+export function shiftMonth(year: number, month: number, diff: number): { year: number; month: number } {
+  const date = new Date(year, month + diff, 1);
+  return { year: date.getFullYear(), month: date.getMonth() };
+}
+
+// 해당 월의 첫날 ~ 마지막 날 ("YYYY-MM-DD")
+export function monthDateRange(year: number, month: number): { from: string; to: string } {
+  const lastDay = new Date(year, month + 1, 0).getDate(); // 다음 달 0일 = 이번 달 마지막 날
+  return { from: toDateKey(year, month, 1), to: toDateKey(year, month, lastDay) };
+}
+
 // 해당 월의 달력 칸 목록. 1일 앞의 빈칸은 null로 채웁니다.
 // 예: 1일이 수요일이면 [null, null, null, 1, 2, 3, ...]
 export function monthCells(year: number, month: number): (number | null)[] {

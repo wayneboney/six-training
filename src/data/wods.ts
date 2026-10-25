@@ -11,6 +11,7 @@ export const wodTypes = ["CROSSFIT", "HYROX", "COACH_TRAINING"] as const;
 export type WodType = (typeof wodTypes)[number];
 
 export type Wod = {
+  id: number; // DB의 PK. 관리자 화면에서 수정/삭제할 WOD를 가리킬 때 씁니다.
   date: string; // "YYYY-MM-DD" 형식 (예: "2026-10-26")
   type: WodType;
   title: string; // WOD 이름 (예: "Fran")
