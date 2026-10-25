@@ -36,10 +36,12 @@ export default function WodDetail({ date, wods }: WodDetailProps) {
             <h4 className="mt-2 text-xl font-black">{wod.title}</h4>
             <p className="mt-1 text-sm font-bold text-accent">{wod.format}</p>
 
-            {/* 동작 목록. ol = 순서가 있는 목록 */}
+            {/* 동작 목록. ol = 순서가 있는 목록
+                key에 순서 번호(index)를 함께 넣습니다. 같은 동작이 한 WOD에 두 번 나올 수 있어서
+                (예: 처음과 마지막에 Run 400m) 이름만으로는 key가 겹치기 때문입니다. */}
             <ol className="mt-3 space-y-1">
-              {wod.movements.map((movement) => (
-                <li key={movement} className="border-l-2 border-line pl-3">
+              {wod.movements.map((movement, index) => (
+                <li key={`${index}-${movement}`} className="border-l-2 border-line pl-3">
                   {movement}
                 </li>
               ))}
