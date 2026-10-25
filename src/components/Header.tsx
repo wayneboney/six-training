@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
+import AdminShortcut from "@/components/admin/AdminShortcut";
 import MobileMenu from "@/components/MobileMenu";
 import { gym } from "@/data/gym";
 import { navItems } from "@/data/navigation";
@@ -27,18 +29,26 @@ export default function Header() {
           />
         </Link>
 
-        {/* PC 메뉴: hidden = 기본 숨김, sm:flex = 640px 이상에서만 보임 */}
-        <nav className="hidden gap-6 text-sm text-muted sm:flex">
-          {navItems.map((item) => (
-            // key = 반복으로 만든 항목마다 붙이는 고유값 (React가 항목을 구분하는 데 사용)
-            <Link key={item.href} href={item.href} className="hover:text-foreground">
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        <div className="flex items-center gap-4">
+          {/* PC 메뉴: hidden = 기본 숨김, sm:flex = 640px 이상에서만 보임 */}
+          <nav className="hidden items-center gap-6 text-sm text-muted sm:flex">
+            {navItems.map((item) => (
+              // key = 반복으로 만든 항목마다 붙이는 고유값 (React가 항목을 구분하는 데 사용)
+              <Link key={item.href} href={item.href} className="hover:text-foreground">
+                {item.label}
+              </Link>
+            ))}
+          </nav>
 
-        {/* 모바일 메뉴: 640px 미만에서만 보임 */}
-        <MobileMenu />
+          {/* 관리자 버튼: 관리자로 로그인했을 때만 보임 (PC, 모바일 공통)
+              fallback={null} = 확인하는 동안 아무것도 안 보여줌 (일반 방문자는 계속 안 보임) */}
+          <Suspense fallback={null}>
+            <AdminShortcut />
+          </Suspense>
+
+          {/* 모바일 메뉴: 640px 미만에서만 보임 */}
+          <MobileMenu />
+        </div>
       </div>
     </header>
   );

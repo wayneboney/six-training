@@ -11,9 +11,10 @@ type WodCalendarProps = {
   // WOD 목록은 바깥(page.tsx)에서 넘겨받습니다.
   // 이 컴포넌트는 데이터가 파일에서 왔는지 DB에서 왔는지 모르기 때문에, 나중에 DB로 바꿔도 수정할 필요가 없습니다.
   wods: Wod[];
+  isAdmin?: boolean; // 관리자면 상세 카드에 수정/등록 바로가기 버튼 표시
 };
 
-export default function WodCalendar({ wods }: WodCalendarProps) {
+export default function WodCalendar({ wods, isAdmin = false }: WodCalendarProps) {
   // 날짜별로 WOD를 묶어 둡니다. { "2026-10-26": [Wod, Wod], ... } (Java의 Map<String, List<Wod>>)
   // useMemo = wods가 바뀔 때만 다시 계산 (화면이 다시 그려질 때마다 매번 계산하지 않도록)
   const wodsByDate = useMemo(() => {
@@ -159,7 +160,7 @@ export default function WodCalendar({ wods }: WodCalendarProps) {
       </div>
 
       {/* 선택한 날짜의 WOD 상세 */}
-      <WodDetail date={selected} wods={selected ? (wodsByDate.get(selected) ?? []) : []} />
+      <WodDetail date={selected} wods={selected ? (wodsByDate.get(selected) ?? []) : []} isAdmin={isAdmin} />
     </div>
   );
 }

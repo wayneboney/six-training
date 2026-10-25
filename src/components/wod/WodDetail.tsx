@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { wodTypeStyles } from "@/components/wod/wodTypeStyles";
 import { wodTypeLabels, type Wod } from "@/data/wods";
 import { formatDateKey, parseDateKey } from "@/lib/date";
@@ -5,10 +6,12 @@ import { formatDateKey, parseDateKey } from "@/lib/date";
 type WodDetailProps = {
   date: string | null; // 선택한 날짜. 아직 선택 전이면 null
   wods: Wod[]; // 그날의 WOD 목록
+  isAdmin?: boolean; // 관리자면 수정/등록 바로가기 버튼을 보여줌
 };
 
 // WodDetail = 달력에서 선택한 날짜의 WOD 내용
-export default function WodDetail({ date, wods }: WodDetailProps) {
+// 버튼은 화면 표시용일 뿐이고, 실제 수정 권한은 관리자 화면과 DB(RLS)에서 다시 확인합니다.
+export default function WodDetail({ date, wods, isAdmin = false }: WodDetailProps) {
   if (!date) {
     return <aside className="rounded-lg bg-surface p-6 text-muted">날짜를 선택해 주세요.</aside>;
   }
@@ -47,8 +50,26 @@ export default function WodDetail({ date, wods }: WodDetailProps) {
             </ol>
 
             {wod.note && <p className="mt-3 rounded bg-surface p-3 text-sm text-muted">💬 {wod.note}</p>}
+
+            {isAdmin && (
+              <Link
+                href={`/admin/wods/${wod.id}`}
+                className="mt-4 inline-block rounded-md border border-line px-3 py-1 text-sm font-bold hover:bg-surface"
+              >
+                수정
+              </Link>
+            )}
           </article>
         ))
+      )}
+
+      {isAdmin && (
+        <Link
+          href={`/admin/wods/new?date=${date}`}
+          className="block rounded-lg border border-dashed border-accent p-3 text-center text-sm font-bold text-accent hover:bg-accent-soft"
+        >
+          + 이 날짜에 WOD 등록
+        </Link>
       )}
     </aside>
   );

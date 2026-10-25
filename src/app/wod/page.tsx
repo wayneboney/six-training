@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import WodCalendar from "@/components/wod/WodCalendar";
 import { parseDateKey, seoulTodayKey, toDateKey } from "@/lib/date";
+import { getAdminIfSignedIn } from "@/lib/auth/admin";
 import { getWods } from "@/lib/wods/repository";
 
 export const metadata: Metadata = {
@@ -51,6 +52,10 @@ async function WodSection() {
 
   // try/catch는 "DB 조회"만 감쌉니다.
   // 화면(JSX)을 try 안에서 만들면, 화면을 그리다 난 에러는 이 catch로 잡히지 않는데도 잡히는 것처럼 보여서 헷갈립니다.
+  // WOD 조회와 관리자 확인을 동시에 시작합니다. (하나씩 기다리지 않아서 더 빠름)
+  // 관리자 확인은 로그인 쿠키가 없으면 바로 끝나고, 실패해도 null이라 페이지가 깨지지 않습니다.
+  const adminPromise = getAdminIfSignedIn();
+
   let wods: Awaited<ReturnType<typeof getWods>> | null = null;
   try {
     wods = await getWods(from, to);
@@ -58,6 +63,7 @@ async function WodSection() {
     // 자세한 원인은 서버 로그에만 남기고, 방문자에게는 안내 문구만 보여줍니다. (DB 정보 노출 방지)
     console.error("[wod page] WOD를 불러오지 못했습니다.", error);
   }
+  const isAdmin = (await adminPromise) !== null;
 
   if (wods === null) {
     return (
@@ -68,5 +74,5 @@ async function WodSection() {
     );
   }
 
-  return <WodCalendar wods={wods} />;
+  return <WodCalendar wods={wods} isAdmin={isAdmin} />;
 }
