@@ -102,6 +102,40 @@ export async function updateWod(id: number, input: WodInput): Promise<WodSaveRes
   return rowToWodOrError(data);
 }
 
+export type WodDeleteResult =
+  | { ok: true; date: string } // 지운 WOD의 날짜 (그 달 목록으로 돌아가기 위해)
+  | { ok: false; error: { kind: "unauthorized" } | { kind: "not_found" } | { kind: "unknown" } };
+
+export async function deleteWod(id: number): Promise<WodDeleteResult> {
+  if (!(await getCurrentAdmin())) {
+    return { ok: false, error: { kind: "unauthorized" } };
+  }
+  const supabase = await createAuthSupabase();
+
+  // delete from wods where id = ? returning id, wod_date
+  // 지운 줄을 돌려받아서, 실제로 지워졌는지(0줄이면 이미 없던 것) 확인합니다.
+  const { data, error } = await supabase
+    .from("wods")
+    .delete()
+    .eq("id", id)
+    .select("id, wod_date")
+    .maybeSingle()
+    .overrideTypes<{ id: number; wod_date: string } | null, { merge: false }>();
+
+  if (error) {
+    if (error.code === PG_INSUFFICIENT_PRIVILEGE) {
+      return { ok: false, error: { kind: "unauthorized" } };
+    }
+    console.error("[wods] 삭제 실패", error);
+    return { ok: false, error: { kind: "unknown" } };
+  }
+  if (!data) {
+    // 이미 삭제됐거나, RLS 때문에 지울 수 있는 줄이 없었던 경우
+    return { ok: false, error: { kind: "not_found" } };
+  }
+  return { ok: true, date: data.wod_date };
+}
+
 // 수정 화면에 채울 WOD 한 건. 관리자가 아니거나 없으면 null
 export async function getWodById(id: number): Promise<Wod | null> {
   if (!(await getCurrentAdmin())) {

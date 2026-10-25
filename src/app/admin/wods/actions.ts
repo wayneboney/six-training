@@ -5,7 +5,7 @@
 
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/admin";
-import { createWod, updateWod, type WodSaveError } from "@/lib/wods/admin-repository";
+import { createWod, deleteWod, updateWod, type WodSaveError } from "@/lib/wods/admin-repository";
 import {
   parseWodId,
   validateWodForm,
@@ -36,9 +36,9 @@ function messageFor(error: WodSaveError): string {
   }
 }
 
-// 저장 후 돌아갈 목록 주소: 저장한 WOD의 달 + 저장 완료 표시
-function listUrl(date: string): string {
-  return `/admin?month=${date.slice(0, 7)}&saved=1`;
+// 저장/삭제 후 돌아갈 목록 주소: 그 WOD의 달 + 완료 표시(saved 또는 deleted)
+function listUrl(date: string, done: "saved" | "deleted" = "saved"): string {
+  return `/admin?month=${date.slice(0, 7)}&${done}=1`;
 }
 
 export async function createWodAction(_prev: WodFormState, formData: FormData): Promise<WodFormState> {
@@ -86,4 +86,32 @@ export async function updateWodAction(
   }
 
   redirect(listUrl(saved.wod.date));
+}
+
+// 삭제 결과 (실패했을 때만 메시지를 돌려줌. 성공하면 목록으로 이동)
+export type WodDeleteState = { error: string } | undefined;
+
+// 삭제도 수정처럼 id를 .bind로 붙여서 받고, 다시 검사합니다.
+// (입력값이 없어서 이전 상태나 폼 데이터는 받지 않습니다)
+export async function deleteWodAction(id: number): Promise<WodDeleteState> {
+  await requireAdmin();
+
+  const wodId = parseWodId(id);
+  if (wodId === null) {
+    return { error: "잘못된 요청입니다. 목록에서 다시 선택해 주세요." };
+  }
+
+  const deleted = await deleteWod(wodId);
+  if (!deleted.ok) {
+    switch (deleted.error.kind) {
+      case "not_found":
+        return { error: "이미 삭제된 WOD입니다. 목록에서 다시 확인해 주세요." };
+      case "unauthorized":
+        return { error: "관리자 권한이 없습니다. 다시 로그인해 주세요." };
+      case "unknown":
+        return { error: "삭제 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요." };
+    }
+  }
+
+  redirect(listUrl(deleted.date, "deleted"));
 }

@@ -28,7 +28,7 @@ async function AdminHome({ searchParams }: { searchParams: PageProps<"/admin">["
   const admin = await requireAdmin();
 
   // 보고 싶은 달: 주소의 ?month= 값. 없거나 형식이 틀리면 이번 달(한국 시간)
-  const { month: monthParam, saved } = await searchParams;
+  const { month: monthParam, saved, deleted } = await searchParams;
   const todayKey = seoulTodayKey();
   const today = parseDateKey(todayKey);
   const target = parseMonthKey(typeof monthParam === "string" ? monthParam : undefined) ?? {
@@ -69,10 +69,15 @@ async function AdminHome({ searchParams }: { searchParams: PageProps<"/admin">["
         </form>
       </div>
 
-      {/* 저장 완료 안내: 등록/수정 후 ?saved=1을 붙여서 이 화면으로 돌아옵니다 */}
+      {/* 완료 안내: 등록/수정 후 ?saved=1, 삭제 후 ?deleted=1을 붙여서 이 화면으로 돌아옵니다 */}
       {saved === "1" && (
         <p role="status" className="mt-6 rounded-md bg-surface px-4 py-3 text-sm font-bold">
           ✅ 저장되었습니다.
+        </p>
+      )}
+      {deleted === "1" && (
+        <p role="status" className="mt-6 rounded-md bg-surface px-4 py-3 text-sm font-bold">
+          🗑 삭제되었습니다.
         </p>
       )}
 

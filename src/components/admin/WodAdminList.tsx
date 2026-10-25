@@ -8,7 +8,7 @@ type WodAdminListProps = {
 };
 
 // 관리자용 WOD 목록. 날짜별로 묶어서 보여줍니다.
-// (삭제 버튼은 6-6 단계에서 추가합니다)
+// 삭제 버튼은 실수로 누르지 않도록 목록에 두지 않고, 수정 화면 맨 아래에 있습니다.
 export default function WodAdminList({ wods }: WodAdminListProps) {
   if (wods.length === 0) {
     return <p className="rounded-lg bg-surface p-8 text-center text-muted">이 달에 등록된 WOD가 없습니다.</p>;
