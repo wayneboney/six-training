@@ -1,0 +1,54 @@
+import { wodTypeLabels, type Wod } from "@/data/wods";
+import { formatDateKey, parseDateKey } from "@/lib/date";
+
+type WodDetailProps = {
+  date: string | null; // 선택한 날짜. 아직 선택 전이면 null
+  wods: Wod[]; // 그날의 WOD 목록
+};
+
+// WodDetail = 달력에서 선택한 날짜의 WOD 내용
+export default function WodDetail({ date, wods }: WodDetailProps) {
+  if (!date) {
+    return <aside className="rounded-lg bg-surface p-6 text-muted">날짜를 선택해 주세요.</aside>;
+  }
+
+  const { year, month, day } = parseDateKey(date);
+  const isSunday = new Date(year, month, day).getDay() === 0;
+
+  return (
+    <aside className="space-y-4">
+      <h3 className="text-lg font-black">{formatDateKey(date)}</h3>
+
+      {wods.length === 0 ? (
+        <p className="rounded-lg bg-surface p-6 text-muted">
+          {isSunday ? "일요일은 휴무입니다." : "등록된 WOD가 없습니다."}
+        </p>
+      ) : (
+        wods.map((wod) => (
+          <article key={`${wod.date}-${wod.type}-${wod.title}`} className="rounded-lg border border-line p-5">
+            <span
+              className={`inline-block rounded px-2 py-0.5 text-xs font-bold ${
+                wod.type === "CROSSFIT" ? "bg-foreground text-white" : "bg-accent text-white"
+              }`}
+            >
+              {wodTypeLabels[wod.type]}
+            </span>
+            <h4 className="mt-2 text-xl font-black">{wod.title}</h4>
+            <p className="mt-1 text-sm font-bold text-accent">{wod.format}</p>
+
+            {/* 동작 목록. ol = 순서가 있는 목록 */}
+            <ol className="mt-3 space-y-1">
+              {wod.movements.map((movement) => (
+                <li key={movement} className="border-l-2 border-line pl-3">
+                  {movement}
+                </li>
+              ))}
+            </ol>
+
+            {wod.note && <p className="mt-3 rounded bg-surface p-3 text-sm text-muted">💬 {wod.note}</p>}
+          </article>
+        ))
+      )}
+    </aside>
+  );
+}
