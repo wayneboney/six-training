@@ -1,14 +1,21 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
+import { Suspense } from "react";
 import WodCalendar from "@/components/wod/WodCalendar";
-import { wods } from "@/data/wods";
+import { parseDateKey, seoulTodayKey, toDateKey } from "@/lib/date";
+import { getWods } from "@/lib/wods/repository";
 
 export const metadata: Metadata = {
   title: "WOD",
 };
 
+// 몇 달치 WOD를 가져올지 (오늘이 속한 달 기준)
+const MONTHS_BEFORE = 6;
+const MONTHS_AFTER = 3;
+
 // /wod 주소의 화면.
-// 지금은 src/data/wods.ts 파일에서 WOD를 가져오지만, 나중에 DB를 붙이면 이 파일에서 DB를 조회해서
-// 같은 모양의 배열을 <WodCalendar wods={...} />에 넘기기만 하면 됩니다. (Controller가 Service를 호출해 화면에 넘기는 구조와 같음)
+// 제목 부분은 빌드할 때 미리 만들어 두고, WOD 달력 부분(WodSection)만 방문할 때마다 DB에서 새로 읽습니다.
+// 그래서 코치가 DB에 WOD를 올리면 다음 방문부터 바로 반영됩니다.
 export default function WodPage() {
   return (
     <>
@@ -21,8 +28,45 @@ export default function WodPage() {
       </div>
 
       <div className="mx-auto max-w-5xl px-4 py-12">
-        <WodCalendar wods={wods} />
+        {/* Suspense = 안쪽(WodSection)이 DB를 읽는 동안 fallback을 먼저 보여주고, 다 읽으면 바꿔 끼웁니다 */}
+        <Suspense fallback={<p className="py-20 text-center text-muted">WOD를 불러오는 중입니다…</p>}>
+          <WodSection />
+        </Suspense>
       </div>
     </>
   );
+}
+
+// DB에서 WOD를 읽어 달력에 넘기는 부분 (Controller가 Service를 호출해 화면에 넘기는 역할)
+async function WodSection() {
+  // connection() = "여기부터는 빌드할 때가 아니라 방문자가 접속했을 때 실행"하라는 표시
+  await connection();
+
+  // 조회 기간: 오늘이 속한 달 기준 6개월 전 1일 ~ 3개월 후 말일 (한국 시간 기준)
+  const { year, month } = parseDateKey(seoulTodayKey());
+  const fromDate = new Date(year, month - MONTHS_BEFORE, 1);
+  const toDate = new Date(year, month + MONTHS_AFTER + 1, 0); // 다음 달 0일 = 이번 달 말일
+  const from = toDateKey(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate());
+  const to = toDateKey(toDate.getFullYear(), toDate.getMonth(), toDate.getDate());
+
+  // try/catch는 "DB 조회"만 감쌉니다.
+  // 화면(JSX)을 try 안에서 만들면, 화면을 그리다 난 에러는 이 catch로 잡히지 않는데도 잡히는 것처럼 보여서 헷갈립니다.
+  let wods: Awaited<ReturnType<typeof getWods>> | null = null;
+  try {
+    wods = await getWods(from, to);
+  } catch (error) {
+    // 자세한 원인은 서버 로그에만 남기고, 방문자에게는 안내 문구만 보여줍니다. (DB 정보 노출 방지)
+    console.error("[wod page] WOD를 불러오지 못했습니다.", error);
+  }
+
+  if (wods === null) {
+    return (
+      <div role="alert" className="rounded-lg border border-line bg-surface p-8 text-center">
+        <p className="font-bold">WOD를 불러오지 못했습니다.</p>
+        <p className="mt-2 text-sm text-muted">잠시 후 다시 시도해 주세요.</p>
+      </div>
+    );
+  }
+
+  return <WodCalendar wods={wods} />;
 }

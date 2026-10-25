@@ -13,6 +13,13 @@ export function dateToKey(date: Date): string {
   return toDateKey(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
+// 한국 시간 기준 오늘 날짜 "YYYY-MM-DD".
+// 서버는 보통 UTC 시간대라서 그냥 new Date()로 날짜를 만들면 한국 날짜와 하루 차이가 날 수 있습니다.
+// en-CA 형식이 "YYYY-MM-DD" 모양이라 그대로 씁니다.
+export function seoulTodayKey(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());
+}
+
 // "YYYY-MM-DD" → 연, 월(0~11), 일
 export function parseDateKey(key: string): { year: number; month: number; day: number } {
   const [year, month, day] = key.split("-").map(Number);
