@@ -1,3 +1,4 @@
+import { wodTypeStyles } from "@/components/wod/wodTypeStyles";
 import { wodTypeLabels, type Wod } from "@/data/wods";
 import { formatDateKey, parseDateKey } from "@/lib/date";
 
@@ -27,9 +28,7 @@ export default function WodDetail({ date, wods }: WodDetailProps) {
         wods.map((wod) => (
           <article key={`${wod.date}-${wod.type}-${wod.title}`} className="rounded-lg border border-line p-5">
             <span
-              className={`inline-block rounded px-2 py-0.5 text-xs font-bold ${
-                wod.type === "CROSSFIT" ? "bg-foreground text-white" : "bg-accent text-white"
-              }`}
+              className={`inline-block rounded px-2 py-0.5 text-xs font-bold text-white ${wodTypeStyles[wod.type].color}`}
             >
               {wodTypeLabels[wod.type]}
             </span>

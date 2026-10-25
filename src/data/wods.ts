@@ -3,7 +3,13 @@
 // 화면(WodCalendar)은 데이터를 어디서 가져오는지 모르게 만들어 두어서, 그때 화면 코드는 고칠 필요가 없습니다.
 // TODO: 아래 WOD는 화면 확인용 예시입니다. 실제 WOD로 바꿔 주세요.
 
-export type WodType = "CROSSFIT" | "HYROX";
+// WOD 종류 목록. 종류를 추가하려면 여기와 아래 wodTypeLabels,
+// 그리고 화면 색상(src/components/wod/wodTypeStyles.ts)에 한 줄씩 추가합니다.
+// DB 테이블의 check 제약(wod_type in (...))에도 같은 값을 넣어야 합니다.
+export const wodTypes = ["CROSSFIT", "HYROX", "COACH_TRAINING"] as const;
+
+// "CROSSFIT" | "HYROX" | "COACH_TRAINING" (위 목록에서 자동으로 만들어지는 타입)
+export type WodType = (typeof wodTypes)[number];
 
 export type Wod = {
   date: string; // "YYYY-MM-DD" 형식 (예: "2026-10-26")
@@ -14,9 +20,11 @@ export type Wod = {
   note?: string; // 코치 메모 (생략 가능)
 };
 
+// Record<WodType, string> = 종류마다 이름이 하나씩 반드시 있어야 합니다. 빠뜨리면 컴파일 에러
 export const wodTypeLabels: Record<WodType, string> = {
   CROSSFIT: "CROSSFIT",
   HYROX: "HYROX",
+  COACH_TRAINING: "COACH TRAINING",
 };
 
 export const wods: Wod[] = [
@@ -84,5 +92,13 @@ export const wods: Wod[] = [
     title: "Station Practice",
     format: "3 Rounds",
     movements: ["SkiErg 500m", "Sled Push 25m x 2", "Row 500m", "Farmers Carry 50m"],
+  },
+  {
+    date: "2026-10-27",
+    type: "COACH_TRAINING",
+    title: "Olympic Lifting Technique",
+    format: "Skill Session",
+    movements: ["Snatch Balance 5 x 3", "Hang Power Snatch 5 x 2", "Overhead Squat 4 x 5"],
+    note: "코치 트레이닝 예시입니다.",
   },
 ];

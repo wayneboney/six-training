@@ -3,7 +3,8 @@
 
 import { useMemo, useState, useSyncExternalStore } from "react";
 import WodDetail from "@/components/wod/WodDetail";
-import { wodTypeLabels, type Wod } from "@/data/wods";
+import { wodTypeStyles } from "@/components/wod/wodTypeStyles";
+import { wodTypeLabels, wodTypes, type Wod } from "@/data/wods";
 import { dateToKey, monthCells, parseDateKey, toDateKey, weekdayLabels } from "@/lib/date";
 
 type WodCalendarProps = {
@@ -146,13 +147,14 @@ export default function WodCalendar({ wods }: WodCalendarProps) {
         </div>
 
         {/* 범례 */}
-        <div className="mt-3 flex gap-4 text-xs text-muted">
-          <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-foreground" /> {wodTypeLabels.CROSSFIT}
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="h-2 w-2 rounded-full bg-accent" /> {wodTypeLabels.HYROX}
-          </span>
+        {/* 범례: 종류 목록(wodTypes)을 돌면서 만들어서, 종류가 늘어나도 여기는 고칠 필요가 없습니다 */}
+        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
+          {wodTypes.map((type) => (
+            <span key={type} className="flex items-center gap-1">
+              <span className={`h-2 w-2 rounded-full ${wodTypeStyles[type].color}`} />
+              {wodTypeLabels[type]}
+            </span>
+          ))}
         </div>
       </div>
 
@@ -177,8 +179,7 @@ function useToday(): string | null {
 
 // 날짜 칸 안의 WOD 종류 표시
 function WodMark({ type, inverted }: { type: Wod["type"]; inverted: boolean }) {
-  const color = type === "CROSSFIT" ? "bg-foreground" : "bg-accent";
-  const shortLabel = type === "CROSSFIT" ? "CF" : "HX";
+  const { color, short: shortLabel } = wodTypeStyles[type];
   return (
     <>
       {/* 모바일: 점 */}
