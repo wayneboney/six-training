@@ -28,8 +28,9 @@ async function AdminHome({ searchParams }: { searchParams: PageProps<"/admin">["
   const admin = await requireAdmin();
 
   // 보고 싶은 달: 주소의 ?month= 값. 없거나 형식이 틀리면 이번 달(한국 시간)
-  const { month: monthParam } = await searchParams;
-  const today = parseDateKey(seoulTodayKey());
+  const { month: monthParam, saved } = await searchParams;
+  const todayKey = seoulTodayKey();
+  const today = parseDateKey(todayKey);
   const target = parseMonthKey(typeof monthParam === "string" ? monthParam : undefined) ?? {
     year: today.year,
     month: today.month,
@@ -37,6 +38,10 @@ async function AdminHome({ searchParams }: { searchParams: PageProps<"/admin">["
   const prev = shiftMonth(target.year, target.month, -1);
   const next = shiftMonth(target.year, target.month, 1);
   const { from, to } = monthDateRange(target.year, target.month);
+
+  // "새 WOD 등록"을 누르면 채워 둘 날짜: 이번 달을 보고 있으면 오늘, 다른 달이면 그 달 1일
+  const isCurrentMonth = target.year === today.year && target.month === today.month;
+  const newWodDate = isCurrentMonth ? todayKey : from;
 
   // DB 조회만 try/catch로 감쌉니다. (화면 코드는 밖에서)
   let wods: Wod[] | null = null;
@@ -63,6 +68,13 @@ async function AdminHome({ searchParams }: { searchParams: PageProps<"/admin">["
           </button>
         </form>
       </div>
+
+      {/* 저장 완료 안내: 등록/수정 후 ?saved=1을 붙여서 이 화면으로 돌아옵니다 */}
+      {saved === "1" && (
+        <p role="status" className="mt-6 rounded-md bg-surface px-4 py-3 text-sm font-bold">
+          ✅ 저장되었습니다.
+        </p>
+      )}
 
       {/* WOD 목록 */}
       <section className="mt-10">
@@ -94,7 +106,15 @@ async function AdminHome({ searchParams }: { searchParams: PageProps<"/admin">["
           </div>
         ) : (
           <>
-            <p className="mb-4 text-sm text-muted">총 {wods.length}개</p>
+            <div className="mb-4 flex items-center justify-between">
+              <p className="text-sm text-muted">총 {wods.length}개</p>
+              <Link
+                href={`/admin/wods/new?date=${newWodDate}`}
+                className="rounded-md bg-accent px-4 py-2 text-sm font-bold text-white hover:opacity-90"
+              >
+                + 새 WOD 등록
+              </Link>
+            </div>
             <WodAdminList wods={wods} />
           </>
         )}

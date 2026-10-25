@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { wodTypeStyles } from "@/components/wod/wodTypeStyles";
 import { wodTypeLabels, type Wod } from "@/data/wods";
 import { formatDateKey } from "@/lib/date";
@@ -7,7 +8,7 @@ type WodAdminListProps = {
 };
 
 // 관리자용 WOD 목록. 날짜별로 묶어서 보여줍니다.
-// (등록/수정/삭제 버튼은 6-5, 6-6 단계에서 추가합니다)
+// (삭제 버튼은 6-6 단계에서 추가합니다)
 export default function WodAdminList({ wods }: WodAdminListProps) {
   if (wods.length === 0) {
     return <p className="rounded-lg bg-surface p-8 text-center text-muted">이 달에 등록된 WOD가 없습니다.</p>;
@@ -44,6 +45,13 @@ export default function WodAdminList({ wods }: WodAdminListProps) {
                 </div>
 
                 {wod.note && <span className="shrink-0 text-xs text-muted">💬 메모 있음</span>}
+
+                <Link
+                  href={`/admin/wods/${wod.id}`}
+                  className="w-fit shrink-0 rounded-md border border-line px-3 py-1 text-sm font-bold hover:bg-surface"
+                >
+                  수정
+                </Link>
               </li>
             ))}
           </ul>
