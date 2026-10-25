@@ -6,7 +6,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 // 접속 정보는 코드에 직접 쓰지 않고 환경변수(.env.local)에서 읽습니다.
 // (Spring의 application.properties에 DB 주소를 두는 것과 같은 역할)
 // NEXT_PUBLIC_ 이 붙은 값은 브라우저에 노출돼도 되는 값입니다. 공개 키는 RLS 규칙이 허용한 것만 할 수 있어서 안전합니다.
-function readEnv(): { url: string; key: string } {
+export function readSupabaseEnv(): { url: string; key: string } {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
@@ -19,8 +19,9 @@ function readEnv(): { url: string; key: string } {
   return { url, key };
 }
 
+// 로그인과 상관없는 공개 데이터(WOD 읽기 등)를 조회할 때 쓰는 접속 도구
 export function createServerSupabase(): SupabaseClient {
-  const { url, key } = readEnv();
+  const { url, key } = readSupabaseEnv();
   return createClient(url, key, {
     // 서버에서 데이터만 읽으므로 로그인 세션은 저장하지 않습니다.
     auth: { persistSession: false, autoRefreshToken: false },
