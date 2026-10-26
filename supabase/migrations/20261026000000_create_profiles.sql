@@ -3,7 +3,7 @@
 --
 -- 로그인 계정(auth.users)은 Supabase가 관리하고, 우리 서비스의 회원 정보는 이 테이블에 둡니다.
 --   role   : member(일반회원) / admin(코치 포함 관리자)
---   status : pending(승인대기) / active(활동) / inactive(휴면)  -- 수업 예약은 active만 가능하게 할 예정
+--   status : pending(승인대기) / active(활동) / inactive(비활동: 회원권이 끝난 회원)  -- 수업 예약은 active만 가능하게 할 예정
 --
 -- 보안 원칙
 --   1) 회원이 직접 고칠 수 있는 컬럼은 name, avatar_url 둘뿐입니다. role, status는 API로 못 바꿉니다.
@@ -77,7 +77,7 @@ comment on table  public.profiles            is '회원 프로필. 로그인 계
 comment on column public.profiles.name       is '회원 이름 (화면 표시용)';
 comment on column public.profiles.avatar_url is '프로필 사진 주소 (https만 허용)';
 comment on column public.profiles.role       is '역할: member(일반회원), admin(관리자·코치)';
-comment on column public.profiles.status     is '상태: pending(승인대기), active(활동), inactive(휴면)';
+comment on column public.profiles.status     is '상태: pending(승인대기), active(활동), inactive(비활동: 회원권이 끝난 회원)';
 
 -- 수정할 때 updated_at 자동 갱신 (6-1에서 만든 함수 재사용)
 create trigger profiles_set_updated_at
