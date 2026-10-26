@@ -25,8 +25,9 @@ export default function LoginPage({ searchParams }: PageProps<"/login">) {
 async function LoginGate({ searchParams }: { searchParams: PageProps<"/login">["searchParams"] }) {
   // searchParams(주소의 ?뒤 값)와 로그인 쿠키는 요청할 때마다 달라서 요청 시점에만 읽을 수 있습니다.
   const query = await searchParams;
+  // 이미 로그인한 사람이 들어오면 로그인 폼 대신 홈으로 보냅니다.
   if (await getMemberIfSignedIn()) {
-    redirect("/me");
+    redirect("/");
   }
   return (
     <>

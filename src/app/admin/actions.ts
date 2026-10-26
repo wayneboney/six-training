@@ -3,6 +3,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { landingPathAfterLogin } from "@/lib/auth/landing";
 import { createAuthSupabase } from "@/lib/supabase/auth";
 
 // 로그인 폼에 돌려줄 결과. 에러가 있으면 메시지와 입력했던 이메일을 돌려줘서 다시 입력하지 않게 합니다.
@@ -31,24 +32,17 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
     return { error: INVALID_LOGIN, email };
   }
 
-  // 3) 역할이 관리자(admin)인 계정인지 확인. 아니면 바로 로그아웃시킵니다.
-  const { data: adminRow, error: adminError } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("user_id", data.user.id)
-    .maybeSingle();
-
-  if (adminError || adminRow?.role !== "admin") {
-    if (adminError) {
-      console.error("[auth] 로그인 중 관리자 확인 실패", adminError);
-    }
+  // 3) 역할에 따라 이동할 화면 결정: 관리자는 관리자 화면, 일반회원은 홈
+  //    (일반회원이 이 화면으로 로그인해도 로그아웃시키지 않고 홈으로 보냅니다. 관리자 화면은 각 페이지에서 따로 막습니다.)
+  const landing = await landingPathAfterLogin(supabase, data.user.id);
+  if (!landing) {
     await supabase.auth.signOut();
-    return { error: "관리자 권한이 없는 계정입니다.", email };
+    return { error: "로그인 정보를 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.", email };
   }
 
-  // 4) 성공: 관리자 첫 화면으로 이동
+  // 4) 성공: 이동
   // redirect는 내부적으로 특별한 에러를 던져서 이동시키는 방식이라 try/catch 밖에서 호출해야 합니다.
-  redirect("/admin");
+  redirect(landing);
 }
 
 export async function logout(): Promise<void> {

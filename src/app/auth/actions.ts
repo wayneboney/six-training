@@ -2,6 +2,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { landingPathAfterLogin } from "@/lib/auth/landing";
 import { getSiteUrl } from "@/lib/auth/site-url";
 import { validateSignup } from "@/lib/auth/validation";
 import { createAuthSupabase } from "@/lib/supabase/auth";
@@ -78,7 +79,7 @@ export async function memberLogin(_prev: MemberLoginState, formData: FormData): 
   }
 
   const supabase = await createAuthSupabase();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
     // 이메일 인증 전 계정은 별도 안내 (인증 안내는 비밀번호가 맞아야만 나오므로 정보 노출 위험이 낮음)
     if (error.code === "email_not_confirmed") {
@@ -86,7 +87,13 @@ export async function memberLogin(_prev: MemberLoginState, formData: FormData): 
     }
     return { error: INVALID_LOGIN, email };
   }
-  redirect("/me");
+  // 일반회원은 홈, 관리자는 관리자 화면으로
+  const landing = await landingPathAfterLogin(supabase, data.user.id);
+  if (!landing) {
+    await supabase.auth.signOut();
+    return { error: "로그인 정보를 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.", email };
+  }
+  redirect(landing);
 }
 
 export async function memberLogout(): Promise<void> {
