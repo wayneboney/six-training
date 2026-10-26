@@ -11,7 +11,7 @@ import {
 import MemberActionForm from "@/components/admin/MemberActionForm";
 import { requireAdmin } from "@/lib/auth/admin";
 import { seoulTodayKey } from "@/lib/date";
-import { formatDateTimeToKey } from "@/lib/members/format";
+import { formatDateTimeToKey, formatHoldRange } from "@/lib/members/format";
 import {
   getActiveCodes,
   getActivePlans,
@@ -251,7 +251,7 @@ function MembershipCard({ membership: m, userId, today }: { membership: Membersh
             return (
               <li key={h.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
                 <span className={cancelled ? "text-muted line-through" : ""}>
-                  홀딩 {h.holdStart} ~ {h.holdEnd} ({h.days}일)
+                  홀딩 {formatHoldRange(h.holdStart, h.holdEnd, h.days)}
                   {h.note && <span className="text-muted"> · {h.note}</span>}
                 </span>
                 <span className="flex items-center gap-2">

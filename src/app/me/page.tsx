@@ -7,6 +7,7 @@ import { addMyHoldAction, cancelMyHoldAction } from "@/app/me/actions";
 import MemberActionForm from "@/components/admin/MemberActionForm";
 import { requireMember } from "@/lib/auth/member";
 import { addDaysToKey, parseDateKey, seoulTodayKey } from "@/lib/date";
+import { formatHoldRange } from "@/lib/members/format";
 import { createAuthSupabase } from "@/lib/supabase/auth";
 
 export const metadata: Metadata = {
@@ -178,7 +179,7 @@ async function MyInfo() {
                 return (
                   <li key={h.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
                     <span className={cancelled ? "text-muted line-through" : ""}>
-                      {h.hold_start} ~ {h.hold_end} ({h.days}일)
+                      {formatHoldRange(h.hold_start, h.hold_end, h.days)}
                     </span>
                     <span className="flex items-center gap-2">
                       <span className="text-xs text-muted">
