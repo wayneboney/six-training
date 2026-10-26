@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
-import AdminShortcut from "@/components/admin/AdminShortcut";
+import AccountLinks from "@/components/AccountLinks";
 import MobileMenu from "@/components/MobileMenu";
 import { gym } from "@/data/gym";
 import { navItems } from "@/data/navigation";
@@ -40,10 +40,10 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* 관리자 버튼: 관리자로 로그인했을 때만 보임 (PC, 모바일 공통)
-              fallback={null} = 확인하는 동안 아무것도 안 보여줌 (일반 방문자는 계속 안 보임) */}
+          {/* 계정 링크: 로그인 전 [로그인], 로그인 후 [내 정보] (관리자는 [관리자]도) — PC, 모바일 공통
+              fallback={null} = 확인하는 동안 아무것도 안 보여줌 */}
           <Suspense fallback={null}>
-            <AdminShortcut />
+            <AccountLinks />
           </Suspense>
 
           {/* 모바일 메뉴: 640px 미만에서만 보임 */}

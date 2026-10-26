@@ -1,7 +1,7 @@
 // proxy = 요청이 페이지에 도착하기 전에 먼저 실행되는 코드 (Next.js 15까지는 middleware라고 불렀습니다)
 // Java의 Servlet Filter와 비슷한 역할입니다.
 //
-// 여기서는 관리자 화면(/admin) 요청마다 로그인 쿠키(토큰)가 만료되기 전에 갱신만 합니다.
+// 여기서는 관리자 화면(/admin)과 회원 화면(/me, /login, /signup) 요청마다 로그인 쿠키(토큰)가 만료되기 전에 갱신만 합니다.
 // ⚠️ 권한 검사는 여기서 하지 않습니다. 실제 검사는 각 페이지와 Server Action의 requireAdmin()에서 합니다.
 //    (Next.js 문서 권장: proxy는 빠른 사전 처리용이고, 인증/권한의 최종 판단 장소가 아님)
 import { NextResponse, type NextRequest } from "next/server";
@@ -45,7 +45,7 @@ export async function proxy(request: NextRequest) {
   return response;
 }
 
-// /admin으로 시작하는 주소에서만 실행 (일반 방문자 페이지에는 영향 없음)
+// 아래 주소에서만 실행 (일반 방문자 페이지에는 영향 없음)
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*", "/me/:path*", "/login", "/signup"],
 };
