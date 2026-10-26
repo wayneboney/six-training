@@ -216,7 +216,8 @@ function MemberItem({
             </span>
           </p>
           <p className="truncate text-sm text-muted">
-            {m.email ?? "이메일 없음"} · 가입 {formatDateTimeToKey(m.createdAt)}
+            {m.email ?? "이메일 없음"}
+            <span className="ml-3">가입 {formatDateTimeToKey(m.createdAt)}</span>
           </p>
         </div>
 
@@ -306,34 +307,37 @@ function MemberItem({
   );
 }
 
+// 회원권 이용 현황. 남은 일수를 가장 크게 보여주고, 종류와 종료일은 아래에 작게 보여줍니다.
 function MembershipSummary({ member: m, presence }: { member: MemberRow; presence: Presence }) {
   switch (presence) {
     case "pending":
-      return <span className="font-bold text-accent">승인 대기 중</span>;
+      return <span className="text-lg font-black text-accent">승인 대기 중</span>;
     case "active":
     case "expiring":
       return (
         <>
-          <span className="font-bold">{m.planName}</span>
-          <span className={`block ${presence === "expiring" ? "font-bold text-accent" : "text-muted"}`}>
-            {m.daysLeft}일 남음 · ~ {m.endDate}
-            {presence === "expiring" && " ⚠️ 만료 임박"}
+          <span className={`block text-lg font-black ${presence === "expiring" ? "text-accent" : ""}`}>
+            {m.daysLeft}일 남음{presence === "expiring" && " ⚠️"}
+          </span>
+          <span className="block text-muted">
+            {m.planName} ~ {m.endDate}
+            {presence === "expiring" && <span className="ml-2 font-bold text-accent">만료 임박</span>}
           </span>
         </>
       );
     case "upcoming":
       return (
         <>
-          <span className="font-bold">{m.planName}</span>
+          <span className="block text-lg font-black">{m.startsInDays}일 후 시작</span>
           <span className="block text-muted">
-            {m.startsInDays}일 후 시작 · ~ {m.endDate}
+            {m.planName} ~ {m.endDate}
           </span>
         </>
       );
     case "ended":
       return (
         <>
-          <span className="font-bold text-muted">회원권 만료</span>
+          <span className="block text-lg font-black text-muted">회원권 만료</span>
           <span className="block text-muted">{m.lastEndDate} 종료</span>
         </>
       );
