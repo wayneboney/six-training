@@ -29,7 +29,7 @@ export default function Header() {
           />
         </Link>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 sm:gap-8">
           {/* PC 메뉴: hidden = 기본 숨김, sm:flex = 640px 이상에서만 보임 */}
           <nav className="hidden items-center gap-6 text-sm text-muted sm:flex">
             {navItems.map((item) => (
