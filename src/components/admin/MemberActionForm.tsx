@@ -2,7 +2,7 @@
 // 서버 함수(action)를 실행하고, 처리 중 표시와 성공/실패 메시지를 보여줍니다.
 "use client";
 
-import { useActionState, type ReactNode } from "react";
+import { useActionState, useEffect, useState, type ReactNode } from "react";
 import type { MemberActionState } from "@/app/admin/members/actions";
 
 type MemberActionFormProps = {
@@ -19,6 +19,8 @@ type MemberActionFormProps = {
   children?: ReactNode; // 입력칸들
 };
 
+const TOAST_MILLIS = 5000;
+
 export default function MemberActionForm({
   action,
   submitLabel,
@@ -29,6 +31,19 @@ export default function MemberActionForm({
   children,
 }: MemberActionFormProps) {
   const [state, formAction, pending] = useActionState<MemberActionState, FormData>(action, undefined);
+
+  // 성공 메시지는 화면 아래에 잠깐 떴다가 5초 뒤 저절로 사라지는 알림(toast)으로 보여줍니다.
+  // 처리 결과(state)는 제출할 때마다 새 객체라서, "이미 닫은 결과"를 기억해 두고 그것과 같으면 숨깁니다.
+  // 오류 메시지는 다시 확인할 수 있도록 폼 아래에 계속 남겨 둡니다.
+  const [dismissed, setDismissed] = useState<MemberActionState>(undefined);
+  const toastVisible = state?.ok === true && dismissed !== state;
+  useEffect(() => {
+    if (state?.ok !== true) {
+      return;
+    }
+    const timer = setTimeout(() => setDismissed(state), TOAST_MILLIS);
+    return () => clearTimeout(timer); // 5초 전에 새로 제출하면 이전 타이머는 취소
+  }, [state]);
 
   return (
     <form
@@ -70,14 +85,29 @@ export default function MemberActionForm({
         </button>
       )}
 
-      {state && (
-        <p
-          role={state.ok ? "status" : "alert"}
-          className={`rounded-md px-3 py-2 text-sm font-bold ${state.ok ? "bg-surface" : "bg-accent-soft text-accent"}`}
-        >
-          {state.ok ? "✅ " : ""}
+      {/* 실패: 폼 아래에 계속 표시 */}
+      {state && !state.ok && (
+        <p role="alert" className="rounded-md bg-accent-soft px-3 py-2 text-sm font-bold text-accent">
           {state.message}
         </p>
+      )}
+
+      {/* 성공: 화면 아래 가운데에 5초 동안 표시. role="status" = 화면 낭독기가 읽어 줌 */}
+      {toastVisible && state && (
+        <div
+          role="status"
+          className="fixed inset-x-4 bottom-6 z-50 mx-auto flex max-w-sm items-center justify-between gap-3 rounded-lg bg-foreground px-4 py-3 text-sm font-bold text-background shadow-lg"
+        >
+          <span>✅ {state.message}</span>
+          <button
+            type="button"
+            onClick={() => setDismissed(state)}
+            aria-label="알림 닫기"
+            className="shrink-0 text-background/70 hover:text-background"
+          >
+            ✕
+          </button>
+        </div>
       )}
     </form>
   );
