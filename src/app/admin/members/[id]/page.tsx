@@ -10,7 +10,7 @@ import {
 } from "@/app/admin/members/actions";
 import MemberActionForm from "@/components/admin/MemberActionForm";
 import { requireAdmin } from "@/lib/auth/admin";
-import { seoulTodayKey } from "@/lib/date";
+import { diffDays, seoulTodayKey } from "@/lib/date";
 import { formatDateTimeToKey, formatHoldRange } from "@/lib/members/format";
 import {
   getActiveCodes,
@@ -218,6 +218,12 @@ function MembershipCard({ membership: m, userId, today }: { membership: Membersh
   const usedCount = m.holds.length; // 취소한 홀딩도 횟수에는 포함
   const usedDays = m.holds.reduce((sum, h) => sum + h.days, 0);
   const stateLabel = ended ? "종료" : upcoming ? "시작 예정" : "이용 중";
+  // 남은 일수: 오늘을 포함해서 센 값입니다. (종료일 당일이면 1일)
+  const remaining = ended
+    ? `${diffDays(m.endDate, today)}일 전에 종료`
+    : upcoming
+      ? `${diffDays(today, m.startDate)}일 후 시작`
+      : `${diffDays(today, m.endDate) + 1}일 남음`;
 
   return (
     <li className={`rounded-lg border border-line p-5 ${ended ? "opacity-70" : ""}`}>
@@ -230,6 +236,7 @@ function MembershipCard({ membership: m, userId, today }: { membership: Membersh
           {m.startDate} ~ <span className="font-bold">{m.endDate}</span>
         </p>
       </div>
+      <p className={`mt-2 text-lg font-black ${ended ? "text-muted" : "text-accent"}`}>{remaining}</p>
       <p className="mt-1 text-sm text-muted">
         홀딩 사용(회원 신청) {usedDays}/{m.holdMaxDays}일 · {usedCount}/{m.holdMaxCount}회
         {m.bonusDays > 0 && ` · 서비스 +${m.bonusDays}일`}

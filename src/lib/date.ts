@@ -79,3 +79,10 @@ export function addDaysToKey(key: string, days: number): string {
   const date = new Date(Date.UTC(year, month, day + days));
   return toDateKey(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
 }
+
+// 두 날짜("YYYY-MM-DD") 사이의 일수 (b - a). b가 더 늦으면 양수
+export function diffDays(a: string, b: string): number {
+  const pa = parseDateKey(a);
+  const pb = parseDateKey(b);
+  return Math.round((Date.UTC(pb.year, pb.month, pb.day) - Date.UTC(pa.year, pa.month, pa.day)) / 86400000);
+}

@@ -6,7 +6,7 @@ import { memberLogout } from "@/app/auth/actions";
 import { addMyHoldAction, cancelMyHoldAction } from "@/app/me/actions";
 import MemberActionForm from "@/components/admin/MemberActionForm";
 import { requireMember } from "@/lib/auth/member";
-import { addDaysToKey, parseDateKey, seoulTodayKey } from "@/lib/date";
+import { addDaysToKey, diffDays, seoulTodayKey } from "@/lib/date";
 import { formatHoldRange } from "@/lib/members/format";
 import { createAuthSupabase } from "@/lib/supabase/auth";
 
@@ -27,13 +27,6 @@ export default function MePage() {
       </div>
     </div>
   );
-}
-
-// 두 날짜(YYYY-MM-DD) 사이의 일수 (b - a)
-function diffDays(a: string, b: string): number {
-  const pa = parseDateKey(a);
-  const pb = parseDateKey(b);
-  return Math.round((Date.UTC(pb.year, pb.month, pb.day) - Date.UTC(pa.year, pa.month, pa.day)) / 86400000);
 }
 
 type HoldItem = { id: number; hold_start: string; hold_end: string; days: number; cancelled_at: string | null };
