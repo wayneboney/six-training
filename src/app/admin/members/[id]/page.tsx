@@ -139,9 +139,9 @@ async function MemberDetailView({ params }: { params: PageProps<"/admin/members/
             {!hasCurrentMembership && (
               <div>
                 <label htmlFor="startDate" className={labelClass}>
-                  시작일 <span className="font-normal text-muted">(비우면 오늘)</span>
+                  시작일 <span className="font-normal text-muted">(기본: 오늘)</span>
                 </label>
-                <input id="startDate" name="startDate" type="date" className={inputClass} />
+                <input id="startDate" name="startDate" type="date" defaultValue={today} className={inputClass} />
               </div>
             )}
             <div>
