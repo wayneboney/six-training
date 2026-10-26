@@ -8,6 +8,7 @@ export type Member = {
   userId: string;
   email: string;
   name: string;
+  avatarUrl: string | null; // 프로필 사진 주소 (없으면 null)
   role: string; // 공통코드 ROLE (member / admin)
   status: string; // 공통코드 STATUS (pending / active / inactive)
 };
@@ -28,7 +29,7 @@ export async function getCurrentMember(): Promise<Member | null> {
   // RLS 규칙상 본인 프로필 한 줄만 읽을 수 있습니다.
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("name, role, status")
+    .select("name, avatar_url, role, status")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -43,6 +44,7 @@ export async function getCurrentMember(): Promise<Member | null> {
     userId: user.id,
     email: user.email ?? "",
     name: profile.name as string,
+    avatarUrl: (profile.avatar_url as string | null) ?? null,
     role: profile.role as string,
     status: profile.status as string,
   };
