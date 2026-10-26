@@ -3,7 +3,10 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import Link from "next/link";
 import { memberLogout } from "@/app/auth/actions";
+import { addMyHoldAction } from "@/app/me/actions";
+import MemberActionForm from "@/components/admin/MemberActionForm";
 import { requireMember } from "@/lib/auth/member";
+import { addDaysToKey, seoulTodayKey } from "@/lib/date";
 import { createAuthSupabase } from "@/lib/supabase/auth";
 
 export const metadata: Metadata = {
@@ -25,7 +28,10 @@ export default function MePage() {
   );
 }
 
+type HoldItem = { id: number; hold_start: string; hold_end: string; days: number; cancelled_at: string | null };
+
 type MembershipRow = {
+  membership_id: number | null;
   plan_name: string | null;
   start_date: string | null;
   end_date: string | null;
@@ -54,13 +60,40 @@ async function MyInfo() {
   // 내 회원권 요약 (뷰는 RLS가 적용되어 본인 것만 나옴)
   const { data: membership, error: membershipError } = await supabase
     .from("member_membership_status")
-    .select("plan_name, start_date, end_date, days_left, starts_in_days, hold_days_left, hold_count_left, holding_until")
+    .select(
+      "membership_id, plan_name, start_date, end_date, days_left, starts_in_days, hold_days_left, hold_count_left, holding_until",
+    )
     .eq("user_id", member.userId)
     .maybeSingle()
     .overrideTypes<MembershipRow, { merge: false }>();
   if (membershipError) {
     console.error("[me] 회원권 조회 실패", membershipError);
   }
+
+  // 이 회원권의 홀딩 기록 (본인 것만 RLS로 조회됨)
+  let holds: HoldItem[] = [];
+  if (membership?.membership_id) {
+    const { data: holdRows, error: holdError } = await supabase
+      .from("membership_holds")
+      .select("id, hold_start, hold_end, days, cancelled_at")
+      .eq("membership_id", membership.membership_id)
+      .order("hold_start", { ascending: true })
+      .overrideTypes<HoldItem[], { merge: false }>();
+    if (holdError) {
+      console.error("[me] 홀딩 조회 실패", holdError);
+    } else {
+      holds = holdRows;
+    }
+  }
+  const today = seoulTodayKey();
+  const tomorrow = addDaysToKey(today, 1);
+  // 신청 가능 여부: 이용 중인 일반회원이고 남은 홀딩 일수와 횟수가 있어야 함 (최종 판단은 DB)
+  const canHold =
+    member.role === "member" &&
+    member.status === "active" &&
+    !!membership?.plan_name &&
+    (membership.hold_days_left ?? 0) > 0 &&
+    (membership.hold_count_left ?? 0) > 0;
 
   return (
     <div className="space-y-6">
@@ -115,6 +148,75 @@ async function MyInfo() {
               </div>
             )}
           </dl>
+        </section>
+      )}
+
+      {membership?.plan_name && member.status === "active" && (
+        <section className="rounded-md border border-line p-5">
+          <h2 className="font-bold">홀딩 (일시정지)</h2>
+          <p className="mt-1 text-sm text-muted">
+            홀딩한 일수만큼 종료일이 늘어납니다. 내일부터 시작하는 날짜만 신청할 수 있고, 신청한 홀딩은 직접 취소할 수 없습니다.
+            (취소가 필요하면 코치에게 문의해 주세요. 해제해도 사용한 횟수는 돌아오지 않습니다.)
+          </p>
+
+          {holds.length > 0 && (
+            <ul className="mt-3 divide-y divide-line rounded-md border border-line text-sm">
+              {holds.map((h) => (
+                <li key={h.id} className="flex justify-between gap-2 px-3 py-2">
+                  <span className={h.cancelled_at ? "text-muted line-through" : ""}>
+                    {h.hold_start} ~ {h.hold_end} ({h.days}일)
+                  </span>
+                  <span className="text-xs text-muted">
+                    {h.cancelled_at ? "해제됨" : h.hold_end < today ? "종료" : h.hold_start <= today ? "홀딩 중" : "예정"}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {canHold ? (
+            <div className="mt-4">
+              <MemberActionForm
+                action={addMyHoldAction}
+                submitLabel="홀딩 신청"
+                pendingLabel="신청 중…"
+                confirmMessage="홀딩을 신청할까요? 신청 후에는 직접 취소할 수 없고, 해제해도 사용한 횟수는 돌아오지 않습니다."
+              >
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="holdStart" className="mb-1 block text-sm font-bold">
+                      시작일
+                    </label>
+                    <input
+                      id="holdStart"
+                      name="holdStart"
+                      type="date"
+                      required
+                      min={tomorrow}
+                      className="w-full rounded-md border border-line px-3 py-2 text-sm focus:border-accent focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="holdEnd" className="mb-1 block text-sm font-bold">
+                      종료일
+                    </label>
+                    <input
+                      id="holdEnd"
+                      name="holdEnd"
+                      type="date"
+                      required
+                      min={tomorrow}
+                      className="w-full rounded-md border border-line px-3 py-2 text-sm focus:border-accent focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </MemberActionForm>
+            </div>
+          ) : (
+            <p className="mt-4 rounded-md bg-surface px-3 py-2 text-sm text-muted">
+              사용할 수 있는 홀딩이 남아 있지 않습니다.
+            </p>
+          )}
         </section>
       )}
 

@@ -18,6 +18,8 @@ export type MemberRow = {
   // 일수 추가 대상 회원권: 이용 중/예정이면 그 회원권, 모두 끝났으면 가장 마지막 회원권. 회원권이 한 번도 없으면 null
   targetMembershipId: number | null;
   lastEndDate: string | null; // 지금까지 등록된 회원권 중 가장 늦은 종료일 (만료된 회원 표시용)
+  // 진행 중이거나 예정된 홀딩 (회원이 직접 등록한 것). 없으면 null
+  hold: { id: number; start: string; end: string } | null;
 };
 
 export type CodeOption = { code: string; name: string };
@@ -121,6 +123,27 @@ export async function listMembers(today: string): Promise<{ members: MemberRow[]
     // 안 끝난 회원권이 여러 개면 먼저 시작하는 것(이미 등록된 것)을 유지
   }
 
+  // 해제되지 않았고 아직 끝나지 않은 홀딩(진행 중 + 예정). 회원별로 가장 빠른 것 하나만 목록에 보여줍니다.
+  const { data: activeHolds, error: holdError } = await supabase
+    .from("membership_holds")
+    .select("id, membership_id, hold_start, hold_end")
+    .is("cancelled_at", null)
+    .gte("hold_end", today)
+    .order("hold_start", { ascending: true })
+    .limit(MEMBER_LIST_LIMIT * 2)
+    .overrideTypes<{ id: number; membership_id: number; hold_start: string; hold_end: string }[], { merge: false }>();
+  if (holdError) {
+    throw holdError;
+  }
+  const userByMembership = new Map(allMemberships.map((ms) => [ms.id, ms.user_id]));
+  const holdByUser = new Map<string, { id: number; start: string; end: string }>();
+  for (const h of activeHolds) {
+    const userId = userByMembership.get(h.membership_id);
+    if (userId && !holdByUser.has(userId)) {
+      holdByUser.set(userId, { id: h.id, start: h.hold_start, end: h.hold_end });
+    }
+  }
+
   const summaryByUser = new Map(summaries.map((row) => [row.user_id, row]));
   const members = profiles.map((p): MemberRow => {
     const s = summaryByUser.get(p.user_id);
@@ -137,6 +160,7 @@ export async function listMembers(today: string): Promise<{ members: MemberRow[]
       startsInDays: s?.starts_in_days ?? null,
       targetMembershipId: targetByUser.get(p.user_id)?.id ?? null,
       lastEndDate: lastEndByUser.get(p.user_id) ?? null,
+      hold: holdByUser.get(p.user_id) ?? null,
     };
   });
   return { members, truncated: profiles.length >= MEMBER_LIST_LIMIT };

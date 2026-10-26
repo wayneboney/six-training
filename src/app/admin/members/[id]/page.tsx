@@ -4,7 +4,6 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import {
   adjustDaysAction,
-  addHoldAction,
   cancelHoldAction,
   registerMembershipAction,
   updateMemberAction,
@@ -232,7 +231,7 @@ function MembershipCard({ membership: m, userId, today }: { membership: Membersh
         </p>
       </div>
       <p className="mt-1 text-sm text-muted">
-        홀딩 사용 {usedDays}/{m.holdMaxDays}일 · {usedCount}/{m.holdMaxCount}회
+        홀딩 사용(회원 신청) {usedDays}/{m.holdMaxDays}일 · {usedCount}/{m.holdMaxCount}회
         {m.bonusDays > 0 && ` · 서비스 +${m.bonusDays}일`}
         {m.note && ` · 메모: ${m.note}`}
       </p>
@@ -243,7 +242,7 @@ function MembershipCard({ membership: m, userId, today }: { membership: Membersh
             const cancelled = h.cancelledAt !== null;
             const canCancel = !cancelled && h.holdEnd >= today;
             const holdState = cancelled
-              ? "취소됨"
+              ? "해제됨"
               : h.holdEnd < today
                 ? "종료"
                 : h.holdStart <= today
@@ -260,9 +259,9 @@ function MembershipCard({ membership: m, userId, today }: { membership: Membersh
                   {canCancel && (
                     <MemberActionForm
                       action={cancelHoldAction.bind(null, userId, h.id)}
-                      submitLabel="홀딩 취소"
-                      pendingLabel="취소 중…"
-                      confirmMessage="홀딩을 취소할까요? 취소해도 사용한 홀딩 횟수는 돌아오지 않습니다."
+                      submitLabel="홀딩 해제"
+                      pendingLabel="해제 중…"
+                      confirmMessage="홀딩을 해제할까요? 해제해도 회원이 사용한 홀딩 횟수는 돌아오지 않습니다."
                       layout="inline"
                     />
                   )}
@@ -273,34 +272,7 @@ function MembershipCard({ membership: m, userId, today }: { membership: Membersh
         </ul>
       )}
 
-      <div className="mt-4 grid gap-4 border-t border-line pt-4 sm:grid-cols-2">
-          {!ended && (
-          <div>
-            <h3 className="mb-2 text-sm font-bold">홀딩 추가</h3>
-            <MemberActionForm
-              action={addHoldAction.bind(null, userId, m.id)}
-              submitLabel="홀딩 등록"
-              pendingLabel="등록 중…"
-            >
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label htmlFor={`hs-${m.id}`} className="mb-1 block text-xs font-bold">
-                    시작일
-                  </label>
-                  <input id={`hs-${m.id}`} name="holdStart" type="date" required min={today} className={inputClass} />
-                </div>
-                <div>
-                  <label htmlFor={`he-${m.id}`} className="mb-1 block text-xs font-bold">
-                    종료일
-                  </label>
-                  <input id={`he-${m.id}`} name="holdEnd" type="date" required min={today} className={inputClass} />
-                </div>
-              </div>
-              <input name="note" type="text" maxLength={NOTE_MAX} placeholder="메모 (선택)" aria-label="홀딩 메모" className={inputClass} />
-            </MemberActionForm>
-          </div>
-          )}
-
+      <div className="mt-4 border-t border-line pt-4">
           <div>
             <h3 className="mb-2 text-sm font-bold">
               서비스 일수 조정{ended && <span className="ml-1 font-normal text-muted">(추가하면 다시 이용 가능해질 수 있음)</span>}

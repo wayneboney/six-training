@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { adjustDaysAction, registerMembershipAction } from "@/app/admin/members/actions";
+import { adjustDaysAction, cancelHoldAction, registerMembershipAction } from "@/app/admin/members/actions";
 import MemberActionForm from "@/components/admin/MemberActionForm";
 import { requireAdmin } from "@/lib/auth/admin";
 import { seoulTodayKey } from "@/lib/date";
@@ -175,7 +175,7 @@ async function MemberList({ searchParams }: { searchParams: PageProps<"/admin/me
       ) : (
         <ul className="divide-y divide-line rounded-lg border border-line">
           {visible.map((m) => (
-            <MemberItem key={m.userId} member={m} presence={presenceOf(m)} statusLabel={statusName.get(m.status) ?? m.status} plans={plans} />
+            <MemberItem key={m.userId} member={m} presence={presenceOf(m)} statusLabel={statusName.get(m.status) ?? m.status} plans={plans} today={today} />
           ))}
         </ul>
       )}
@@ -189,11 +189,13 @@ function MemberItem({
   presence,
   statusLabel,
   plans,
+  today,
 }: {
   member: MemberRow;
   presence: Presence;
   statusLabel: string;
   plans: PlanOption[];
+  today: string;
 }) {
   const isMember = m.role === "member";
   return (
@@ -230,6 +232,25 @@ function MemberItem({
           상세
         </Link>
       </div>
+
+      {/* 홀딩 현황: 홀딩은 회원이 직접 등록하고, 관리자는 확인과 해제만 합니다 */}
+      {m.hold && (
+        <div className="flex flex-wrap items-center gap-2 rounded-md bg-surface px-3 py-2">
+          <span className="text-sm font-bold">
+            {m.hold.start <= today ? "🧘 홀딩 중" : "🗓 홀딩 예정"}
+            <span className="ml-2 font-normal">
+              {m.hold.start} ~ {m.hold.end}
+            </span>
+          </span>
+          <MemberActionForm
+            action={cancelHoldAction.bind(null, m.userId, m.hold.id)}
+            submitLabel="홀딩 해제"
+            pendingLabel="해제 중…"
+            confirmMessage={`${m.name}님의 홀딩을 해제할까요? 해제해도 사용한 홀딩 횟수는 돌아오지 않습니다.`}
+            layout="inline"
+          />
+        </div>
+      )}
 
       {/* 빠른 처리 */}
       {isMember && presence === "pending" && (

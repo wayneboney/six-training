@@ -72,3 +72,10 @@ export function monthCells(year: number, month: number): (number | null)[] {
   }
   return cells;
 }
+
+// "YYYY-MM-DD"에 일수를 더한 날짜 "YYYY-MM-DD" (n이 음수면 뺌). 달력 날짜끼리만 계산해서 시간대 영향이 없습니다.
+export function addDaysToKey(key: string, days: number): string {
+  const { year, month, day } = parseDateKey(key);
+  const date = new Date(Date.UTC(year, month, day + days));
+  return toDateKey(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+}
