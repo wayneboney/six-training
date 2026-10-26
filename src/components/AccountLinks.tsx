@@ -18,10 +18,6 @@ export default async function AccountLinks() {
   }
   return (
     <div className="flex items-center gap-3">
-      {/* 누가 로그인했는지 표시. 이름이 길면 …으로 줄이고, 좁은 화면(모바일)에서는 "님"까지만 보여줍니다. */}
-      <span className="max-w-[7rem] truncate text-sm font-bold sm:max-w-[12rem]" title={`${member.name}님`}>
-        {member.name}님<span className="hidden font-normal text-muted sm:inline"> 환영합니다</span>
-      </span>
       {member.role === "admin" && (
         <Link
           href="/admin"
@@ -33,6 +29,10 @@ export default async function AccountLinks() {
       <Link href="/me" className="text-sm text-muted hover:text-foreground">
         내 정보
       </Link>
+      {/* 누가 로그인했는지 표시. 이름이 길면 …으로 줄이고, 좁은 화면(모바일)에서는 "님"까지만 보여줍니다. */}
+      <span className="max-w-[7rem] truncate text-sm font-bold sm:max-w-[12rem] sm:border-l sm:border-line sm:pl-4" title={`${member.name}님`}>
+        {member.name}님<span className="hidden font-normal text-muted sm:inline"> 환영합니다</span>
+      </span>
     </div>
   );
 }
