@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { addDaysAction, registerMembershipAction } from "@/app/admin/members/actions";
+import { adjustDaysAction, registerMembershipAction } from "@/app/admin/members/actions";
 import MemberActionForm from "@/components/admin/MemberActionForm";
 import { requireAdmin } from "@/lib/auth/admin";
 import { seoulTodayKey } from "@/lib/date";
@@ -257,11 +257,15 @@ function MemberItem({
       )}
       {isMember && m.targetMembershipId !== null && presence !== "pending" && (
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm font-bold">일수 추가:</span>
+          <span className="text-sm font-bold">일수 조정:</span>
           <MemberActionForm
-            action={addDaysAction.bind(null, m.userId, m.targetMembershipId)}
+            action={adjustDaysAction.bind(null, m.userId, m.targetMembershipId)}
             submitLabel="추가"
-            pendingLabel="추가 중…"
+            pendingLabel="처리 중…"
+            modes={[
+              { value: "add", label: "추가" },
+              { value: "remove", label: "차감", outline: true, confirmMessage: "서비스로 추가했던 일수를 차감할까요? 종료일이 줄어듭니다." },
+            ]}
             layout="inline"
           >
             <input

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import {
-  addDaysAction,
+  adjustDaysAction,
   addHoldAction,
   cancelHoldAction,
   registerMembershipAction,
@@ -303,12 +303,16 @@ function MembershipCard({ membership: m, userId, today }: { membership: Membersh
 
           <div>
             <h3 className="mb-2 text-sm font-bold">
-              서비스 일수 추가{ended && <span className="ml-1 font-normal text-muted">(추가하면 다시 이용 가능해질 수 있음)</span>}
+              서비스 일수 조정{ended && <span className="ml-1 font-normal text-muted">(추가하면 다시 이용 가능해질 수 있음)</span>}
             </h3>
             <MemberActionForm
-              action={addDaysAction.bind(null, userId, m.id)}
+              action={adjustDaysAction.bind(null, userId, m.id)}
               submitLabel="일수 추가"
-              pendingLabel="추가 중…"
+              pendingLabel="처리 중…"
+              modes={[
+                { value: "add", label: "추가" },
+              { value: "remove", label: "차감", outline: true, confirmMessage: "서비스로 추가했던 일수를 차감할까요? 종료일이 줄어듭니다." },
+            ]}
             >
               <input
                 name="days"
@@ -316,11 +320,11 @@ function MembershipCard({ membership: m, userId, today }: { membership: Membersh
                 required
                 min={1}
                 max={1000}
-                placeholder="추가할 일수"
-                aria-label="추가할 일수"
+                placeholder="일수"
+                aria-label="조정할 일수"
                 className={inputClass}
               />
-              <input name="note" type="text" maxLength={NOTE_MAX} placeholder="메모 (선택)" aria-label="일수 추가 메모" className={inputClass} />
+              <input name="note" type="text" maxLength={NOTE_MAX} placeholder="메모 (선택)" aria-label="일수 조정 메모" className={inputClass} />
             </MemberActionForm>
           </div>
         </div>

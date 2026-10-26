@@ -155,8 +155,10 @@ export async function cancelHoldAction(userId: string, holdId: number): Promise<
   return { ok: true, message: "홀딩을 취소했습니다." };
 }
 
-// 서비스 일수 추가
-export async function addDaysAction(
+// 서비스 일수 추가/차감. 같은 입력칸에서 어떤 버튼을 눌렀는지(mode)로 구분합니다.
+//   add    : 일수를 더함 (끝난 회원권도 가능)
+//   remove : 잘못 추가한 서비스 일수를 되돌림 (그 회원권에 서비스로 추가한 일수까지만 가능, DB가 확인)
+export async function adjustDaysAction(
   userId: string,
   membershipId: number,
   _prev: MemberActionState,
@@ -165,27 +167,27 @@ export async function addDaysAction(
   await requireAdmin();
   const uid = parseUuid(userId);
   const mid = parseBigintId(membershipId);
+  const mode = formData.get("mode");
   const days = parseInteger(formData.get("days"));
   const note = parseNote(formData.get("note"));
-  if (!uid || mid === null) {
+  if (!uid || mid === null || (mode !== "add" && mode !== "remove")) {
     return BAD_REQUEST;
   }
   if (days === null || days < 1 || days > 1000) {
-    return { ok: false, message: "추가 일수는 1~1000일로 입력해 주세요." };
+    return { ok: false, message: "일수는 1~1000일로 입력해 주세요." };
   }
   if (note === undefined) {
     return { ok: false, message: "메모는 200자 이하로 입력해 주세요." };
   }
 
   const supabase = await createAuthSupabase();
-  const { error } = await supabase.rpc("admin_add_membership_days", {
-    p_membership_id: mid,
-    p_days: days,
-    p_note: note,
-  });
+  const { error } =
+    mode === "add"
+      ? await supabase.rpc("admin_add_membership_days", { p_membership_id: mid, p_days: days, p_note: note })
+      : await supabase.rpc("admin_remove_membership_days", { p_membership_id: mid, p_days: days, p_note: note });
   if (error) {
-    return toFailure(error, "일수 추가");
+    return toFailure(error, mode === "add" ? "일수 추가" : "일수 차감");
   }
   refresh(uid);
-  return { ok: true, message: `${days}일을 추가했습니다.` };
+  return { ok: true, message: mode === "add" ? `${days}일을 추가했습니다.` : `${days}일을 차감했습니다.` };
 }

@@ -12,6 +12,8 @@ type MemberActionFormProps = {
   pendingLabel: string;
   // 값이 있으면 제출 전에 브라우저 확인창("정말 …할까요?")을 띄웁니다.
   confirmMessage?: string;
+  // 버튼이 둘 이상일 때(예: 추가 / 차감). 누른 버튼의 value가 폼 값 "mode"로 서버에 전달됩니다.
+  modes?: { value: string; label: string; confirmMessage?: string; outline?: boolean }[];
   // "inline": 입력칸 + 버튼을 한 줄에 (홀딩 취소처럼 입력칸이 없는 경우), 기본은 세로로 쌓임
   layout?: "stack" | "inline";
   children?: ReactNode; // 입력칸들
@@ -22,6 +24,7 @@ export default function MemberActionForm({
   submitLabel,
   pendingLabel,
   confirmMessage,
+  modes,
   layout = "stack",
   children,
 }: MemberActionFormProps) {
@@ -31,8 +34,10 @@ export default function MemberActionForm({
     <form
       action={formAction}
       onSubmit={(event) => {
-        // 확인창에서 취소하면 제출을 막습니다.
-        if (confirmMessage && !window.confirm(confirmMessage)) {
+        // 확인창에서 취소하면 제출을 막습니다. (버튼이 여러 개면 누른 버튼의 확인 문구를 씁니다)
+        const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+        const message = modes ? modes.find((mode) => mode.value === submitter?.value)?.confirmMessage : confirmMessage;
+        if (message && !window.confirm(message)) {
           event.preventDefault();
         }
       }}
@@ -40,13 +45,30 @@ export default function MemberActionForm({
     >
       {children}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-md bg-accent px-4 py-2 text-sm font-bold text-white hover:opacity-90 disabled:opacity-50"
-      >
-        {pending ? pendingLabel : submitLabel}
-      </button>
+      {modes ? (
+        modes.map((mode) => (
+          <button
+            key={mode.value}
+            type="submit"
+            name="mode"
+            value={mode.value}
+            disabled={pending}
+            className={`rounded-md px-4 py-2 text-sm font-bold disabled:opacity-50 ${
+              mode.outline ? "border border-line hover:bg-surface" : "bg-accent text-white hover:opacity-90"
+            }`}
+          >
+            {pending ? pendingLabel : mode.label}
+          </button>
+        ))
+      ) : (
+        <button
+          type="submit"
+          disabled={pending}
+          className="rounded-md bg-accent px-4 py-2 text-sm font-bold text-white hover:opacity-90 disabled:opacity-50"
+        >
+          {pending ? pendingLabel : submitLabel}
+        </button>
+      )}
 
       {state && (
         <p
