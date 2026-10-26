@@ -25,10 +25,10 @@ export async function getCurrentAdmin(): Promise<Admin | null> {
     return null;
   }
 
-  // admins 테이블에 등록된 계정인지 확인. RLS 규칙상 "본인 줄"만 읽을 수 있습니다.
+  // 내 프로필의 역할이 관리자(admin)인지 확인. RLS 규칙상 "본인 줄"만 읽을 수 있습니다.
   const { data: adminRow, error: adminError } = await supabase
-    .from("admins")
-    .select("name")
+    .from("profiles")
+    .select("name, role")
     .eq("user_id", user.id)
     .maybeSingle(); // 0줄이면 null, 1줄이면 그 줄 (Java의 Optional과 비슷)
 
@@ -36,7 +36,7 @@ export async function getCurrentAdmin(): Promise<Admin | null> {
     console.error("[auth] 관리자 정보 조회 실패", adminError);
     return null;
   }
-  if (!adminRow) {
+  if (!adminRow || adminRow.role !== "admin") {
     return null;
   }
 

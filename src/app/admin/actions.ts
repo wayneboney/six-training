@@ -31,14 +31,14 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
     return { error: INVALID_LOGIN, email };
   }
 
-  // 3) 관리자로 등록된 계정인지 확인. 아니면 바로 로그아웃시킵니다.
+  // 3) 역할이 관리자(admin)인 계정인지 확인. 아니면 바로 로그아웃시킵니다.
   const { data: adminRow, error: adminError } = await supabase
-    .from("admins")
-    .select("user_id")
+    .from("profiles")
+    .select("role")
     .eq("user_id", data.user.id)
     .maybeSingle();
 
-  if (adminError || !adminRow) {
+  if (adminError || adminRow?.role !== "admin") {
     if (adminError) {
       console.error("[auth] 로그인 중 관리자 확인 실패", adminError);
     }
