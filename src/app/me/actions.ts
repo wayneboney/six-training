@@ -5,7 +5,7 @@
 import { revalidatePath } from "next/cache";
 import { requireMember } from "@/lib/auth/member";
 import { toFailure, type ActionResult } from "@/lib/members/rpc-error";
-import { parseDate } from "@/lib/members/validation";
+import { parseBigintId, parseDate } from "@/lib/members/validation";
 import { createAuthSupabase } from "@/lib/supabase/auth";
 
 export type MyActionState = ActionResult | undefined;
@@ -28,4 +28,24 @@ export async function addMyHoldAction(_prev: MyActionState, formData: FormData):
 
   revalidatePath("/me");
   return { ok: true, message: "홀딩을 등록했습니다. 홀딩 일수만큼 종료일이 늘어났습니다." };
+}
+
+// 내 홀딩 해제. 시작 전이면 전부 되돌리고, 진행 중이면 어제까지 쉰 일수만 사용한 것으로 처리합니다. (사용한 횟수는 그대로)
+// holdId는 화면에서 .bind로 붙여 오지만 조작될 수 있어서 다시 검사하고, 본인 홀딩인지는 DB 함수가 확인합니다.
+export async function cancelMyHoldAction(holdId: number): Promise<MyActionState> {
+  await requireMember();
+
+  const id = parseBigintId(holdId);
+  if (id === null) {
+    return { ok: false, message: "잘못된 요청입니다. 화면을 새로고침한 뒤 다시 시도해 주세요." };
+  }
+
+  const supabase = await createAuthSupabase();
+  const { error } = await supabase.rpc("member_cancel_hold", { p_hold_id: id });
+  if (error) {
+    return toFailure(error, "홀딩 해제");
+  }
+
+  revalidatePath("/me");
+  return { ok: true, message: "홀딩을 해제했습니다. 쉰 일수만큼만 종료일이 늘어난 상태로 정리되었습니다." };
 }

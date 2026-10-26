@@ -3,10 +3,10 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import Link from "next/link";
 import { memberLogout } from "@/app/auth/actions";
-import { addMyHoldAction } from "@/app/me/actions";
+import { addMyHoldAction, cancelMyHoldAction } from "@/app/me/actions";
 import MemberActionForm from "@/components/admin/MemberActionForm";
 import { requireMember } from "@/lib/auth/member";
-import { addDaysToKey, seoulTodayKey } from "@/lib/date";
+import { addDaysToKey, parseDateKey, seoulTodayKey } from "@/lib/date";
 import { createAuthSupabase } from "@/lib/supabase/auth";
 
 export const metadata: Metadata = {
@@ -26,6 +26,13 @@ export default function MePage() {
       </div>
     </div>
   );
+}
+
+// 두 날짜(YYYY-MM-DD) 사이의 일수 (b - a)
+function diffDays(a: string, b: string): number {
+  const pa = parseDateKey(a);
+  const pb = parseDateKey(b);
+  return Math.round((Date.UTC(pb.year, pb.month, pb.day) - Date.UTC(pa.year, pa.month, pa.day)) / 86400000);
 }
 
 type HoldItem = { id: number; hold_start: string; hold_end: string; days: number; cancelled_at: string | null };
@@ -155,22 +162,45 @@ async function MyInfo() {
         <section className="rounded-md border border-line p-5">
           <h2 className="font-bold">홀딩 (일시정지)</h2>
           <p className="mt-1 text-sm text-muted">
-            홀딩한 일수만큼 종료일이 늘어납니다. 내일부터 시작하는 날짜만 신청할 수 있고, 신청한 홀딩은 직접 취소할 수 없습니다.
-            (취소가 필요하면 코치에게 문의해 주세요. 해제해도 사용한 횟수는 돌아오지 않습니다.)
+            홀딩한 일수만큼 종료일이 늘어납니다. 내일부터 시작하는 날짜만 신청할 수 있습니다.
+            홀딩 중에 해제하면 쉰 일수만큼만 늘어나고, 해제하지 않아도 기간이 끝나면 저절로 풀립니다.
+            단, 해제해도 사용한 홀딩 횟수는 돌아오지 않습니다.
           </p>
 
           {holds.length > 0 && (
             <ul className="mt-3 divide-y divide-line rounded-md border border-line text-sm">
-              {holds.map((h) => (
-                <li key={h.id} className="flex justify-between gap-2 px-3 py-2">
-                  <span className={h.cancelled_at ? "text-muted line-through" : ""}>
-                    {h.hold_start} ~ {h.hold_end} ({h.days}일)
-                  </span>
-                  <span className="text-xs text-muted">
-                    {h.cancelled_at ? "해제됨" : h.hold_end < today ? "종료" : h.hold_start <= today ? "홀딩 중" : "예정"}
-                  </span>
-                </li>
-              ))}
+              {holds.map((h) => {
+                const cancelled = h.cancelled_at !== null;
+                const canCancel = !cancelled && h.hold_end >= today;
+                const started = h.hold_start <= today;
+                // 해제하면 오늘 전날까지 쉰 일수만 남습니다. (확인창 안내용 계산)
+                const usedDays = started ? diffDays(h.hold_start, today) : 0;
+                return (
+                  <li key={h.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
+                    <span className={cancelled ? "text-muted line-through" : ""}>
+                      {h.hold_start} ~ {h.hold_end} ({h.days}일)
+                    </span>
+                    <span className="flex items-center gap-2">
+                      <span className="text-xs text-muted">
+                        {cancelled ? "해제됨" : h.hold_end < today ? "종료" : started ? "홀딩 중" : "예정"}
+                      </span>
+                      {canCancel && (
+                        <MemberActionForm
+                          action={cancelMyHoldAction.bind(null, h.id)}
+                          submitLabel="해제"
+                          pendingLabel="해제 중…"
+                          confirmMessage={
+                            started
+                              ? `오늘부터 홀딩을 해제할까요? 어제까지 쉰 ${usedDays}일만 사용한 것으로 처리되고, 종료일은 ${usedDays}일만 늘어난 상태가 됩니다. 사용한 홀딩 횟수는 돌아오지 않습니다.`
+                              : "아직 시작하지 않은 홀딩을 해제할까요? 늘어났던 종료일이 원래대로 돌아오지만, 사용한 홀딩 횟수는 돌아오지 않습니다."
+                          }
+                          layout="inline"
+                        />
+                      )}
+                    </span>
+                  </li>
+                );
+              })}
             </ul>
           )}
 
@@ -180,7 +210,7 @@ async function MyInfo() {
                 action={addMyHoldAction}
                 submitLabel="홀딩 신청"
                 pendingLabel="신청 중…"
-                confirmMessage="홀딩을 신청할까요? 신청 후에는 직접 취소할 수 없고, 해제해도 사용한 횟수는 돌아오지 않습니다."
+                confirmMessage="홀딩을 신청할까요? 해제하더라도 사용한 홀딩 횟수는 돌아오지 않습니다."
               >
                 <div className="grid grid-cols-2 gap-3">
                   <div>
