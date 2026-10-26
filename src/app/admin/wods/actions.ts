@@ -38,7 +38,7 @@ function messageFor(error: WodSaveError): string {
 
 // 저장/삭제 후 돌아갈 목록 주소: 그 WOD의 달 + 완료 표시(saved 또는 deleted)
 function listUrl(date: string, done: "saved" | "deleted" = "saved"): string {
-  return `/admin?month=${date.slice(0, 7)}&${done}=1`;
+  return `/admin/wods?month=${date.slice(0, 7)}&${done}=1`;
 }
 
 export async function createWodAction(_prev: WodFormState, formData: FormData): Promise<WodFormState> {

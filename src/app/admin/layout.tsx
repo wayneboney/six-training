@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import AdminNav from "@/components/admin/AdminNav";
 
 // 관리자 화면 공통 설정
 export const metadata: Metadata = {
@@ -11,5 +13,13 @@ export const metadata: Metadata = {
 };
 
 export default function AdminLayout({ children }: LayoutProps<"/admin">) {
-  return <div className="mx-auto w-full max-w-5xl px-4 py-12">{children}</div>;
+  return (
+    <div className="mx-auto w-full max-w-5xl px-4 py-12">
+      {/* 현재 주소를 읽는 컴포넌트라 Suspense로 감쌉니다 (주소는 요청 시점에 정해지므로) */}
+      <Suspense fallback={null}>
+        <AdminNav />
+      </Suspense>
+      {children}
+    </div>
+  );
 }

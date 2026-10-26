@@ -39,7 +39,7 @@ async function NewWod({ searchParams }: { searchParams: PageProps<"/admin/wods/n
       action={createWodAction}
       initialValues={{ date: initialDate, type: "CROSSFIT", title: "", format: "", movements: "", note: "" }}
       submitLabel="등록"
-      cancelHref={`/admin?month=${initialDate.slice(0, 7)}`}
+      cancelHref={`/admin/wods?month=${initialDate.slice(0, 7)}`}
     />
   );
 }

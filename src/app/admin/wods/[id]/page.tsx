@@ -54,7 +54,7 @@ async function EditWod({ params }: { params: PageProps<"/admin/wods/[id]">["para
         action={updateWodAction.bind(null, wod.id)}
         initialValues={wodToFormValues(wod)}
         submitLabel="수정 저장"
-        cancelHref={`/admin?month=${wod.date.slice(0, 7)}`}
+        cancelHref={`/admin/wods?month=${wod.date.slice(0, 7)}`}
       />
 
       {/* 삭제는 실수로 누르지 않도록 목록이 아니라 수정 화면 맨 아래에만 둡니다 */}
