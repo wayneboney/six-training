@@ -50,6 +50,11 @@ export async function registerMembershipAction(
   if (startDate === undefined) {
     return { ok: false, message: "시작일 형식이 올바르지 않습니다." };
   }
+  // 시작일 칸이 화면에 있는데(= 이어 붙일 회원권이 없는 경우) 비어 있으면 선택하라고 안내합니다.
+  // 칸 자체가 없으면(목록의 빠른 승인, 이어서 시작) 비워 둔 것이 정상이며 DB가 알아서 정합니다.
+  if (formData.has("startDate") && startDate === null) {
+    return { ok: false, message: "시작일을 선택해 주세요." };
+  }
   if (note === undefined) {
     return { ok: false, message: "메모는 200자 이하로 입력해 주세요." };
   }
