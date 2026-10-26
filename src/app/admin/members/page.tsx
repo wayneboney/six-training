@@ -342,6 +342,7 @@ function MembershipSummary({ member: m, presence }: { member: MemberRow; presenc
         </>
       );
     case "none":
-      return <span className="text-muted">회원권 없음</span>;
+      // 관리자(코치) 계정은 회원권을 쓰지 않으므로 "없음" 대신 해당 없음으로 표시
+      return <span className="text-muted">{m.role === "admin" ? "회원권 해당 없음" : "회원권 없음"}</span>;
   }
 }
