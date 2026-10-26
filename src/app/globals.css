@@ -31,3 +31,13 @@ body {
   font-family: var(--font-noto-sans-kr), system-ui, sans-serif;
   word-break: keep-all; /* 한글 문장이 단어 중간에서 줄바꿈되지 않게 */
 }
+
+/* 콤보박스(select): 브라우저 기본 화살표는 오른쪽 끝에 너무 붙어 보여서, 기본 모양을 끄고 여백을 둔 화살표를 직접 그립니다. */
+select {
+  appearance: none;
+  padding-right: 2.25rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%23666' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  background-color: var(--background);
+}

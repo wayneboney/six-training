@@ -21,11 +21,22 @@ export default function AdminNav() {
   return (
     <nav aria-label="관리자 메뉴" className="mb-8 flex items-center justify-between gap-2 border-b border-line pb-3">
       <div className="flex gap-2">
-        {adminMenus.map((menu) => (
-          <Link key={menu.href} href={menu.href} className="rounded-md px-3 py-1.5 text-sm font-bold hover:bg-surface">
-            {menu.label}
-          </Link>
-        ))}
+        {adminMenus.map((menu) => {
+          // 현재 화면이 이 메뉴 아래에 있으면 선택된 메뉴로 표시 (예: /admin/members/123 → 회원 관리)
+          const active = pathname === menu.href || pathname.startsWith(`${menu.href}/`);
+          return (
+            <Link
+              key={menu.href}
+              href={menu.href}
+              aria-current={active ? "page" : undefined}
+              className={`rounded-md px-4 py-1.5 text-sm font-bold ${
+                active ? "bg-accent text-white" : "text-muted hover:bg-surface hover:text-foreground"
+              }`}
+            >
+              {menu.label}
+            </Link>
+          );
+        })}
       </div>
       {/* 로그아웃: 폼 제출로 서버의 logout 함수를 실행합니다 */}
       <form action={logout}>
