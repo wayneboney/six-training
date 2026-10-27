@@ -23,7 +23,7 @@ type ClassCardProps = {
 const typeBadge: Record<ClassSession["classType"], string> = {
   CROSSFIT: "bg-foreground text-background",
   HYROX: "bg-accent text-white",
-  OPEN_GYM: "bg-muted text-white",
+  OPEN_GYM: "bg-emerald-700 text-white",
 };
 
 export default function ClassCard({ session: s, started, isAdmin, readOnly = false, attendees }: ClassCardProps) {

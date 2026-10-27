@@ -221,10 +221,16 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
 // 날짜 칸 안의 "내 예약" 이름표. 누르면 그 날짜의 해당 수업 카드로 이동(스크롤)합니다.
 //   첫 줄: 수업 종류(크로스핏/하이록스/오픈짐), 둘째 줄: 예약 또는 대기 + 시작 시각
 //   왼쪽 굵은 선의 색으로 종류를 구분하고(검정/붉은색/회색), 대기는 점선으로 구분합니다.
+// 종류마다 선과 글자색을 다르게: 크로스핏 검정, 하이록스 붉은색, 오픈짐 초록색
 const chipAccent: Record<string, string> = {
   CROSSFIT: "border-l-foreground",
   HYROX: "border-l-accent",
-  OPEN_GYM: "border-l-muted",
+  OPEN_GYM: "border-l-emerald-600",
+};
+const chipText: Record<string, string> = {
+  CROSSFIT: "text-foreground",
+  HYROX: "text-accent",
+  OPEN_GYM: "text-emerald-700",
 };
 
 function MyChip({ reservation: r, date, selected }: { reservation: MyReservation; date: string; selected: boolean }) {
@@ -238,7 +244,7 @@ function MyChip({ reservation: r, date, selected }: { reservation: MyReservation
         chipAccent[r.classType] ?? "border-l-muted"
       } ${selected ? "bg-white" : "bg-surface"} ${waiting ? "border-y border-r border-dashed border-y-line border-r-line" : ""}`}
     >
-      <span className="block text-[11px] font-black text-foreground">{label}</span>
+      <span className={`block text-[11px] font-black ${chipText[r.classType] ?? "text-foreground"}`}>{label}</span>
       <span className={`block text-[10px] ${waiting ? "font-bold text-accent" : "text-muted"}`}>
         {waiting ? "대기" : "예약"} {r.startTime}
       </span>
