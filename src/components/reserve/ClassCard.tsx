@@ -99,7 +99,10 @@ export default function ClassCard({ session: s, started, isAdmin, attendees }: C
               <label htmlFor={`cap-${s.slotId}-${s.classDate}`} className="text-sm font-bold">
                 정원
               </label>
+              {/* key={s.capacity}: 정원이 바뀌면 선택 상자를 새로 만들어서 현재 정원이 선택된 상태로 보이게 합니다.
+                  (defaultValue는 처음 그릴 때만 적용되고, 폼이 저장 후 초기화되면 예전 값으로 돌아갈 수 있어서) */}
               <select
+                key={s.capacity}
                 id={`cap-${s.slotId}-${s.classDate}`}
                 name="capacity"
                 defaultValue={s.capacity === 30 ? "30" : "20"}
