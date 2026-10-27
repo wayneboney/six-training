@@ -2,6 +2,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import ClassCard from "@/components/reserve/ClassCard";
+import ScrollToTarget from "@/components/reserve/ScrollToTarget";
 import { classLabelsKo } from "@/data/timetable";
 import { requireMember } from "@/lib/auth/member";
 import { addDaysToKey, parseDateKey, seoulTodayKey, weekdayLabels } from "@/lib/date";
@@ -110,6 +111,7 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
 
   return (
     <div className="space-y-8">
+      <ScrollToTarget />
       {!canReserve && (
         <p role="status" className="rounded-md bg-accent-soft px-4 py-3 text-sm text-accent">
           {member.status === "pending"
@@ -132,16 +134,6 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
                   {first.month + 1}/{first.day} ~ {last.month + 1}/{last.day}
                 </span>
               </p>
-              {/* 내 예약 줄: 날짜 칸 바로 위에, 같은 열에 맞춰서 "C예약", "H예약"처럼 이름표를 보여줍니다. */}
-              <div className="mb-1.5 grid grid-cols-6 gap-2" aria-label="내 예약">
-                {week.map((d) => (
-                  <div key={d} className="flex flex-col justify-end gap-1">
-                    {(mineByDate.get(d) ?? []).map((r) => (
-                      <MyChip key={r.id} reservation={r} />
-                    ))}
-                  </div>
-                ))}
-              </div>
               <nav aria-label={`${label} 날짜 선택`} className="grid grid-cols-6 gap-2">
                 {week.map((d) => {
                   const { day } = parseDateKey(d);
@@ -172,15 +164,28 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
                       )}
                     </>
                   );
+                  const mineToday = mineByDate.get(d) ?? [];
                   return (
-                    <Link
+                    // 칸 전체는 div로 감싸고, 날짜 부분과 "내 예약" 이름표를 각각 링크로 둡니다. (링크 안에 링크를 넣을 수 없어서)
+                    <div
                       key={d}
-                      href={`/reserve?date=${d}`}
-                      aria-current={active ? "date" : undefined}
-                      className={`${box} ${active ? "" : "hover:bg-surface"} ${!active && past ? "bg-surface/60" : ""}`}
+                      className={`${box} ${active ? "" : past ? "bg-surface/60" : ""}`}
                     >
-                      {content}
-                    </Link>
+                      <Link
+                        href={`/reserve?date=${d}`}
+                        aria-current={active ? "date" : undefined}
+                        className="flex w-full flex-col items-center"
+                      >
+                        {content}
+                      </Link>
+                      {mineToday.length > 0 && (
+                        <div className="mt-1.5 flex w-full flex-col gap-1">
+                          {mineToday.map((r) => (
+                            <MyChip key={r.id} reservation={r} date={d} selected={active} />
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
               </nav>
@@ -188,17 +193,6 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
           );
         })}
       </div>
-      {!isAdmin && (
-        <p className="-mt-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
-          내 예약 표시
-          {(Object.keys(chipLetters) as (keyof typeof chipLetters)[]).map((type) => (
-            <span key={type} className="flex items-center gap-1">
-              <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${chipColors[type]}`}>{chipLetters[type]}</span>
-              {classLabelsKo[type]}
-            </span>
-          ))}
-        </p>
-      )}
       <p className="-mt-6 text-xs text-muted">
         오늘부터 {lastDay}(토)까지 예약할 수 있습니다. 지난 날짜를 누르면 예약자 목록만 볼 수 있습니다. 일요일은 휴무입니다.
       </p>
@@ -224,30 +218,30 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
   );
 }
 
-// 날짜 칸 위의 내 예약 이름표: "C예약", "H예약", 대기 중이면 "H대기". C=크로스핏, H=하이록스, O=오픈짐
-// 수업 종류마다 색을 달리하고, 대기는 점선 테두리로 구분합니다. 시작 시각은 마우스를 올리면(title) 보입니다.
-const chipLetters = { CROSSFIT: "C", HYROX: "H", OPEN_GYM: "O" } as const;
-const chipColors: Record<string, string> = {
-  CROSSFIT: "bg-foreground text-background",
-  HYROX: "bg-accent text-white",
-  OPEN_GYM: "bg-muted text-white",
+// 날짜 칸 안의 "내 예약" 이름표. 누르면 그 날짜의 해당 수업 카드로 이동(스크롤)합니다.
+//   첫 줄: 수업 종류(크로스핏/하이록스/오픈짐), 둘째 줄: 예약 또는 대기 + 시작 시각
+//   왼쪽 굵은 선의 색으로 종류를 구분하고(검정/붉은색/회색), 대기는 점선으로 구분합니다.
+const chipAccent: Record<string, string> = {
+  CROSSFIT: "border-l-foreground",
+  HYROX: "border-l-accent",
+  OPEN_GYM: "border-l-muted",
 };
 
-function MyChip({ reservation: r }: { reservation: MyReservation }) {
-  const type = r.classType as keyof typeof chipLetters;
-  const letter = chipLetters[type] ?? "?";
-  const label = classLabelsKo[type] ?? r.classType;
+function MyChip({ reservation: r, date, selected }: { reservation: MyReservation; date: string; selected: boolean }) {
+  const label = classLabelsKo[r.classType as keyof typeof classLabelsKo] ?? r.classType;
   const waiting = r.status === "waiting";
   return (
-    <span
-      className={`rounded py-0.5 text-center text-[11px] font-bold leading-tight ${chipColors[r.classType] ?? "bg-muted text-white"} ${
-        waiting ? "outline-dashed outline-1 -outline-offset-2 outline-white" : ""
-      }`}
-      title={`${label} ${waiting ? "대기" : "예약"} ${r.startTime}`}
-      aria-label={`${label} ${waiting ? "대기" : "예약"} ${r.startTime}`}
+    <Link
+      href={`/reserve?date=${date}#class-${r.slotId}-${date}`}
+      title={`${label} ${waiting ? "대기" : "예약"} ${r.startTime} (누르면 해당 수업으로 이동)`}
+      className={`block w-full rounded-md border-l-4 px-1.5 py-1 text-left leading-tight shadow-sm hover:brightness-95 ${
+        chipAccent[r.classType] ?? "border-l-muted"
+      } ${selected ? "bg-white" : "bg-surface"} ${waiting ? "border-y border-r border-dashed border-y-line border-r-line" : ""}`}
     >
-      {letter}
-      {waiting ? "대기" : "예약"}
-    </span>
+      <span className="block text-[11px] font-black text-foreground">{label}</span>
+      <span className={`block text-[10px] ${waiting ? "font-bold text-accent" : "text-muted"}`}>
+        {waiting ? "대기" : "예약"} {r.startTime}
+      </span>
+    </Link>
   );
 }

@@ -17,6 +17,7 @@ export type ClassSession = {
 
 export type MyReservation = {
   id: number;
+  slotId: number;
   classDate: string;
   startTime: string;
   classType: string;
@@ -76,13 +77,14 @@ export async function getMyReservations(from: string): Promise<MyReservation[]> 
   const supabase = await createAuthSupabase();
   const { data, error } = await supabase
     .from("reservations")
-    .select("id, class_date, status, class_slots(start_time, class_type)")
+    .select("id, slot_id, class_date, status, class_slots(start_time, class_type)")
     .neq("status", "cancelled")
     .gte("class_date", from)
     .order("class_date", { ascending: true })
     .overrideTypes<
       {
         id: number;
+        slot_id: number;
         class_date: string;
         status: "confirmed" | "waiting";
         class_slots: { start_time: string; class_type: string } | null;
@@ -96,6 +98,7 @@ export async function getMyReservations(from: string): Promise<MyReservation[]> 
     .filter((row) => row.class_slots !== null)
     .map((row) => ({
       id: row.id,
+      slotId: row.slot_id,
       classDate: row.class_date,
       startTime: hhmm(row.class_slots!.start_time),
       classType: row.class_slots!.class_type,

@@ -34,7 +34,11 @@ export default function ClassCard({ session: s, started, isAdmin, readOnly = fal
   const myWaitingNo = waiting.find((a) => a.isMe)?.queueNo; // 내가 대기 중이면 몇 번째인지
 
   return (
-    <li className="space-y-3 rounded-lg border border-line p-4">
+    // id: 날짜 칸의 "내 예약" 이름표를 누르면 이 카드로 스크롤합니다. (이동 후 강조는 ScrollToTarget이 처리)
+    <li
+      id={`class-${s.slotId}-${s.classDate}`}
+      className="scroll-mt-24 space-y-3 rounded-lg border border-line p-4"
+    >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-3">
           <span className="text-xl font-black">{s.startTime}</span>
