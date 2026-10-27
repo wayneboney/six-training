@@ -5,4 +5,5 @@ export const navItems = [
   { href: "/", label: "홈" },
   { href: "/about", label: "체육관 소개" },
   { href: "/wod", label: "WOD" },
+  { href: "/reserve", label: "수업 예약" },
 ];
