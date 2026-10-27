@@ -4,6 +4,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import {
   adjustDaysAction,
+  deleteMemberAction,
   cancelHoldAction,
   registerMembershipAction,
   updateMemberAction,
@@ -207,6 +208,26 @@ async function MemberDetailView({ params }: { params: PageProps<"/admin/members/
           </MemberActionForm>
         </div>
       </section>
+
+      {/* 회원 삭제: 되돌릴 수 없는 작업이라 맨 아래에 따로 둡니다. 관리자 계정은 삭제할 수 없습니다. */}
+      {member.role === "member" && (
+        <section className="space-y-3 rounded-lg border border-accent/40 p-5">
+          <div>
+            <h2 className="font-bold text-accent">회원 삭제</h2>
+            <p className="mt-1 text-sm text-muted">
+              계정, 회원권/홀딩 기록, 프로필 사진이 모두 삭제되며 되돌릴 수 없습니다. 회원권이 끝난 회원의 기록을 남겨 두려면
+              삭제하지 말고 &apos;비활동&apos; 상태로 두세요. (비활동으로 바뀌어도 사진과 기록은 그대로 남습니다.)
+            </p>
+          </div>
+          <MemberActionForm
+            action={deleteMemberAction.bind(null, member.userId)}
+            submitLabel="회원 삭제"
+            pendingLabel="삭제 중…"
+            confirmMessage={`${member.name}님을 삭제할까요?\n계정, 회원권/홀딩 기록, 프로필 사진이 모두 삭제되며 되돌릴 수 없습니다.`}
+            layout="inline"
+          />
+        </section>
+      )}
     </div>
   );
 }

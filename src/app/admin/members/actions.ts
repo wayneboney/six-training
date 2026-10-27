@@ -3,7 +3,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/admin";
+import { AVATAR_BUCKET } from "@/lib/profile/avatar";
 import { toFailure, type ActionResult } from "@/lib/members/rpc-error";
 import { parseBigintId, parseDate, parseInteger, parseNote, parseUuid } from "@/lib/members/validation";
 import { createAuthSupabase } from "@/lib/supabase/auth";
@@ -139,4 +141,45 @@ export async function adjustDaysAction(
   }
   refresh(uid);
   return { ok: true, message: mode === "add" ? `${days}일을 추가했습니다.` : `${days}일을 차감했습니다.` };
+}
+
+// 회원 삭제: 계정(프로필, 회원권, 홀딩 기록 포함)과 프로필 사진 파일을 함께 지웁니다.
+// 순서가 중요합니다. ① 사진 목록 확인 → ② 계정 삭제(실패하면 아무것도 지워지지 않음) → ③ 사진 파일 삭제
+//   사진을 먼저 지우면 계정 삭제가 실패했을 때 사진만 사라지기 때문에, 계정을 먼저 지우고 사진은 마지막에 정리합니다.
+//   (사진 삭제만 실패하면 파일이 남지만 회원 삭제는 이미 끝난 상태이므로 로그만 남깁니다.)
+// 비활동 전환(회원권 종료)은 이 함수와 무관하게 아무것도 지우지 않습니다.
+export async function deleteMemberAction(userId: string): Promise<MemberActionState> {
+  await requireAdmin();
+  const uid = parseUuid(userId);
+  if (!uid) {
+    return BAD_REQUEST;
+  }
+
+  const supabase = await createAuthSupabase();
+
+  // ① 이 회원 폴더의 사진 파일 목록 (관리자는 DB 규칙으로 읽기 허용)
+  const { data: files, error: listError } = await supabase.storage.from(AVATAR_BUCKET).list(uid, { limit: 100 });
+  if (listError) {
+    console.error("[members] 사진 목록 조회 실패", listError.message);
+    return { ok: false, message: "사진 정보를 확인하지 못했습니다. 잠시 후 다시 시도해 주세요." };
+  }
+  const paths = (files ?? []).map((file) => `${uid}/${file.name}`);
+
+  // ② 계정 삭제 (관리자 확인, 자기 자신/관리자 계정 보호는 DB 함수가 합니다)
+  const { error } = await supabase.rpc("admin_delete_member", { p_user_id: uid });
+  if (error) {
+    return toFailure(error, "회원 삭제");
+  }
+
+  // ③ 사진 파일 삭제
+  if (paths.length > 0) {
+    const { error: removeError } = await supabase.storage.from(AVATAR_BUCKET).remove(paths);
+    if (removeError) {
+      console.error("[members] 삭제한 회원의 사진 파일 정리 실패", removeError.message);
+    }
+  }
+
+  revalidatePath("/admin/members");
+  // redirect는 try/catch 밖에서 호출해야 합니다. 삭제된 회원의 상세 화면은 더 이상 없으므로 목록으로 이동
+  redirect("/admin/members?deleted=1");
 }

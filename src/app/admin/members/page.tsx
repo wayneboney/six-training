@@ -72,6 +72,7 @@ async function MemberList({ searchParams }: { searchParams: PageProps<"/admin/me
 
   const query = await searchParams;
   const statusParam = typeof query.status === "string" ? query.status : "";
+  const deleted = query.deleted === "1"; // 회원 삭제 후 이 화면으로 돌아왔을 때
   const q = (typeof query.q === "string" ? query.q : "").trim().slice(0, 50);
   const today = seoulTodayKey();
 
@@ -131,6 +132,12 @@ async function MemberList({ searchParams }: { searchParams: PageProps<"/admin/me
 
   return (
     <div className="space-y-6">
+      {deleted && (
+        <p role="status" className="rounded-md bg-surface px-4 py-3 text-sm font-bold">
+          🗑 회원을 삭제했습니다.
+        </p>
+      )}
+
       {/* 상태 탭: 링크로 만들어서 주소(?status=)만 바꿉니다 */}
       <nav aria-label="회원 상태" className="flex flex-wrap gap-2">
         {tabs.map((t) => (
