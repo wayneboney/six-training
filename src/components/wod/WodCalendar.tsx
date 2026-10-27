@@ -4,6 +4,7 @@
 import { useMemo, useState, useSyncExternalStore } from "react";
 import WodDetail from "@/components/wod/WodDetail";
 import { wodTypeStyles } from "@/components/wod/wodTypeStyles";
+import { getHoliday } from "@/data/holidays";
 import { wodTypeLabels, wodTypes, type Wod } from "@/data/wods";
 import { dateToKey, monthCells, parseDateKey, toDateKey, weekdayLabels } from "@/lib/date";
 
@@ -115,6 +116,8 @@ export default function WodCalendar({ wods, isAdmin = false }: WodCalendarProps)
             const isSelected = key === selected;
             const isToday = key === today;
             const isSunday = index % 7 === 0;
+            const holiday = getHoliday(key); // 공휴일이면 이름, 아니면 undefined
+            const isRedDay = isSunday || holiday !== undefined; // 일요일과 공휴일은 빨간 날짜
 
             return (
               <button
@@ -122,7 +125,7 @@ export default function WodCalendar({ wods, isAdmin = false }: WodCalendarProps)
                 type="button"
                 onClick={() => setPickedDate(key)}
                 aria-pressed={isSelected}
-                aria-label={`${view.month + 1}월 ${day}일${dayWods.length > 0 ? `, WOD ${dayWods.length}개` : ""}`}
+                aria-label={`${view.month + 1}월 ${day}일${holiday ? `, ${holiday}` : ""}${dayWods.length > 0 ? `, WOD ${dayWods.length}개` : ""}`}
                 className={`flex min-h-16 flex-col items-center gap-1 rounded-md border p-1 text-sm sm:min-h-20 ${
                   isSelected
                     ? "border-accent bg-accent text-white"
@@ -132,10 +135,21 @@ export default function WodCalendar({ wods, isAdmin = false }: WodCalendarProps)
                 }`}
               >
                 <span
-                  className={`font-bold ${!isSelected && isSunday ? "text-accent" : ""}`}
+                  className={`font-bold ${!isSelected && isRedDay ? "text-accent" : ""}`}
                 >
                   {day}
                 </span>
+                {/* 공휴일 이름: 칸이 좁아서 길면 …으로 줄입니다. (전체 이름은 날짜를 누르면 오른쪽 상세에 나옴) */}
+                {holiday && (
+                  <span
+                    title={holiday}
+                    className={`w-full truncate text-center text-[9px] leading-tight sm:text-[10px] ${
+                      isSelected ? "text-white" : "text-accent"
+                    }`}
+                  >
+                    {holiday}
+                  </span>
+                )}
                 {/* 그날 있는 WOD 종류를 작은 표시로. 모바일은 점, PC(sm 이상)는 글자 */}
                 <span className="flex flex-wrap justify-center gap-0.5">
                   {dayWods.map((wod, wodIndex) => (
@@ -156,11 +170,19 @@ export default function WodCalendar({ wods, isAdmin = false }: WodCalendarProps)
               {wodTypeLabels[type]}
             </span>
           ))}
+          <span className="flex items-center gap-1">
+            <span className="font-bold text-accent">빨간 날짜</span>일요일과 공휴일
+          </span>
         </div>
       </div>
 
       {/* 선택한 날짜의 WOD 상세 */}
-      <WodDetail date={selected} wods={selected ? (wodsByDate.get(selected) ?? []) : []} isAdmin={isAdmin} />
+      <WodDetail
+        date={selected}
+        wods={selected ? (wodsByDate.get(selected) ?? []) : []}
+        holiday={selected ? getHoliday(selected) : undefined}
+        isAdmin={isAdmin}
+      />
     </div>
   );
 }

@@ -6,12 +6,13 @@ import { formatDateKey, parseDateKey } from "@/lib/date";
 type WodDetailProps = {
   date: string | null; // 선택한 날짜. 아직 선택 전이면 null
   wods: Wod[]; // 그날의 WOD 목록
+  holiday?: string; // 공휴일이면 그 이름
   isAdmin?: boolean; // 관리자면 수정/등록 바로가기 버튼을 보여줌
 };
 
 // WodDetail = 달력에서 선택한 날짜의 WOD 내용
 // 버튼은 화면 표시용일 뿐이고, 실제 수정 권한은 관리자 화면과 DB(RLS)에서 다시 확인합니다.
-export default function WodDetail({ date, wods, isAdmin = false }: WodDetailProps) {
+export default function WodDetail({ date, wods, holiday, isAdmin = false }: WodDetailProps) {
   if (!date) {
     return <aside className="rounded-lg bg-surface p-6 text-muted">날짜를 선택해 주세요.</aside>;
   }
@@ -21,7 +22,12 @@ export default function WodDetail({ date, wods, isAdmin = false }: WodDetailProp
 
   return (
     <aside className="space-y-4">
-      <h3 className="text-lg font-black">{formatDateKey(date)}</h3>
+      <h3 className="text-lg font-black">
+        {formatDateKey(date)}
+        {holiday && (
+          <span className="ml-2 rounded bg-accent px-2 py-0.5 align-middle text-xs font-bold text-white">{holiday}</span>
+        )}
+      </h3>
 
       {wods.length === 0 ? (
         <p className="rounded-lg bg-surface p-6 text-muted">
