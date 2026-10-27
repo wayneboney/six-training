@@ -17,6 +17,16 @@ const DISPLAY_NAMES: Record<string, string> = {
   "1월1일": "신정",
 };
 
+// 화면에 보여줄 이름. 대체공휴일은 API가 "대체공휴일(기독탄신일)"처럼 돌려주므로 "성탄절 대체"로 줄여서 보여줍니다.
+function toDisplayName(name: string): string {
+  const substitute = /^대체공휴일\((.+)\)$/.exec(name);
+  if (substitute) {
+    const original = substitute[1];
+    return `${DISPLAY_NAMES[original] ?? original} 대체`;
+  }
+  return DISPLAY_NAMES[name] ?? name;
+}
+
 type ApiItem = { dateName?: unknown; locdate?: unknown; isHoliday?: unknown };
 
 // 서비스 키: 공공데이터포털은 "인코딩된 키"와 "디코딩된 키" 두 가지를 줍니다.
@@ -79,7 +89,7 @@ async function fetchYear(year: number, serviceKey: string): Promise<Record<strin
   for (const item of toItems(body)) {
     const key = toDateKey(item.locdate);
     if (key && item.isHoliday === "Y" && typeof item.dateName === "string") {
-      result[key] = DISPLAY_NAMES[item.dateName] ?? item.dateName;
+      result[key] = toDisplayName(item.dateName);
     }
   }
   return result;
