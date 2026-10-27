@@ -19,7 +19,6 @@ import {
 
 export const metadata = { title: "수업 예약" };
 
-const DAYS_AHEAD = 7; // 오늘부터 7일 후까지 예약 가능
 
 // /reserve  (로그인한 회원 전용)   주소의 ?date=YYYY-MM-DD 로 보고 싶은 날을 고릅니다.
 export default function ReservePage(props: PageProps<"/reserve">) {
@@ -27,7 +26,7 @@ export default function ReservePage(props: PageProps<"/reserve">) {
     <div className="mx-auto w-full max-w-3xl px-4 py-12">
       <h1 className="text-2xl font-black">수업 예약</h1>
       <p className="mt-2 text-sm text-muted">
-        오늘부터 {DAYS_AHEAD}일 후까지 예약할 수 있습니다. 정원이 차면 대기로 등록되고, 자리가 나면 자동으로 예약됩니다.
+        이번 주 수업을 예약할 수 있습니다. 정원이 차면 대기로 등록되고, 자리가 나면 자동으로 예약됩니다.
       </p>
       <div className="mt-8">
         <Suspense fallback={<p className="text-muted">불러오는 중…</p>}>
@@ -55,17 +54,13 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
   const isAdmin = member.role === "admin";
 
   const today = seoulTodayKey();
-  const lastDay = addDaysToKey(today, DAYS_AHEAD);
-  const bookable = (d: string) => d >= today && d <= lastDay; // 예약할 수 있는 날짜 (오늘 ~ 7일 후)
-
-  // 날짜 선택은 "월 화 수 목 금 토" 순서의 주 단위로 보여줍니다. (일요일은 휴무라서 뺌)
+  // 날짜 선택은 "월 화 수 목 금 토" 순서로 이번 주만 보여줍니다. (일요일은 휴무라서 뺌)
   // 이번 주 월요일: 오늘이 일요일이면 내일(다음 주 월요일), 아니면 오늘이 속한 주의 월요일
   const todayWeekday = weekdayOf(today); // 0=일 ... 6=토
   const firstMonday = todayWeekday === 0 ? addDaysToKey(today, 1) : addDaysToKey(today, -(todayWeekday - 1));
-  // 이번 주, 다음 주 두 줄. 예약할 수 있는 날이 하나도 없는 주는 보여주지 않습니다.
-  const weeks = [0, 7]
-    .map((offset) => Array.from({ length: 6 }, (_, i) => addDaysToKey(firstMonday, offset + i)))
-    .filter((week) => week.some(bookable));
+  const lastDay = addDaysToKey(firstMonday, 5); // 그 주 토요일
+  const bookable = (d: string) => d >= today && d <= lastDay; // 예약할 수 있는 날짜 (오늘 ~ 이번 주 토요일)
+  const weeks = [Array.from({ length: 6 }, (_, i) => addDaysToKey(firstMonday, i))];
   const weekDays = weeks.flat();
 
   const query = await searchParams;
@@ -226,7 +221,7 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
         })}
       </div>
       <p className="-mt-6 text-xs text-muted">
-        {today} ~ {lastDay} 사이만 예약할 수 있습니다. 일요일은 휴무입니다.
+        오늘부터 {lastDay}(토)까지 예약할 수 있습니다. 일요일은 휴무입니다.
       </p>
 
       {/* 선택한 날의 수업 */}
