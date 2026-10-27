@@ -15,6 +15,7 @@ type ClassCardProps = {
   session: ClassSession;
   started: boolean; // 수업이 이미 시작했는지 (시작했으면 예약/취소 불가)
   isAdmin: boolean;
+  readOnly?: boolean; // 지난 날짜: 예약/취소/정원 변경 버튼 없이 예약자 목록만 보여줌
   attendees: Attendee[]; // 이 수업의 예약 + 대기 (신청 순서). 회원/관리자 모두에게 보임
 };
 
@@ -25,7 +26,7 @@ const typeBadge: Record<ClassSession["classType"], string> = {
   OPEN_GYM: "bg-muted text-white",
 };
 
-export default function ClassCard({ session: s, started, isAdmin, attendees }: ClassCardProps) {
+export default function ClassCard({ session: s, started, isAdmin, readOnly = false, attendees }: ClassCardProps) {
   const full = s.confirmedCount >= s.capacity;
   const percent = Math.min(100, Math.round((s.confirmedCount / s.capacity) * 100));
   const confirmed = attendees.filter((a) => a.status === "confirmed");
@@ -55,7 +56,7 @@ export default function ClassCard({ session: s, started, isAdmin, attendees }: C
       </div>
 
       {/* 회원 버튼 (관리자는 수업을 예약하지 않으므로 보이지 않음) */}
-      {!isAdmin && (
+      {!isAdmin && !readOnly && (
       <div className="flex flex-wrap items-center gap-2">
         {started ? (
           <span className="rounded-md bg-surface px-3 py-2 text-sm text-muted">수업이 시작되었습니다</span>
@@ -89,7 +90,7 @@ export default function ClassCard({ session: s, started, isAdmin, attendees }: C
       )}
 
       {/* 관리자 전용: 정원 선택(20/30) */}
-      {isAdmin && !started && (
+      {isAdmin && !started && !readOnly && (
         <div className="border-t border-line pt-3">
           <MemberActionForm
             action={setCapacityAction.bind(null, s.slotId, s.classDate)}
@@ -117,21 +118,31 @@ export default function ClassCard({ session: s, started, isAdmin, attendees }: C
       )}
 
       {/* 예약자 목록 (회원/관리자 모두): 프로필 사진 + 이름. 관리자에게는 대신 취소 버튼도 보임 */}
-      <details className="border-t border-line pt-3">
+      <details open={readOnly} className="border-t border-line pt-3">
         <summary className="cursor-pointer text-sm font-bold">
           예약자 {confirmed.length}명{waiting.length > 0 && ` · 대기 ${waiting.length}명`}
         </summary>
         <div className="mt-3 space-y-3 text-sm">
           {attendees.length === 0 && <p className="text-muted">아직 예약한 회원이 없습니다.</p>}
-          {confirmed.length > 0 && <AttendeeList title="예약" list={confirmed} />}
-          {waiting.length > 0 && <AttendeeList title="대기 (신청 순서)" list={waiting} numbered />}
+          {confirmed.length > 0 && <AttendeeList title="예약" list={confirmed} readOnly={readOnly} />}
+          {waiting.length > 0 && <AttendeeList title="대기 (신청 순서)" list={waiting} numbered readOnly={readOnly} />}
         </div>
       </details>
     </li>
   );
 }
 
-function AttendeeList({ title, list, numbered = false }: { title: string; list: Attendee[]; numbered?: boolean }) {
+function AttendeeList({
+  title,
+  list,
+  numbered = false,
+  readOnly = false,
+}: {
+  title: string;
+  list: Attendee[];
+  numbered?: boolean;
+  readOnly?: boolean;
+}) {
   return (
     <div>
       <p className="mb-1 text-xs font-bold text-muted">{title}</p>
@@ -146,7 +157,7 @@ function AttendeeList({ title, list, numbered = false }: { title: string; list: 
               {a.isMe && <span className="rounded bg-accent px-1.5 py-0.5 text-[10px] font-bold text-white">나</span>}
             </span>
             {/* 대신 취소는 관리자에게만 예약 번호가 와서 관리자에게만 보입니다 */}
-            {a.reservationId !== null && (
+            {a.reservationId !== null && !readOnly && (
               <MemberActionForm
                 action={adminCancelReservationAction.bind(null, a.reservationId)}
                 submitLabel="취소"

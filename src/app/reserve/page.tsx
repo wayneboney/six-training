@@ -65,12 +65,13 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
 
   const query = await searchParams;
   const picked = typeof query.date === "string" ? query.date : "";
-  // 선택한 날: 주소의 날짜가 예약 가능한 날이면 그 날, 아니면 오늘(월~토일 때), 아니면 가장 가까운 예약 가능한 날
-  const selected = weekDays.includes(picked) && bookable(picked)
+  // 선택한 날: 주소의 날짜가 이번 주 안이면 그 날(지난 날도 가능), 아니면 오늘(월~토일 때), 아니면 가장 가까운 예약 가능한 날
+  const selected = weekDays.includes(picked)
     ? picked
     : weekDays.includes(today)
       ? today
       : (weekDays.find(bookable) ?? today);
+  const isPastDay = selected < today; // 지난 날짜를 보는 중이면 예약 버튼 없이 예약자 목록만 보여줍니다.
 
   // DB 조회만 try/catch로 감쌉니다. (화면은 밖에서)
   let sessions: ClassSession[] | null = null;
@@ -175,7 +176,7 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
                   const holiday = holidays[d];
                   const active = d === selected;
                   const isToday = d === today;
-                  const enabled = bookable(d);
+                  const past = d < today; // 지난 날: 눌러서 예약자 목록은 볼 수 있지만 예약은 못 함
                   const red = holiday !== undefined;
                   const box = `flex flex-col items-center rounded-md border px-1 py-2 text-sm ${
                     active
@@ -189,7 +190,7 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
                       <span className={`text-xs ${active ? "text-white" : red ? "text-accent" : "text-muted"}`}>
                         {weekdayLabels[weekdayOf(d)]}
                       </span>
-                      <span className={`font-black ${!active && red ? "text-accent" : ""}`}>{day}</span>
+                      <span className={`font-black ${!active && red ? "text-accent" : ""} ${!active && past ? "text-muted" : ""}`}>{day}</span>
                       {isToday ? (
                         <span className={`text-[10px] font-bold ${active ? "" : "text-accent"}`}>오늘</span>
                       ) : holiday ? (
@@ -199,20 +200,15 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
                       )}
                     </>
                   );
-                  // 오늘보다 이전이거나 7일 뒤를 넘는 날은 눌러도 이동하지 않게 비활성으로 표시합니다.
-                  return enabled ? (
+                  return (
                     <Link
                       key={d}
                       href={`/reserve?date=${d}`}
                       aria-current={active ? "date" : undefined}
-                      className={`${box} ${active ? "" : "hover:bg-surface"}`}
+                      className={`${box} ${active ? "" : "hover:bg-surface"} ${!active && past ? "bg-surface/60" : ""}`}
                     >
                       {content}
                     </Link>
-                  ) : (
-                    <div key={d} aria-disabled="true" className={`${box} opacity-35`}>
-                      {content}
-                    </div>
                   );
                 })}
               </nav>
@@ -221,7 +217,7 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
         })}
       </div>
       <p className="-mt-6 text-xs text-muted">
-        오늘부터 {lastDay}(토)까지 예약할 수 있습니다. 일요일은 휴무입니다.
+        오늘부터 {lastDay}(토)까지 예약할 수 있습니다. 지난 날짜를 누르면 예약자 목록만 볼 수 있습니다. 일요일은 휴무입니다.
       </p>
 
       {/* 선택한 날의 수업 */}
@@ -234,6 +230,7 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
               key={`${s.slotId}-${s.classDate}`}
               session={s}
               started={hasStarted(s.classDate, s.startTime)}
+              readOnly={isPastDay}
               isAdmin={isAdmin}
               attendees={attendees.filter((a) => a.slotId === s.slotId && a.classDate === s.classDate)}
             />
