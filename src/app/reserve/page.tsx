@@ -212,30 +212,32 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
         오늘부터 {lastDay}(토)까지 예약할 수 있습니다. 지난 날짜를 누르면 예약자 목록만 볼 수 있습니다. 일요일은 휴무입니다.
       </p>
 
-      {/* 선택한 날의 수업. id="day-classes": "오늘로 이동" 버튼이 화면을 내려 주는 위치 */}
-      <h2 id="day-classes" className="-mb-4 scroll-mt-24 text-lg font-black">
-        {selectedLabel} 수업
-        {selected === today && (
-          <span className="ml-2 rounded bg-accent px-2 py-0.5 align-middle text-xs font-bold text-white">오늘</span>
+      {/* 선택한 날의 수업: 제목과 카드 목록을 한 묶음으로 두고, 묶음 안에서만 간격을 줍니다. (제목이 카드와 겹치지 않게) */}
+      <section className="space-y-3">
+        <h2 className="flex flex-wrap items-center gap-2 text-lg font-black leading-tight">
+          <span>{selectedLabel} 수업</span>
+          {selected === today && (
+            <span className="rounded bg-accent px-2 py-0.5 text-xs font-bold text-white">오늘</span>
+          )}
+          {isPastDay && <span className="text-xs font-normal text-muted">지난 수업 (예약자만 볼 수 있음)</span>}
+        </h2>
+        {sessions.length === 0 ? (
+          <p className="rounded-lg bg-surface p-8 text-center text-muted">이 날은 예약할 수 있는 수업이 없습니다.</p>
+        ) : (
+          <ul className="space-y-3">
+            {sessions.map((s) => (
+              <ClassCard
+                key={`${s.slotId}-${s.classDate}`}
+                session={s}
+                started={hasStarted(s.classDate, s.startTime)}
+                readOnly={isPastDay}
+                isAdmin={isAdmin}
+                attendees={attendees.filter((a) => a.slotId === s.slotId && a.classDate === s.classDate)}
+              />
+            ))}
+          </ul>
         )}
-        {isPastDay && <span className="ml-2 align-middle text-xs font-normal text-muted">지난 수업 (예약자만 볼 수 있음)</span>}
-      </h2>
-      {sessions.length === 0 ? (
-        <p className="rounded-lg bg-surface p-8 text-center text-muted">이 날은 예약할 수 있는 수업이 없습니다.</p>
-      ) : (
-        <ul className="space-y-3">
-          {sessions.map((s) => (
-            <ClassCard
-              key={`${s.slotId}-${s.classDate}`}
-              session={s}
-              started={hasStarted(s.classDate, s.startTime)}
-              readOnly={isPastDay}
-              isAdmin={isAdmin}
-              attendees={attendees.filter((a) => a.slotId === s.slotId && a.classDate === s.classDate)}
-            />
-          ))}
-        </ul>
-      )}
+      </section>
     </div>
   );
 }

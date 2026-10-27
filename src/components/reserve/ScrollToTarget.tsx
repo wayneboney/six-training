@@ -21,7 +21,7 @@ export default function ScrollToTarget() {
       handled.current = key;
       target.scrollIntoView({ behavior: "smooth", block: "start" });
       // 이동해 온 카드를 잠깐(2초) 테두리로 강조합니다. (CSS의 :target은 링크 이동 방식에서는 적용되지 않아서 직접 처리)
-      // (수업 카드로 이동할 때만. "오늘로 이동"처럼 목록 제목으로 이동하는 경우에는 강조하지 않음)
+      // (수업 카드로 이동할 때만 강조)
       if (id.startsWith("class-")) {
         const highlight = ["ring-2", "ring-accent/50", "border-accent"];
         target.classList.add(...highlight);
