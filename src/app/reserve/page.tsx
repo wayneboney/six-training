@@ -38,6 +38,12 @@ export default function ReservePage(props: PageProps<"/reserve">) {
   );
 }
 
+// 날짜(YYYY-MM-DD)의 요일: 0=일 ... 6=토
+function weekdayOf(dateKey: string): number {
+  const { year, month, day } = parseDateKey(dateKey);
+  return new Date(year, month, day).getDay();
+}
+
 // 수업 시작 시각(한국 시간)이 지났는지
 function hasStarted(date: string, time: string): boolean {
   return new Date(`${date}T${time}:00+09:00`).getTime() <= Date.now();
@@ -50,10 +56,26 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
 
   const today = seoulTodayKey();
   const lastDay = addDaysToKey(today, DAYS_AHEAD);
-  const days = Array.from({ length: DAYS_AHEAD + 1 }, (_, i) => addDaysToKey(today, i));
+  const bookable = (d: string) => d >= today && d <= lastDay; // 예약할 수 있는 날짜 (오늘 ~ 7일 후)
+
+  // 날짜 선택은 "월 화 수 목 금 토" 순서의 주 단위로 보여줍니다. (일요일은 휴무라서 뺌)
+  // 이번 주 월요일: 오늘이 일요일이면 내일(다음 주 월요일), 아니면 오늘이 속한 주의 월요일
+  const todayWeekday = weekdayOf(today); // 0=일 ... 6=토
+  const firstMonday = todayWeekday === 0 ? addDaysToKey(today, 1) : addDaysToKey(today, -(todayWeekday - 1));
+  // 이번 주, 다음 주 두 줄. 예약할 수 있는 날이 하나도 없는 주는 보여주지 않습니다.
+  const weeks = [0, 7]
+    .map((offset) => Array.from({ length: 6 }, (_, i) => addDaysToKey(firstMonday, offset + i)))
+    .filter((week) => week.some(bookable));
+  const weekDays = weeks.flat();
+
   const query = await searchParams;
   const picked = typeof query.date === "string" ? query.date : "";
-  const selected = days.includes(picked) ? picked : today; // 이상한 날짜는 오늘로
+  // 선택한 날: 주소의 날짜가 예약 가능한 날이면 그 날, 아니면 오늘(월~토일 때), 아니면 가장 가까운 예약 가능한 날
+  const selected = weekDays.includes(picked) && bookable(picked)
+    ? picked
+    : weekDays.includes(today)
+      ? today
+      : (weekDays.find(bookable) ?? today);
 
   // DB 조회만 try/catch로 감쌉니다. (화면은 밖에서)
   let sessions: ClassSession[] | null = null;
@@ -65,7 +87,7 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
       getSchedule(selected, selected),
       getMyReservations(today),
       getAttendees(selected, selected),
-      getHolidays([...new Set(days.map((d) => parseDateKey(d).year))]),
+      getHolidays([...new Set(weekDays.map((d) => parseDateKey(d).year))]),
     ]);
     sessions = schedule;
     mine = myList;
@@ -106,7 +128,7 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
           <ul className="mt-2 divide-y divide-line rounded-lg border border-line">
             {mine.map((r) => {
               const { month, day } = parseDateKey(r.classDate);
-              const weekday = weekdayLabels[new Date(parseDateKey(r.classDate).year, month, day).getDay()];
+              const weekday = weekdayLabels[weekdayOf(r.classDate)];
               const started = hasStarted(r.classDate, r.startTime);
               return (
                 <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm">
@@ -138,40 +160,73 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
       </section>
       )}
 
-      {/* 날짜 선택 */}
-      <nav aria-label="날짜 선택" className="grid grid-cols-4 gap-2 sm:grid-cols-8">
-        {days.map((d) => {
-          const { year, month, day } = parseDateKey(d);
-          const weekday = new Date(year, month, day).getDay();
-          const holiday = holidays[d];
-          const red = weekday === 0 || holiday !== undefined;
-          const active = d === selected;
+      {/* 날짜 선택: 월~토를 한 줄로, 이번 주 / 다음 주. 오늘은 테두리와 "오늘" 표시로 강조합니다. */}
+      <div className="space-y-4">
+        {weeks.map((week, weekIndex) => {
+          const label = weekIndex === 0 && todayWeekday !== 0 ? "이번 주" : "다음 주";
+          const first = parseDateKey(week[0]);
+          const last = parseDateKey(week[5]);
           return (
-            <Link
-              key={d}
-              href={`/reserve?date=${d}`}
-              aria-current={active ? "date" : undefined}
-              className={`flex flex-col items-center rounded-md border px-1 py-2 text-sm ${
-                active ? "border-accent bg-accent text-white" : "border-line hover:bg-surface"
-              }`}
-            >
-              <span className={`text-xs ${active ? "text-white" : red ? "text-accent" : "text-muted"}`}>
-                {weekdayLabels[weekday]}
-              </span>
-              <span className={`font-black ${!active && red ? "text-accent" : ""}`}>{day}</span>
-              {d === today ? (
-                <span className="text-[10px] font-bold">오늘</span>
-              ) : holiday ? (
-                <span className="w-full truncate text-center text-[10px]">{holiday}</span>
-              ) : (
-                <span className="text-[10px]">&nbsp;</span>
-              )}
-            </Link>
+            <div key={week[0]}>
+              <p className="mb-1.5 text-xs font-bold text-muted">
+                {label}{" "}
+                <span className="font-normal">
+                  {first.month + 1}/{first.day} ~ {last.month + 1}/{last.day}
+                </span>
+              </p>
+              <nav aria-label={`${label} 날짜 선택`} className="grid grid-cols-6 gap-2">
+                {week.map((d) => {
+                  const { day } = parseDateKey(d);
+                  const holiday = holidays[d];
+                  const active = d === selected;
+                  const isToday = d === today;
+                  const enabled = bookable(d);
+                  const red = holiday !== undefined;
+                  const box = `flex flex-col items-center rounded-md border px-1 py-2 text-sm ${
+                    active
+                      ? "border-accent bg-accent text-white"
+                      : isToday
+                        ? "border-2 border-accent"
+                        : "border-line"
+                  }`;
+                  const content = (
+                    <>
+                      <span className={`text-xs ${active ? "text-white" : red ? "text-accent" : "text-muted"}`}>
+                        {weekdayLabels[weekdayOf(d)]}
+                      </span>
+                      <span className={`font-black ${!active && red ? "text-accent" : ""}`}>{day}</span>
+                      {isToday ? (
+                        <span className={`text-[10px] font-bold ${active ? "" : "text-accent"}`}>오늘</span>
+                      ) : holiday ? (
+                        <span className="w-full truncate text-center text-[10px]">{holiday}</span>
+                      ) : (
+                        <span className="text-[10px]">&nbsp;</span>
+                      )}
+                    </>
+                  );
+                  // 오늘보다 이전이거나 7일 뒤를 넘는 날은 눌러도 이동하지 않게 비활성으로 표시합니다.
+                  return enabled ? (
+                    <Link
+                      key={d}
+                      href={`/reserve?date=${d}`}
+                      aria-current={active ? "date" : undefined}
+                      className={`${box} ${active ? "" : "hover:bg-surface"}`}
+                    >
+                      {content}
+                    </Link>
+                  ) : (
+                    <div key={d} aria-disabled="true" className={`${box} opacity-35`}>
+                      {content}
+                    </div>
+                  );
+                })}
+              </nav>
+            </div>
           );
         })}
-      </nav>
+      </div>
       <p className="-mt-6 text-xs text-muted">
-        {today} ~ {lastDay} 사이만 예약할 수 있습니다.
+        {today} ~ {lastDay} 사이만 예약할 수 있습니다. 일요일은 휴무입니다.
       </p>
 
       {/* 선택한 날의 수업 */}
