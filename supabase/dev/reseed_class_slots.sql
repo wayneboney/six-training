@@ -1,14 +1,14 @@
 -- =========================================================
 -- 개발용: 시간표(class_slots)를 지우고 기본 시간표로 다시 만듭니다.
 --   ⚠️ 모든 예약(reservations)도 함께 삭제됩니다. 테스트 중에만 쓰세요. 실제 예약이 생긴 뒤에는 실행하지 마세요.
---   정원: 평일 20명, 토요일 30명 (오픈짐은 20명). 코치트레이닝(토 09:00) 포함이라 8-7 SQL을 먼저 실행해야 합니다.
+--   기본 정원: 모든 수업 20명. 코치트레이닝(토 09:00) 포함이라 8-7 SQL을 먼저 실행해야 합니다.
 -- 실행: Supabase 대시보드 → SQL Editor에 붙여넣고 Run (한 번에 실행되므로 중간에 오류가 나면 전부 취소됨)
 -- =========================================================
 delete from public.reservations;
 delete from public.class_slots;
 
 insert into public.class_slots (weekday, start_time, class_type, capacity)
-select w, t::time, c, case when w = 6 then 30 else 20 end   -- 정원: 평일 20명, 토요일 30명
+select w, t::time, c, 20   -- 기본 정원 20명
 from (values
   -- 06:45 크로스핏 (월~금)
   (1,'06:45','CROSSFIT'),(2,'06:45','CROSSFIT'),(3,'06:45','CROSSFIT'),(4,'06:45','CROSSFIT'),(5,'06:45','CROSSFIT'),
@@ -32,6 +32,6 @@ from (values
   (1,'21:20','CROSSFIT'),(2,'21:20','CROSSFIT'),(3,'21:20','CROSSFIT'),(4,'21:20','CROSSFIT'),(5,'21:20','CROSSFIT')
 ) as v(w, t, c);
 
--- 확인: 월~금 20명, 토요일 30명, 총 47칸 (코치트레이닝 포함)
+-- 확인: 모두 정원 20명, 총 47칸 (코치트레이닝 포함)
 select weekday, class_type, capacity, count(*) as 칸수
 from public.class_slots group by 1, 2, 3 order by 1, 2;

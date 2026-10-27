@@ -414,13 +414,13 @@ grant execute on function public.admin_cancel_reservation(bigint) to authenticat
 
 -- =========================================================
 -- 기본 시간표 (src/data/timetable.ts의 수업을 옮긴 것)
---   정원: 평일 수업 20명, 토요일 수업 30명. (오픈짐은 정해진 값이 없어서 평일과 같은 20명으로 넣었습니다.)
+--   기본 정원: 모든 수업 20명. (필요할 때 예약 화면에서 날짜별로 20/30명을 고릅니다)
 --   나중에 바꿀 때는 아래처럼 SQL로 고칩니다. (관리자 화면에서 바꾸는 기능은 8-3에서 만듭니다)
 --     update public.class_slots set capacity = 16 where class_type = 'CROSSFIT' and weekday between 1 and 5;
 --   오픈짐 시간(08:00, 15:30)은 "시작 시각" 기준으로 예약합니다.
 -- =========================================================
 insert into public.class_slots (weekday, start_time, class_type, capacity)
-select w, t::time, c, case when w = 6 then 30 else 20 end   -- 정원: 평일 20명, 토요일 30명
+select w, t::time, c, 20   -- 기본 정원 20명 (사람이 많아지면 예약 화면에서 날짜별로 30명으로 늘림)
 from (values
   -- 06:45 크로스핏 (월~금)
   (1,'06:45','CROSSFIT'),(2,'06:45','CROSSFIT'),(3,'06:45','CROSSFIT'),(4,'06:45','CROSSFIT'),(5,'06:45','CROSSFIT'),
