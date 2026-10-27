@@ -5,6 +5,7 @@ import Link from "next/link";
 import { memberLogout } from "@/app/auth/actions";
 import { addMyHoldAction, cancelMyHoldAction } from "@/app/me/actions";
 import MemberActionForm from "@/components/admin/MemberActionForm";
+import ProfileForm from "@/components/auth/ProfileForm";
 import { requireMember } from "@/lib/auth/member";
 import { addDaysToKey, diffDays, seoulTodayKey } from "@/lib/date";
 import { formatHoldRange } from "@/lib/members/format";
@@ -243,6 +244,14 @@ async function MyInfo() {
           )}
         </section>
       )}
+
+      {/* 내 정보 수정: 이름, 프로필 사진 */}
+      <section className="rounded-md border border-line p-5">
+        <h2 className="font-bold">내 정보 수정</h2>
+        <div className="mt-4">
+          <ProfileForm name={member.name} avatarUrl={member.avatarUrl} />
+        </div>
+      </section>
 
       <div className="flex items-center justify-between">
         <Link href="/" className="text-sm text-muted hover:text-foreground">

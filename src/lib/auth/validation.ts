@@ -48,3 +48,15 @@ export function validateSignup(formData: FormData): SignupValidation {
   }
   return { ok: true, value: { email, name, password } };
 }
+
+// 이름만 검증 (내 정보 수정용). 가입 검증과 같은 규칙입니다.
+export function validateName(value: FormDataEntryValue | null): { ok: true; value: string } | { ok: false; error: string } {
+  const name = typeof value === "string" ? value.trim() : "";
+  if (!name) {
+    return { ok: false, error: "이름을 입력해 주세요." };
+  }
+  if (name.length > NAME_MAX || CONTROL_CHARS.test(name)) {
+    return { ok: false, error: `이름은 ${NAME_MAX}자 이하의 글자로 입력해 주세요.` };
+  }
+  return { ok: true, value: name };
+}
