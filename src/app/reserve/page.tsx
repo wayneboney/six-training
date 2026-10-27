@@ -64,7 +64,7 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
     const [schedule, myList, attendeeList, holidayMap] = await Promise.all([
       getSchedule(selected, selected),
       getMyReservations(today),
-      isAdmin ? getAttendees(selected, selected) : Promise.resolve([] as Attendee[]),
+      getAttendees(selected, selected),
       getHolidays([...new Set(days.map((d) => parseDateKey(d).year))]),
     ]);
     sessions = schedule;

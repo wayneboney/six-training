@@ -7,6 +7,7 @@ import {
   setCapacityAction,
 } from "@/app/reserve/actions";
 import MemberActionForm from "@/components/admin/MemberActionForm";
+import Avatar from "@/components/Avatar";
 import { classLabels } from "@/data/timetable";
 import type { Attendee, ClassSession } from "@/lib/reservations/repository";
 
@@ -14,7 +15,7 @@ type ClassCardProps = {
   session: ClassSession;
   started: boolean; // 수업이 이미 시작했는지 (시작했으면 예약/취소 불가)
   isAdmin: boolean;
-  attendees: Attendee[]; // 관리자일 때만 채워짐 (이 수업의 예약 + 대기, 신청 순서)
+  attendees: Attendee[]; // 이 수업의 예약 + 대기 (신청 순서). 회원/관리자 모두에게 보임
 };
 
 // 수업 종류별 표시 색 (Tailwind는 클래스 이름을 통째로 써야 해서 완성된 이름으로 적습니다)
@@ -29,6 +30,7 @@ export default function ClassCard({ session: s, started, isAdmin, attendees }: C
   const percent = Math.min(100, Math.round((s.confirmedCount / s.capacity) * 100));
   const confirmed = attendees.filter((a) => a.status === "confirmed");
   const waiting = attendees.filter((a) => a.status === "waiting");
+  const myWaitingNo = waiting.find((a) => a.isMe)?.queueNo; // 내가 대기 중이면 몇 번째인지
 
   return (
     <li className="space-y-3 rounded-lg border border-line p-4">
@@ -60,7 +62,7 @@ export default function ClassCard({ session: s, started, isAdmin, attendees }: C
         ) : s.myStatus && s.myReservationId !== null ? (
           <>
             <span className="rounded-md bg-surface px-3 py-2 text-sm font-bold">
-              {s.myStatus === "confirmed" ? "✅ 예약됨" : "⏳ 대기 중"}
+              {s.myStatus === "confirmed" ? "✅ 예약됨" : `⏳ 대기 중${myWaitingNo ? ` (${myWaitingNo}번째)` : ""}`}
             </span>
             <MemberActionForm
               action={cancelReservationAction.bind(null, s.myReservationId)}
@@ -86,46 +88,45 @@ export default function ClassCard({ session: s, started, isAdmin, attendees }: C
       </div>
       )}
 
-      {/* 관리자 전용: 정원 선택(20/30) + 예약자 목록 */}
-      {isAdmin && (
-        <div className="space-y-3 border-line pt-1">
-          {!started && (
-            <MemberActionForm
-              action={setCapacityAction.bind(null, s.slotId, s.classDate)}
-              submitLabel="정원 변경"
-              pendingLabel="변경 중…"
-              layout="inline"
+      {/* 관리자 전용: 정원 선택(20/30) */}
+      {isAdmin && !started && (
+        <div className="border-t border-line pt-3">
+          <MemberActionForm
+            action={setCapacityAction.bind(null, s.slotId, s.classDate)}
+            submitLabel="정원 변경"
+            pendingLabel="변경 중…"
+            layout="inline"
+          >
+            <label htmlFor={`cap-${s.slotId}-${s.classDate}`} className="text-sm font-bold">
+              정원
+            </label>
+            {/* key={s.capacity}: 정원이 바뀌면 선택 상자를 새로 만들어서 현재 정원이 선택된 상태로 보이게 합니다.
+                (defaultValue는 처음 그릴 때만 적용되고, 폼이 저장 후 초기화되면 예전 값으로 돌아갈 수 있어서) */}
+            <select
+              key={s.capacity}
+              id={`cap-${s.slotId}-${s.classDate}`}
+              name="capacity"
+              defaultValue={s.capacity === 30 ? "30" : "20"}
+              className="rounded-md border border-line px-2 py-1.5 text-sm focus:border-accent focus:outline-none"
             >
-              <label htmlFor={`cap-${s.slotId}-${s.classDate}`} className="text-sm font-bold">
-                정원
-              </label>
-              {/* key={s.capacity}: 정원이 바뀌면 선택 상자를 새로 만들어서 현재 정원이 선택된 상태로 보이게 합니다.
-                  (defaultValue는 처음 그릴 때만 적용되고, 폼이 저장 후 초기화되면 예전 값으로 돌아갈 수 있어서) */}
-              <select
-                key={s.capacity}
-                id={`cap-${s.slotId}-${s.classDate}`}
-                name="capacity"
-                defaultValue={s.capacity === 30 ? "30" : "20"}
-                className="rounded-md border border-line px-2 py-1.5 text-sm focus:border-accent focus:outline-none"
-              >
-                <option value="20">20명</option>
-                <option value="30">30명</option>
-              </select>
-            </MemberActionForm>
-          )}
-
-          <details>
-            <summary className="cursor-pointer text-sm font-bold">
-              예약자 {confirmed.length}명{waiting.length > 0 && ` · 대기 ${waiting.length}명`}
-            </summary>
-            <div className="mt-2 space-y-3 text-sm">
-              {attendees.length === 0 && <p className="text-muted">예약한 회원이 없습니다.</p>}
-              {confirmed.length > 0 && <AttendeeList title="예약" list={confirmed} />}
-              {waiting.length > 0 && <AttendeeList title="대기 (신청 순서)" list={waiting} numbered />}
-            </div>
-          </details>
+              <option value="20">20명</option>
+              <option value="30">30명</option>
+            </select>
+          </MemberActionForm>
         </div>
       )}
+
+      {/* 예약자 목록 (회원/관리자 모두): 프로필 사진 + 이름. 관리자에게는 대신 취소 버튼도 보임 */}
+      <details className="border-t border-line pt-3">
+        <summary className="cursor-pointer text-sm font-bold">
+          예약자 {confirmed.length}명{waiting.length > 0 && ` · 대기 ${waiting.length}명`}
+        </summary>
+        <div className="mt-3 space-y-3 text-sm">
+          {attendees.length === 0 && <p className="text-muted">아직 예약한 회원이 없습니다.</p>}
+          {confirmed.length > 0 && <AttendeeList title="예약" list={confirmed} />}
+          {waiting.length > 0 && <AttendeeList title="대기 (신청 순서)" list={waiting} numbered />}
+        </div>
+      </details>
     </li>
   );
 }
@@ -135,19 +136,25 @@ function AttendeeList({ title, list, numbered = false }: { title: string; list: 
     <div>
       <p className="mb-1 text-xs font-bold text-muted">{title}</p>
       <ul className="divide-y divide-line rounded-md border border-line">
-        {list.map((a, index) => (
-          <li key={a.reservationId} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
-            <span>
-              {numbered && <span className="mr-2 font-bold text-accent">{index + 1}</span>}
-              {a.name}
+        {list.map((a) => (
+          <li key={`${a.status}-${a.queueNo}`} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
+            <span className="flex items-center gap-2">
+              {numbered && <span className="w-5 text-center font-bold text-accent">{a.queueNo}</span>}
+              {/* 프로필 사진이 없으면 기본 실루엣이 나옵니다 */}
+              <Avatar url={a.avatarUrl} name={a.name} size={28} />
+              <span className={a.isMe ? "font-bold" : ""}>{a.name}</span>
+              {a.isMe && <span className="rounded bg-accent px-1.5 py-0.5 text-[10px] font-bold text-white">나</span>}
             </span>
-            <MemberActionForm
-              action={adminCancelReservationAction.bind(null, a.reservationId)}
-              submitLabel="취소"
-              pendingLabel="취소 중…"
-              confirmMessage={`${a.name}님의 ${numbered ? "대기" : "예약"}를 취소할까요?`}
-              layout="inline"
-            />
+            {/* 대신 취소는 관리자에게만 예약 번호가 와서 관리자에게만 보입니다 */}
+            {a.reservationId !== null && (
+              <MemberActionForm
+                action={adminCancelReservationAction.bind(null, a.reservationId)}
+                submitLabel="취소"
+                pendingLabel="취소 중…"
+                confirmMessage={`${a.name}님의 ${numbered ? "대기" : "예약"}를 취소할까요?`}
+                layout="inline"
+              />
+            )}
           </li>
         ))}
       </ul>

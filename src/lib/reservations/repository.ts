@@ -23,14 +23,16 @@ export type MyReservation = {
   status: "confirmed" | "waiting";
 };
 
-// 관리자가 보는 예약자 한 명
+// 수업의 예약자/대기자 한 명. 이름과 프로필 사진만 담고, 이메일 등 다른 정보는 받지 않습니다.
 export type Attendee = {
-  reservationId: number;
   slotId: number;
   classDate: string;
   status: "confirmed" | "waiting";
-  userId: string;
+  queueNo: number; // 예약 순서 또는 대기 순서 (1부터)
   name: string;
+  avatarUrl: string | null;
+  isMe: boolean;
+  reservationId: number | null; // 관리자에게만 값이 있음 (대신 취소 버튼용)
 };
 
 type ScheduleRow = {
@@ -102,36 +104,32 @@ export async function getMyReservations(today: string): Promise<MyReservation[]>
     .sort((a, b) => (a.classDate + a.startTime).localeCompare(b.classDate + b.startTime));
 }
 
-// 관리자: 기간 내 모든 예약자(예약 + 대기). 신청 순서(id)대로
+// 기간 내 예약자(예약 + 대기). 회원/관리자 모두 볼 수 있습니다. (DB 함수가 이름, 사진, 순번만 돌려줌)
 export async function getAttendees(from: string, to: string): Promise<Attendee[]> {
   const supabase = await createAuthSupabase();
-  const { data, error } = await supabase
-    .from("reservations")
-    .select("id, slot_id, class_date, status, user_id, profiles(name)")
-    .neq("status", "cancelled")
-    .gte("class_date", from)
-    .lte("class_date", to)
-    .order("id", { ascending: true })
-    .overrideTypes<
-      {
-        id: number;
-        slot_id: number;
-        class_date: string;
-        status: "confirmed" | "waiting";
-        user_id: string;
-        profiles: { name: string } | null;
-      }[],
-      { merge: false }
-    >();
+  const { data, error } = await supabase.rpc("get_class_attendees", { p_from: from, p_to: to });
   if (error) {
     throw error;
   }
-  return data.map((row) => ({
-    reservationId: row.id,
+  // 이 DB 함수는 표(여러 줄)를 돌려주는데, 타입 정보가 없어서 직접 타입을 지정합니다.
+  const rows = (data ?? []) as {
+    slot_id: number;
+    class_date: string;
+    status: "confirmed" | "waiting";
+    queue_no: number;
+    name: string;
+    avatar_url: string | null;
+    is_me: boolean;
+    reservation_id: number | null;
+  }[];
+  return rows.map((row) => ({
     slotId: row.slot_id,
     classDate: row.class_date,
     status: row.status,
-    userId: row.user_id,
-    name: row.profiles?.name ?? "(이름 없음)",
+    queueNo: row.queue_no,
+    name: row.name,
+    avatarUrl: row.avatar_url,
+    isMe: row.is_me,
+    reservationId: row.reservation_id,
   }));
 }
