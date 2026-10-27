@@ -184,7 +184,7 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
                           : `hover:border-accent hover:bg-surface ${past ? "bg-surface/60" : ""}`
                       }`}
                     >
-                      {/* after:absolute after:inset-0 = 링크의 클릭 영역을 칸 전체로 넓힘. 이름표는 z-10으로 그 위에 올려서 따로 눌리게 함 */}
+                      {/* after:absolute after:inset-0 = 링크의 클릭 영역을 칸 전체로 넓힘. 이름표는 뒤에 오는 relative 요소라 그 위에 그려져서 따로 눌립니다 (z-index를 주면 헤더 위로 올라와 가리므로 주지 않음) */}
                       <Link
                         href={`/reserve?date=${d}`}
                         aria-current={active ? "date" : undefined}
@@ -194,7 +194,7 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
                         <LinkPendingOverlay />
                       </Link>
                       {mineToday.length > 0 && (
-                        <div className="relative z-10 mt-1.5 flex w-full flex-col gap-1">
+                        <div className="relative mt-1.5 flex w-full flex-col gap-1">
                           {mineToday.map((r) => (
                             <MyChip key={r.id} reservation={r} date={d} selected={active} />
                           ))}
