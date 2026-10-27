@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import KakaoLoginButton from "@/components/auth/KakaoLoginButton";
 import SignupForm from "@/components/auth/SignupForm";
 import { getMemberIfSignedIn } from "@/lib/auth/member";
 
@@ -30,5 +31,10 @@ async function SignupGate() {
   if (await getMemberIfSignedIn()) {
     redirect("/me");
   }
-  return <SignupForm />;
+  return (
+    <>
+      <SignupForm />
+      <KakaoLoginButton />
+    </>
+  );
 }

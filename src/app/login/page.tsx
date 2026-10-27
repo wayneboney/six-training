@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
+import KakaoLoginButton from "@/components/auth/KakaoLoginButton";
 import MemberLoginForm from "@/components/auth/MemberLoginForm";
 import { getMemberIfSignedIn } from "@/lib/auth/member";
 
@@ -36,7 +37,13 @@ async function LoginGate({ searchParams }: { searchParams: PageProps<"/login">["
           인증 링크가 만료되었거나 이미 사용되었습니다. 로그인해 보시고, 안 되면 다시 가입해 주세요.
         </p>
       )}
+      {query.error === "oauth" && (
+        <p role="alert" className="mb-4 rounded-md bg-accent-soft px-3 py-2 text-sm text-accent">
+          카카오 로그인을 완료하지 못했습니다. 다시 시도해 주세요.
+        </p>
+      )}
       <MemberLoginForm />
+      <KakaoLoginButton />
     </>
   );
 }

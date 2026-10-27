@@ -101,7 +101,7 @@ async function MyInfo() {
     <div className="space-y-6">
       <section className="rounded-md border border-line bg-surface p-5">
         <p className="text-lg font-bold">{member.name}님</p>
-        <p className="mt-1 text-sm text-muted">{member.email}</p>
+        <p className="mt-1 text-sm text-muted">{member.email || "이메일 없음 (소셜 로그인)"}</p>
         <p className="mt-3 text-sm">
           상태: <span className="font-bold text-accent">{statusName}</span>
         </p>
