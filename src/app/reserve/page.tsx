@@ -2,6 +2,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import ClassCard from "@/components/reserve/ClassCard";
+import LinkPendingOverlay from "@/components/reserve/LinkPendingOverlay";
 import ScrollToTarget from "@/components/reserve/ScrollToTarget";
 import { classLabelsKo } from "@/data/timetable";
 import { requireMember } from "@/lib/auth/member";
@@ -167,19 +168,26 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
                   const mineToday = mineByDate.get(d) ?? [];
                   return (
                     // 칸 전체는 div로 감싸고, 날짜 부분과 "내 예약" 이름표를 각각 링크로 둡니다. (링크 안에 링크를 넣을 수 없어서)
+                    // relative: 날짜 링크가 칸 전체를 눌리게 만들기 위한 기준 / cursor-pointer + hover + active: 누를 수 있다는 표시
                     <div
                       key={d}
-                      className={`${box} ${active ? "" : past ? "bg-surface/60" : ""}`}
+                      className={`${box} relative cursor-pointer transition duration-150 active:scale-95 ${
+                        active
+                          ? "hover:brightness-110"
+                          : `hover:border-accent hover:bg-surface ${past ? "bg-surface/60" : ""}`
+                      }`}
                     >
+                      {/* after:absolute after:inset-0 = 링크의 클릭 영역을 칸 전체로 넓힘. 이름표는 z-10으로 그 위에 올려서 따로 눌리게 함 */}
                       <Link
                         href={`/reserve?date=${d}`}
                         aria-current={active ? "date" : undefined}
-                        className="flex w-full flex-col items-center"
+                        className="flex w-full flex-col items-center after:absolute after:inset-0 after:rounded-md after:content-[''] focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-accent"
                       >
                         {content}
+                        <LinkPendingOverlay />
                       </Link>
                       {mineToday.length > 0 && (
-                        <div className="mt-1.5 flex w-full flex-col gap-1">
+                        <div className="relative z-10 mt-1.5 flex w-full flex-col gap-1">
                           {mineToday.map((r) => (
                             <MyChip key={r.id} reservation={r} date={d} selected={active} />
                           ))}
