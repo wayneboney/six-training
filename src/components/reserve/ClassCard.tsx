@@ -118,16 +118,20 @@ export default function ClassCard({ session: s, started, isAdmin, readOnly = fal
       )}
 
       {/* 예약자 목록 (회원/관리자 모두): 프로필 사진 + 이름. 관리자에게는 대신 취소 버튼도 보임 */}
-      <details open={readOnly} className="border-t border-line pt-3">
-        <summary className="cursor-pointer text-sm font-bold">
-          예약자 {confirmed.length}명{waiting.length > 0 && ` · 대기 ${waiting.length}명`}
-        </summary>
-        <div className="mt-3 space-y-3 text-sm">
-          {attendees.length === 0 && <p className="text-muted">아직 예약한 회원이 없습니다.</p>}
-          {confirmed.length > 0 && <AttendeeList title="예약" list={confirmed} readOnly={readOnly} />}
-          {waiting.length > 0 && <AttendeeList title="대기 (신청 순서)" list={waiting} numbered readOnly={readOnly} />}
-        </div>
-      </details>
+      {attendees.length === 0 ? (
+        // 예약한 사람이 없으면 펼칠 내용이 없으므로 "예약자 0명"만 보여줍니다.
+        <p className="border-t border-line pt-3 text-sm font-bold">예약자 0명</p>
+      ) : (
+        <details open={readOnly} className="border-t border-line pt-3">
+          <summary className="cursor-pointer text-sm font-bold">
+            예약자 {confirmed.length}명{waiting.length > 0 && ` · 대기 ${waiting.length}명`}
+          </summary>
+          <div className="mt-3 space-y-3 text-sm">
+            {confirmed.length > 0 && <AttendeeList title="예약" list={confirmed} readOnly={readOnly} />}
+            {waiting.length > 0 && <AttendeeList title="대기 (신청 순서)" list={waiting} numbered readOnly={readOnly} />}
+          </div>
+        </details>
+      )}
     </li>
   );
 }
