@@ -22,7 +22,7 @@ type ClassCardProps = {
 // 수업 종류별 표시 색 (Tailwind는 클래스 이름을 통째로 써야 해서 완성된 이름으로 적습니다)
 const typeBadge: Record<ClassSession["classType"], string> = {
   CROSSFIT: "bg-foreground text-background",
-  HYROX: "bg-accent text-white",
+  HYROX: "bg-orange-600 text-white",
   OPEN_GYM: "bg-emerald-700 text-white",
   COACH_TRAINING: "bg-violet-700 text-white",
 };

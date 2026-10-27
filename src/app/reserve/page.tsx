@@ -229,16 +229,16 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
 // 날짜 칸 안의 "내 예약" 이름표. 누르면 그 날짜의 해당 수업 카드로 이동(스크롤)합니다.
 //   첫 줄: 수업 종류(크로스핏/하이록스/오픈짐), 둘째 줄: 예약 또는 대기 + 시작 시각
 //   왼쪽 굵은 선의 색으로 종류를 구분하고(검정/붉은색/회색), 대기는 점선으로 구분합니다.
-// 종류마다 선과 글자색을 다르게: 크로스핏 검정, 하이록스 붉은색, 오픈짐 초록색, 코치트레이닝 보라색
+// 종류마다 선과 글자색을 다르게: 크로스핏 검정, 하이록스 주황, 오픈짐 초록, 코치트레이닝 보라 (사이트 포인트색(붉은색)은 선택/대기 표시에 쓰므로 종류 색에서는 뺌)
 const chipAccent: Record<string, string> = {
   CROSSFIT: "border-l-foreground",
-  HYROX: "border-l-accent",
+  HYROX: "border-l-orange-500",
   OPEN_GYM: "border-l-emerald-600",
   COACH_TRAINING: "border-l-violet-600",
 };
 const chipText: Record<string, string> = {
   CROSSFIT: "text-foreground",
-  HYROX: "text-accent",
+  HYROX: "text-orange-700",
   OPEN_GYM: "text-emerald-700",
   COACH_TRAINING: "text-violet-700",
 };
