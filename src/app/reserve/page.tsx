@@ -84,7 +84,7 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
     );
   }
 
-  const canReserve = isAdmin || member.status === "active";
+  const canReserve = isAdmin || member.status === "active"; // 관리자는 예약하지 않으므로 안내 문구도 보이지 않음
 
   return (
     <div className="space-y-8">
@@ -96,7 +96,8 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
         </p>
       )}
 
-      {/* 내 예약 */}
+      {/* 내 예약 (관리자는 예약하지 않으므로 숨김) */}
+      {!isAdmin && (
       <section>
         <h2 className="font-bold">내 예약 {mine.length > 0 && <span className="text-accent">{mine.length}</span>}</h2>
         {mine.length === 0 ? (
@@ -135,6 +136,7 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
           </ul>
         )}
       </section>
+      )}
 
       {/* 날짜 선택 */}
       <nav aria-label="날짜 선택" className="grid grid-cols-4 gap-2 sm:grid-cols-8">

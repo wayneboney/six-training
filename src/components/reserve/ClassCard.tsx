@@ -52,7 +52,8 @@ export default function ClassCard({ session: s, started, isAdmin, attendees }: C
         <div className={`h-full ${full ? "bg-accent" : "bg-foreground"}`} style={{ width: `${percent}%` }} />
       </div>
 
-      {/* 회원 버튼 */}
+      {/* 회원 버튼 (관리자는 수업을 예약하지 않으므로 보이지 않음) */}
+      {!isAdmin && (
       <div className="flex flex-wrap items-center gap-2">
         {started ? (
           <span className="rounded-md bg-surface px-3 py-2 text-sm text-muted">수업이 시작되었습니다</span>
@@ -83,10 +84,11 @@ export default function ClassCard({ session: s, started, isAdmin, attendees }: C
           />
         )}
       </div>
+      )}
 
       {/* 관리자 전용: 정원 선택(20/30) + 예약자 목록 */}
       {isAdmin && (
-        <div className="space-y-3 border-t border-line pt-3">
+        <div className="space-y-3 border-line pt-1">
           {!started && (
             <MemberActionForm
               action={setCapacityAction.bind(null, s.slotId, s.classDate)}
