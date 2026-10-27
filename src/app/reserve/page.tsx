@@ -1,10 +1,8 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { cancelReservationAction } from "@/app/reserve/actions";
-import MemberActionForm from "@/components/admin/MemberActionForm";
 import ClassCard from "@/components/reserve/ClassCard";
-import { classLabels } from "@/data/timetable";
+import { classLabelsKo } from "@/data/timetable";
 import { requireMember } from "@/lib/auth/member";
 import { addDaysToKey, parseDateKey, seoulTodayKey, weekdayLabels } from "@/lib/date";
 import { getHolidays } from "@/lib/holidays/repository";
@@ -81,7 +79,7 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
   try {
     const [schedule, myList, attendeeList, holidayMap] = await Promise.all([
       getSchedule(selected, selected),
-      getMyReservations(today),
+      isAdmin ? Promise.resolve([] as MyReservation[]) : getMyReservations(firstMonday),
       getAttendees(selected, selected),
       getHolidays([...new Set(weekDays.map((d) => parseDateKey(d).year))]),
     ]);
@@ -102,6 +100,12 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
     );
   }
 
+  // 내 예약을 날짜별로 묶어서 날짜 선택 줄(월~토)의 각 칸 아래에 표시합니다.
+  const mineByDate = new Map<string, MyReservation[]>();
+  for (const r of mine) {
+    mineByDate.set(r.classDate, [...(mineByDate.get(r.classDate) ?? []), r]);
+  }
+
   const canReserve = isAdmin || member.status === "active"; // 관리자는 예약하지 않으므로 안내 문구도 보이지 않음
 
   return (
@@ -112,48 +116,6 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
             ? "가입 승인 후 예약할 수 있습니다. 코치가 회원권을 등록하면 이용할 수 있어요."
             : "이용 중인 회원권이 없습니다. 코치에게 재등록을 문의해 주세요."}
         </p>
-      )}
-
-      {/* 내 예약 (관리자는 예약하지 않으므로 숨김) */}
-      {!isAdmin && (
-      <section>
-        <h2 className="font-bold">내 예약 {mine.length > 0 && <span className="text-accent">{mine.length}</span>}</h2>
-        {mine.length === 0 ? (
-          <p className="mt-2 rounded-md bg-surface px-4 py-3 text-sm text-muted">예약한 수업이 없습니다.</p>
-        ) : (
-          <ul className="mt-2 divide-y divide-line rounded-lg border border-line">
-            {mine.map((r) => {
-              const { month, day } = parseDateKey(r.classDate);
-              const weekday = weekdayLabels[weekdayOf(r.classDate)];
-              const started = hasStarted(r.classDate, r.startTime);
-              return (
-                <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm">
-                  <span>
-                    <span className="font-bold">
-                      {month + 1}/{day} ({weekday}) {r.startTime}
-                    </span>
-                    <span className="ml-2 text-muted">
-                      {classLabels[r.classType as keyof typeof classLabels] ?? r.classType}
-                    </span>
-                    <span className={`ml-2 text-xs font-bold ${r.status === "waiting" ? "text-accent" : ""}`}>
-                      {r.status === "waiting" ? "대기 중" : "예약됨"}
-                    </span>
-                  </span>
-                  {!started && (
-                    <MemberActionForm
-                      action={cancelReservationAction.bind(null, r.id)}
-                      submitLabel="취소"
-                      pendingLabel="취소 중…"
-                      confirmMessage="이 예약을 취소할까요?"
-                      layout="inline"
-                    />
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </section>
       )}
 
       {/* 날짜 선택: 월~토를 한 줄로, 이번 주 / 다음 주. 오늘은 테두리와 "오늘" 표시로 강조합니다. */}
@@ -198,6 +160,14 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
                       ) : (
                         <span className="text-[10px]">&nbsp;</span>
                       )}
+                      {/* 내 예약: "크로스핏 예약", "하이록스 대기"처럼 수업 종류 이름표로 보여줍니다. */}
+                      {(mineByDate.get(d) ?? []).length > 0 && (
+                        <span className="mt-1.5 flex w-full flex-col gap-1">
+                          {(mineByDate.get(d) ?? []).map((r) => (
+                            <MyChip key={r.id} reservation={r} selected={active} />
+                          ))}
+                        </span>
+                      )}
                     </>
                   );
                   return (
@@ -238,5 +208,30 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
         </ul>
       )}
     </div>
+  );
+}
+
+// 날짜 칸 안의 내 예약 이름표: "크로스핏 예약" / "하이록스 대기" + 시작 시각
+// 수업 종류마다 색을 달리합니다. (선택된 날짜 칸은 배경이 붉어서 흰 바탕으로 뒤집어 보여줌)
+const chipColors: Record<string, string> = {
+  CROSSFIT: "bg-foreground text-background",
+  HYROX: "bg-accent text-white",
+  OPEN_GYM: "bg-muted text-white",
+};
+
+function MyChip({ reservation: r, selected }: { reservation: MyReservation; selected: boolean }) {
+  const label = classLabelsKo[r.classType as keyof typeof classLabelsKo] ?? r.classType;
+  const waiting = r.status === "waiting";
+  const colors = selected ? "bg-white text-accent" : (chipColors[r.classType] ?? "bg-muted text-white");
+  return (
+    <span
+      className={`w-full rounded px-1 py-1 text-center text-[10px] font-bold leading-tight ${colors} ${
+        waiting ? "outline outline-1 outline-offset-[-2px] outline-dashed" : ""
+      }`}
+      title={`${label} ${waiting ? "대기" : "예약"} ${r.startTime}`}
+    >
+      {label} {waiting ? "대기" : "예약"}
+      <span className="block font-normal opacity-90">{r.startTime}</span>
+    </span>
   );
 }

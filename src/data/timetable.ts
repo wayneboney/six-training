@@ -25,6 +25,13 @@ export const classLabels: Record<ClassType, string> = {
   CLOSE: "CLOSE",
 };
 
+// 수업 예약 화면에서 쓰는 한글 이름
+export const classLabelsKo: Record<"CROSSFIT" | "HYROX" | "OPEN_GYM", string> = {
+  CROSSFIT: "크로스핏",
+  HYROX: "하이록스",
+  OPEN_GYM: "오픈짐",
+};
+
 export type TimeSlot = {
   time: string;
   // Record<DayKey, ClassType> = 요일마다 수업 하나씩. 요일이 하나라도 빠지면 컴파일 에러가 납니다. (Java의 Map<DayKey, ClassType>)

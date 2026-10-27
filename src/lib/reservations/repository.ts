@@ -71,14 +71,14 @@ export async function getSchedule(from: string, to: string): Promise<ClassSessio
   }));
 }
 
-// 내 예약/대기 (오늘 이후)
-export async function getMyReservations(today: string): Promise<MyReservation[]> {
+// 내 예약/대기 (from 날짜부터. 이번 주 월요일부터 넘기면 이번 주 지난 수업도 포함)
+export async function getMyReservations(from: string): Promise<MyReservation[]> {
   const supabase = await createAuthSupabase();
   const { data, error } = await supabase
     .from("reservations")
     .select("id, class_date, status, class_slots(start_time, class_type)")
     .neq("status", "cancelled")
-    .gte("class_date", today)
+    .gte("class_date", from)
     .order("class_date", { ascending: true })
     .overrideTypes<
       {

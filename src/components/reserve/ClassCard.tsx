@@ -8,7 +8,7 @@ import {
 } from "@/app/reserve/actions";
 import MemberActionForm from "@/components/admin/MemberActionForm";
 import Avatar from "@/components/Avatar";
-import { classLabels } from "@/data/timetable";
+import { classLabelsKo } from "@/data/timetable";
 import type { Attendee, ClassSession } from "@/lib/reservations/repository";
 
 type ClassCardProps = {
@@ -39,7 +39,7 @@ export default function ClassCard({ session: s, started, isAdmin, readOnly = fal
         <div className="flex items-center gap-3">
           <span className="text-xl font-black">{s.startTime}</span>
           <span className={`rounded px-2 py-0.5 text-xs font-bold ${typeBadge[s.classType]}`}>
-            {classLabels[s.classType]}
+            {classLabelsKo[s.classType]}
           </span>
         </div>
         <p className="text-sm">
@@ -71,7 +71,7 @@ export default function ClassCard({ session: s, started, isAdmin, readOnly = fal
               pendingLabel="취소 중…"
               confirmMessage={
                 s.myStatus === "confirmed"
-                  ? `${s.classDate} ${s.startTime} ${classLabels[s.classType]} 예약을 취소할까요?`
+                  ? `${s.classDate} ${s.startTime} ${classLabelsKo[s.classType]} 예약을 취소할까요?`
                   : "대기를 취소할까요?"
               }
               layout="inline"
