@@ -3,7 +3,6 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import ClassCard from "@/components/reserve/ClassCard";
 import LinkPendingOverlay from "@/components/reserve/LinkPendingOverlay";
-import ScrollButtons from "@/components/ScrollButtons";
 import ScrollToTarget from "@/components/reserve/ScrollToTarget";
 import TodayButton from "@/components/reserve/TodayButton";
 import { classLabelsKo } from "@/data/timetable";
@@ -35,7 +34,6 @@ export default function ReservePage(props: PageProps<"/reserve">) {
           <ReserveContent searchParams={props.searchParams} />
         </Suspense>
       </div>
-      <ScrollButtons />
     </div>
   );
 }

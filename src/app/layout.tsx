@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Noto_Sans_KR } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ScrollButtons from "@/components/ScrollButtons";
 import { gym } from "@/data/gym";
 import "./globals.css";
 
@@ -38,6 +39,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <main className="flex-1">{children}</main>
         {/* 푸터는 모든 페이지 맨 아래에 공통으로 나옵니다 */}
         <Footer />
+        {/* 스크롤할 때 나타나는 up / down 버튼도 모든 페이지에 공통으로 나옵니다 */}
+        <ScrollButtons />
       </body>
     </html>
   );
