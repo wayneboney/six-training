@@ -1,6 +1,6 @@
-// 스크롤할 때 오른쪽 아래에 나타나는 "맨 위로 / 맨 아래로" 버튼.
+// 스크롤할 때 오른쪽 아래에 나타나는 "up(맨 위로) / down(맨 아래로)" 버튼.
 // - 스크롤하면 나타나고, 2.5초 동안 스크롤이 없으면 사라집니다. (마우스를 올려 두면 계속 보임)
-// - 이미 맨 위면 ▲ 버튼은, 맨 아래면 ▼ 버튼은 보이지 않습니다.
+// - 이미 맨 위면 up 버튼은, 맨 아래면 down 버튼은 보이지 않습니다.
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -51,8 +51,9 @@ export default function ScrollButtons() {
     };
   }, []);
 
+  // 밝은 톤: 흰 바탕에 얇은 테두리와 그림자. 글자는 "up" / "down"
   const buttonClass =
-    "flex h-11 w-11 items-center justify-center rounded-full bg-foreground/85 text-lg text-background shadow-lg transition hover:bg-foreground active:scale-95";
+    "flex h-9 w-14 items-center justify-center rounded-full border border-line bg-white/95 text-xs font-bold tracking-wide text-foreground shadow-md transition hover:border-accent hover:bg-accent-soft hover:text-accent active:scale-95";
 
   return (
     <div
@@ -76,7 +77,7 @@ export default function ScrollButtons() {
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           className={buttonClass}
         >
-          ▲
+          up
         </button>
       )}
       {canDown && (
@@ -86,7 +87,7 @@ export default function ScrollButtons() {
           onClick={() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "smooth" })}
           className={buttonClass}
         >
-          ▼
+          down
         </button>
       )}
     </div>
