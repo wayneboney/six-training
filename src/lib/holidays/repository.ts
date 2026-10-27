@@ -11,6 +11,12 @@ import { cacheLife } from "next/cache";
 const DEFAULT_API_URL = "https://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo";
 const REQUEST_TIMEOUT_MS = 5000;
 
+// API가 돌려주는 공식 명칭 중 일상에서 잘 안 쓰는 이름을 화면용 이름으로 바꿉니다. 목록에 없는 이름은 그대로 보여줍니다.
+const DISPLAY_NAMES: Record<string, string> = {
+  기독탄신일: "성탄절",
+  "1월1일": "신정",
+};
+
 type ApiItem = { dateName?: unknown; locdate?: unknown; isHoliday?: unknown };
 
 // 서비스 키: 공공데이터포털은 "인코딩된 키"와 "디코딩된 키" 두 가지를 줍니다.
@@ -73,7 +79,7 @@ async function fetchYear(year: number, serviceKey: string): Promise<Record<strin
   for (const item of toItems(body)) {
     const key = toDateKey(item.locdate);
     if (key && item.isHoliday === "Y" && typeof item.dateName === "string") {
-      result[key] = item.dateName;
+      result[key] = DISPLAY_NAMES[item.dateName] ?? item.dateName;
     }
   }
   return result;
