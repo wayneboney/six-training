@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import WodCalendar from "@/components/wod/WodCalendar";
 import { parseDateKey, seoulTodayKey, toDateKey } from "@/lib/date";
 import { getAdminIfSignedIn } from "@/lib/auth/admin";
+import { getHolidays } from "@/lib/holidays/repository";
 import { getWods } from "@/lib/wods/repository";
 
 export const metadata: Metadata = {
@@ -55,6 +56,9 @@ async function WodSection() {
   // WOD 조회와 관리자 확인을 동시에 시작합니다. (하나씩 기다리지 않아서 더 빠름)
   // 관리자 확인은 로그인 쿠키가 없으면 바로 끝나고, 실패해도 null이라 페이지가 깨지지 않습니다.
   const adminPromise = getAdminIfSignedIn();
+  // 공휴일도 같이 가져옵니다. 조회 기간이 걸치는 모든 해(보통 1~2개)가 대상이고, 실패해도 달력은 그대로 나옵니다.
+  const years = Array.from({ length: toDate.getFullYear() - fromDate.getFullYear() + 1 }, (_, i) => fromDate.getFullYear() + i);
+  const holidaysPromise = getHolidays(years);
 
   let wods: Awaited<ReturnType<typeof getWods>> | null = null;
   try {
@@ -74,5 +78,7 @@ async function WodSection() {
     );
   }
 
-  return <WodCalendar wods={wods} isAdmin={isAdmin} />;
+  const holidays = await holidaysPromise;
+
+  return <WodCalendar wods={wods} holidays={holidays} isAdmin={isAdmin} />;
 }

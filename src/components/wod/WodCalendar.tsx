@@ -4,7 +4,6 @@
 import { useMemo, useState, useSyncExternalStore } from "react";
 import WodDetail from "@/components/wod/WodDetail";
 import { wodTypeStyles } from "@/components/wod/wodTypeStyles";
-import { getHoliday } from "@/data/holidays";
 import { wodTypeLabels, wodTypes, type Wod } from "@/data/wods";
 import { dateToKey, monthCells, parseDateKey, toDateKey, weekdayLabels } from "@/lib/date";
 
@@ -12,10 +11,11 @@ type WodCalendarProps = {
   // WOD 목록은 바깥(page.tsx)에서 넘겨받습니다.
   // 이 컴포넌트는 데이터가 파일에서 왔는지 DB에서 왔는지 모르기 때문에, 나중에 DB로 바꿔도 수정할 필요가 없습니다.
   wods: Wod[];
+  holidays?: Record<string, string>; // 공휴일 { "2026-10-03": "개천절", ... }. 서버가 API에서 가져와 넘겨줍니다.
   isAdmin?: boolean; // 관리자면 상세 카드에 수정/등록 바로가기 버튼 표시
 };
 
-export default function WodCalendar({ wods, isAdmin = false }: WodCalendarProps) {
+export default function WodCalendar({ wods, holidays = {}, isAdmin = false }: WodCalendarProps) {
   // 날짜별로 WOD를 묶어 둡니다. { "2026-10-26": [Wod, Wod], ... } (Java의 Map<String, List<Wod>>)
   // useMemo = wods가 바뀔 때만 다시 계산 (화면이 다시 그려질 때마다 매번 계산하지 않도록)
   const wodsByDate = useMemo(() => {
@@ -116,7 +116,7 @@ export default function WodCalendar({ wods, isAdmin = false }: WodCalendarProps)
             const isSelected = key === selected;
             const isToday = key === today;
             const isSunday = index % 7 === 0;
-            const holiday = getHoliday(key); // 공휴일이면 이름, 아니면 undefined
+            const holiday: string | undefined = holidays[key]; // 공휴일이면 이름, 아니면 undefined
             const isRedDay = isSunday || holiday !== undefined; // 일요일과 공휴일은 빨간 날짜
 
             return (
@@ -180,7 +180,7 @@ export default function WodCalendar({ wods, isAdmin = false }: WodCalendarProps)
       <WodDetail
         date={selected}
         wods={selected ? (wodsByDate.get(selected) ?? []) : []}
-        holiday={selected ? getHoliday(selected) : undefined}
+        holiday={selected ? holidays[selected] : undefined}
         isAdmin={isAdmin}
       />
     </div>
