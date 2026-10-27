@@ -7,7 +7,7 @@ export type ClassSession = {
   slotId: number;
   classDate: string; // YYYY-MM-DD
   startTime: string; // "HH:MM"
-  classType: "CROSSFIT" | "HYROX" | "OPEN_GYM";
+  classType: "CROSSFIT" | "HYROX" | "OPEN_GYM" | "COACH_TRAINING";
   capacity: number;
   confirmedCount: number;
   waitingCount: number;

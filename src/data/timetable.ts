@@ -26,10 +26,11 @@ export const classLabels: Record<ClassType, string> = {
 };
 
 // 수업 예약 화면에서 쓰는 한글 이름
-export const classLabelsKo: Record<"CROSSFIT" | "HYROX" | "OPEN_GYM", string> = {
+export const classLabelsKo: Record<"CROSSFIT" | "HYROX" | "OPEN_GYM" | "COACH_TRAINING", string> = {
   CROSSFIT: "크로스핏",
   HYROX: "하이록스",
   OPEN_GYM: "오픈짐",
+  COACH_TRAINING: "코치트레이닝",
 };
 
 export type TimeSlot = {
