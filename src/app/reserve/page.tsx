@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import ClassCard from "@/components/reserve/ClassCard";
 import LinkPendingOverlay from "@/components/reserve/LinkPendingOverlay";
 import ScrollToTarget from "@/components/reserve/ScrollToTarget";
+import TodayButton from "@/components/reserve/TodayButton";
 import { classLabelsKo } from "@/data/timetable";
 import { requireMember } from "@/lib/auth/member";
 import { addDaysToKey, parseDateKey, seoulTodayKey, weekdayLabels } from "@/lib/date";
@@ -71,6 +72,8 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
     : weekDays.includes(today)
       ? today
       : (weekDays.find(bookable) ?? today);
+  const selectedParts = parseDateKey(selected);
+  const selectedLabel = `${selectedParts.month + 1}월 ${selectedParts.day}일 (${weekdayLabels[weekdayOf(selected)]})`;
   const isPastDay = selected < today; // 지난 날짜를 보는 중이면 예약 버튼 없이 예약자 목록만 보여줍니다.
 
   // DB 조회만 try/catch로 감쌉니다. (화면은 밖에서)
@@ -129,12 +132,16 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
           const last = parseDateKey(week[5]);
           return (
             <div key={week[0]}>
-              <p className="mb-1.5 text-xs font-bold text-muted">
-                {label}{" "}
-                <span className="font-normal">
-                  {first.month + 1}/{first.day} ~ {last.month + 1}/{last.day}
-                </span>
-              </p>
+              <div className="mb-1.5 flex items-center justify-between gap-2">
+                <p className="text-xs font-bold text-muted">
+                  {label}{" "}
+                  <span className="font-normal">
+                    {first.month + 1}/{first.day} ~ {last.month + 1}/{last.day}
+                  </span>
+                </p>
+                {/* 오늘이 이 주에 있을 때만 (일요일에는 오늘이 달력에 없어서 숨김) */}
+                {week.includes(today) && <TodayButton date={today} />}
+              </div>
               <nav aria-label={`${label} 날짜 선택`} className="grid grid-cols-6 gap-2">
                 {week.map((d) => {
                   const { day } = parseDateKey(d);
@@ -205,7 +212,14 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
         오늘부터 {lastDay}(토)까지 예약할 수 있습니다. 지난 날짜를 누르면 예약자 목록만 볼 수 있습니다. 일요일은 휴무입니다.
       </p>
 
-      {/* 선택한 날의 수업 */}
+      {/* 선택한 날의 수업. id="day-classes": "오늘로 이동" 버튼이 화면을 내려 주는 위치 */}
+      <h2 id="day-classes" className="-mb-4 scroll-mt-24 text-lg font-black">
+        {selectedLabel} 수업
+        {selected === today && (
+          <span className="ml-2 rounded bg-accent px-2 py-0.5 align-middle text-xs font-bold text-white">오늘</span>
+        )}
+        {isPastDay && <span className="ml-2 align-middle text-xs font-normal text-muted">지난 수업 (예약자만 볼 수 있음)</span>}
+      </h2>
       {sessions.length === 0 ? (
         <p className="rounded-lg bg-surface p-8 text-center text-muted">이 날은 예약할 수 있는 수업이 없습니다.</p>
       ) : (
