@@ -12,25 +12,6 @@ export type SignupState =
   | { status: "check-email"; email: string }
   | undefined;
 
-// 카카오 로그인 시작. 카카오 로그인 화면 주소를 받아서 그곳으로 보냅니다.
-// 카카오에서 돌아오는 곳은 /auth/callback 이고, 거기서 로그인 세션을 만듭니다.
-export async function kakaoLogin(): Promise<void> {
-  const supabase = await createAuthSupabase();
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "kakao",
-    options: {
-      redirectTo: `${getSiteUrl()}/auth/callback`,
-      // 이메일 동의항목(account_email)은 사업자 앱만 쓸 수 있어서 요청하지 않습니다. 닉네임과 프로필 사진만 받습니다.
-      scopes: "profile_nickname profile_image",
-    },
-  });
-  if (error || !data.url) {
-    console.error("[auth] 카카오 로그인 시작 실패", error?.message);
-    redirect("/login?error=oauth");
-  }
-  redirect(data.url);
-}
-
 export type MemberLoginState = { error: string; email: string } | undefined;
 
 // 로그인 실패 메시지는 한 가지로 통일 (이메일 존재 여부를 알아내는 데 악용되는 것을 막기 위해)
