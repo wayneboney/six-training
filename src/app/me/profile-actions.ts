@@ -7,6 +7,7 @@ import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { requireMember } from "@/lib/auth/member";
 import { validateName } from "@/lib/auth/validation";
+import { normalizePhone, parseBirthDate, parseGender } from "@/lib/profile/contact";
 import { AVATAR_BUCKET, AVATAR_MAX_BYTES, avatarPathFromUrl, sniffAvatarType } from "@/lib/profile/avatar";
 import { toFailure, type ActionResult } from "@/lib/members/rpc-error";
 import { createAuthSupabase } from "@/lib/supabase/auth";
@@ -20,6 +21,20 @@ export async function updateProfileAction(_prev: ProfileActionState, formData: F
   const name = validateName(formData.get("name"));
   if (!name.ok) {
     return { ok: false, message: name.error };
+  }
+
+  // 연락처 검증 (개인정보라서 서버에서 다시 확인)
+  const phone = normalizePhone(formData.get("phone"));
+  if (!phone) {
+    return { ok: false, message: "전화번호를 휴대전화 형식(예: 010-1234-5678)으로 입력해 주세요." };
+  }
+  const birthDate = parseBirthDate(formData.get("birthDate"));
+  if (!birthDate) {
+    return { ok: false, message: "생년월일을 올바르게 입력해 주세요." };
+  }
+  const gender = parseGender(formData.get("gender"));
+  if (!gender) {
+    return { ok: false, message: "성별을 선택해 주세요." };
   }
 
   // 사진: 새로 올린 파일이 있으면 교체, 삭제 요청이면 비우기, 둘 다 아니면 그대로
@@ -56,7 +71,13 @@ export async function updateProfileAction(_prev: ProfileActionState, formData: F
   }
 
   // ④ 프로필 저장. select()를 붙여서 실제로 1줄이 바뀌었는지 확인합니다. (RLS 때문에 0줄이면 에러 없이 지나가기도 함)
-  const changes: { name: string; avatar_url?: string | null } = { name: name.value };
+  const changes: {
+    name: string;
+    phone: string;
+    birth_date: string;
+    gender: string;
+    avatar_url?: string | null;
+  } = { name: name.value, phone, birth_date: birthDate, gender };
   if (newAvatarUrl !== undefined) {
     changes.avatar_url = newAvatarUrl;
   }

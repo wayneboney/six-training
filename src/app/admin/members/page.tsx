@@ -5,6 +5,7 @@ import { adjustDaysAction, cancelHoldAction, registerMembershipAction } from "@/
 import MemberActionForm from "@/components/admin/MemberActionForm";
 import { requireAdmin } from "@/lib/auth/admin";
 import { seoulTodayKey } from "@/lib/date";
+import { formatPhone } from "@/lib/profile/contact";
 import { formatDateTimeToKey } from "@/lib/members/format";
 import {
   getActiveCodes,
@@ -109,11 +110,13 @@ async function MemberList({ searchParams }: { searchParams: PageProps<"/admin/me
 
   // 검색/필터는 서버에서 메모리로 처리합니다. (회원 수가 수백 명 수준이라 충분. 1000명을 넘기면 DB 검색으로 바꿔야 함)
   const needle = q.toLowerCase();
+  const needleDigits = q.replace(/[^0-9]/g, ""); // 전화번호 검색: 하이픈 없이 숫자만 비교
   const visible = sortMembers(
     members.filter(
       (m) =>
         matchesTab(m) &&
-        (needle === "" || m.name.toLowerCase().includes(needle) || (m.email ?? "").toLowerCase().includes(needle)),
+        (needle === "" || m.name.toLowerCase().includes(needle) || (m.email ?? "").toLowerCase().includes(needle) ||
+          (needleDigits.length >= 3 && (m.phone ?? "").includes(needleDigits))),
     ),
   );
 
@@ -162,8 +165,8 @@ async function MemberList({ searchParams }: { searchParams: PageProps<"/admin/me
           type="search"
           defaultValue={q}
           maxLength={50}
-          placeholder="이름 또는 이메일 검색"
-          aria-label="이름 또는 이메일 검색"
+          placeholder="이름, 이메일, 전화번호 검색"
+          aria-label="이름, 이메일, 전화번호 검색"
           className="min-w-0 flex-1 rounded-md border border-line px-3 py-2 focus:border-accent focus:outline-none"
         />
         <button type="submit" className="rounded-md border border-line px-4 py-2 text-sm font-bold hover:bg-surface">
@@ -224,6 +227,7 @@ function MemberItem({
           </p>
           <p className="truncate text-sm text-muted">
             {m.email ?? "이메일 없음"}
+            {m.phone && <span className="ml-3">{formatPhone(m.phone)}</span>}
             <span className="ml-3">가입 {formatDateTimeToKey(m.createdAt)}</span>
           </p>
         </div>

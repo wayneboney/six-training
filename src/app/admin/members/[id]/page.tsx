@@ -12,6 +12,7 @@ import {
 import MemberActionForm from "@/components/admin/MemberActionForm";
 import { requireAdmin } from "@/lib/auth/admin";
 import { diffDays, seoulTodayKey } from "@/lib/date";
+import { ageOf, formatPhone, genderLabels, type Gender } from "@/lib/profile/contact";
 import { formatDateTimeToKey, formatHoldRange } from "@/lib/members/format";
 import {
   getActiveCodes,
@@ -105,6 +106,14 @@ async function MemberDetailView({ params }: { params: PageProps<"/admin/members/
         </h1>
         <p className="mt-1 text-sm text-muted">
           {member.email ?? "이메일 없음"} · 가입 {formatDateTimeToKey(member.createdAt)}
+        </p>
+        {/* 연락처/생년월일/성별은 회원 본인만 수정할 수 있습니다. 관리자는 조회만. */}
+        <p className="mt-1 text-sm text-muted">
+          {member.phone ? formatPhone(member.phone) : "전화번호 없음"}
+          {" · "}
+          {member.birthDate ? `${member.birthDate} (만 ${ageOf(member.birthDate)}세)` : "생년월일 없음"}
+          {" · "}
+          {member.gender ? genderLabels[member.gender as Gender] ?? member.gender : "성별 없음"}
         </p>
       </section>
 

@@ -115,6 +115,12 @@ async function MyInfo() {
         )}
       </section>
 
+      {(!member.phone || !member.birthDate || !member.gender) && (
+        <p role="status" className="rounded-md bg-accent-soft px-3 py-2 text-sm text-accent">
+          생년월일, 성별, 전화번호가 아직 등록되지 않았습니다. 아래 &ldquo;내 정보 수정&rdquo;에서 입력해 주세요.
+        </p>
+      )}
+
       {membership?.plan_name && (
         <section className="rounded-md border border-line p-5">
           <h2 className="font-bold">내 회원권</h2>
@@ -249,7 +255,13 @@ async function MyInfo() {
       <section className="rounded-md border border-line p-5">
         <h2 className="font-bold">내 정보 수정</h2>
         <div className="mt-4">
-          <ProfileForm name={member.name} avatarUrl={member.avatarUrl} />
+          <ProfileForm
+            name={member.name}
+            avatarUrl={member.avatarUrl}
+            phone={member.phone}
+            birthDate={member.birthDate}
+            gender={member.gender}
+          />
         </div>
       </section>
 

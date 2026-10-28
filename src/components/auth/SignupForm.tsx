@@ -4,6 +4,8 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { signup, type SignupState } from "@/app/auth/actions";
+import ContactFields from "@/components/auth/ContactFields";
+import { formatPhone } from "@/lib/profile/contact";
 import { NAME_MAX, PASSWORD_MAX, PASSWORD_MIN } from "@/lib/auth/validation";
 
 const inputClass = "w-full rounded-md border border-line px-3 py-2 focus:border-accent focus:outline-none";
@@ -88,6 +90,21 @@ export default function SignupForm() {
           autoComplete="new-password"
           className={inputClass}
         />
+      </div>
+
+      <ContactFields idPrefix="signup" birthDate={values?.birthDate} gender={values?.gender} phone={formatPhone(values?.phone ?? null) || values?.phone} />
+
+      {/* 개인정보 수집·이용 동의 (개인정보 보호법): 항목, 목적, 보유기간을 알려야 합니다. */}
+      <div className="rounded-md border border-line p-3 text-xs text-muted">
+        <p className="font-bold text-foreground">개인정보 수집·이용 안내</p>
+        <p className="mt-1">
+          수집 항목: 이름, 이메일, 생년월일, 성별, 전화번호, (선택) 프로필 사진 / 목적: 회원 확인, 수업 예약·회원권 관리,
+          공지 연락 / 보유 기간: 회원 탈퇴 시까지. 본인과 관리자(코치)만 볼 수 있으며, 동의하지 않으면 가입할 수 없습니다.
+        </p>
+        <label className="mt-2 flex items-center gap-2 text-sm text-foreground">
+          <input type="checkbox" name="consent" required />
+          위 내용에 동의합니다.
+        </label>
       </div>
 
       {values && (

@@ -4,11 +4,11 @@
 import { redirect } from "next/navigation";
 import { landingPathAfterLogin } from "@/lib/auth/landing";
 import { getSiteUrl } from "@/lib/auth/site-url";
-import { validateSignup } from "@/lib/auth/validation";
+import { validateSignup, type SignupFormValues } from "@/lib/auth/validation";
 import { createAuthSupabase } from "@/lib/supabase/auth";
 
 export type SignupState =
-  | { status: "error"; error: string; email: string; name: string }
+  | ({ status: "error"; error: string } & SignupFormValues)
   | { status: "check-email"; email: string }
   | undefined;
 
@@ -20,9 +20,18 @@ const INVALID_LOGIN = "이메일 또는 비밀번호가 올바르지 않습니�
 export async function signup(_prev: SignupState, formData: FormData): Promise<SignupState> {
   const parsed = validateSignup(formData);
   if (!parsed.ok) {
-    return { status: "error", error: parsed.error, email: parsed.email, name: parsed.name };
+    return {
+      status: "error",
+      error: parsed.error,
+      email: parsed.email,
+      name: parsed.name,
+      phone: parsed.phone,
+      birthDate: parsed.birthDate,
+      gender: parsed.gender,
+    };
   }
-  const { email, name, password } = parsed.value;
+  const { email, name, password, phone, birthDate, gender } = parsed.value;
+  const values = { email, name, phone: parsed.value.phone, birthDate, gender: String(gender) };
 
   const supabase = await createAuthSupabase();
   const { data, error } = await supabase.auth.signUp({
@@ -30,7 +39,8 @@ export async function signup(_prev: SignupState, formData: FormData): Promise<Si
     password,
     options: {
       // 가입 정보에 이름을 담아 보내면 DB 트리거가 profiles를 만들 때 읽어 갑니다. (role/status는 읽지 않으므로 보내도 소용없음)
-      data: { name },
+      // 이름, 전화번호, 생년월일, 성별을 담아 보내면 DB 가입 트리거가 profiles에 저장합니다. (role/status는 읽지 않으므로 보내도 소용없음)
+      data: { name, phone, birth_date: birthDate, gender },
       // 인증 메일의 확인 링크가 돌아올 주소 (Supabase 대시보드의 Redirect URLs에 등록된 주소여야 함)
       emailRedirectTo: `${getSiteUrl()}/auth/callback`,
     },
@@ -38,7 +48,7 @@ export async function signup(_prev: SignupState, formData: FormData): Promise<Si
 
   if (error) {
     console.error("[auth] 회원가입 실패", error.code, error.message);
-    return { status: "error", error: toSignupMessage(error.code), email, name };
+    return { status: "error", error: toSignupMessage(error.code), ...values };
   }
 
   // 이메일 인증을 끈 상태면 가입과 동시에 로그인(session)이 만들어집니다 → 바로 내 정보 화면으로

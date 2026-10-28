@@ -4,6 +4,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import MemberActionForm from "@/components/admin/MemberActionForm";
+import ContactFields from "@/components/auth/ContactFields";
+import { formatPhone } from "@/lib/profile/contact";
 import Avatar from "@/components/Avatar";
 import { updateProfileAction, type ProfileActionState } from "@/app/me/profile-actions";
 import { NAME_MAX } from "@/lib/auth/validation";
@@ -44,9 +46,12 @@ async function resizeAvatar(file: File): Promise<File> {
 type ProfileFormProps = {
   name: string;
   avatarUrl: string | null;
+  phone: string | null;
+  birthDate: string | null;
+  gender: string | null;
 };
 
-export default function ProfileForm({ name, avatarUrl }: ProfileFormProps) {
+export default function ProfileForm({ name, avatarUrl, phone, birthDate, gender }: ProfileFormProps) {
   const [newAvatar, setNewAvatar] = useState<File | null>(null); // 새로 고른(줄여 둔) 사진
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [removeAvatar, setRemoveAvatar] = useState(false); // 현재 사진을 지우기로 했는지
@@ -188,6 +193,8 @@ export default function ProfileForm({ name, avatarUrl }: ProfileFormProps) {
           className="w-full rounded-md border border-line px-3 py-2 text-sm focus:border-accent focus:outline-none"
         />
       </div>
+
+      <ContactFields idPrefix="profile" birthDate={birthDate} gender={gender} phone={formatPhone(phone)} />
     </MemberActionForm>
   );
 }
