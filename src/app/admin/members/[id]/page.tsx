@@ -7,6 +7,7 @@ import {
   deleteMemberAction,
   cancelHoldAction,
   registerMembershipAction,
+  sendPasswordResetAction,
   updateMemberAction,
 } from "@/app/admin/members/actions";
 import MemberActionForm from "@/components/admin/MemberActionForm";
@@ -217,6 +218,26 @@ async function MemberDetailView({ params }: { params: PageProps<"/admin/members/
           </MemberActionForm>
         </div>
       </section>
+
+      {/* 비밀번호 초기화: 관리자가 비밀번호를 정하지 않고, 회원 이메일로 재설정 링크를 보냅니다. */}
+      {member.email && (
+        <section className="space-y-3 rounded-lg border border-line p-5">
+          <div>
+            <h2 className="font-bold">비밀번호 초기화</h2>
+            <p className="mt-1 text-sm text-muted">
+              회원의 이메일({member.email})로 비밀번호 재설정 링크를 보냅니다. 회원이 링크를 눌러 직접 새 비밀번호를
+              정하며, 관리자는 비밀번호를 알 수 없습니다. 기존 비밀번호는 회원이 바꾸기 전까지 그대로 사용할 수 있습니다.
+            </p>
+          </div>
+          <MemberActionForm
+            action={sendPasswordResetAction.bind(null, member.userId)}
+            submitLabel="재설정 메일 보내기"
+            pendingLabel="보내는 중…"
+            confirmMessage={`${member.name}님(${member.email})에게 비밀번호 재설정 메일을 보낼까요?`}
+            layout="inline"
+          />
+        </section>
+      )}
 
       {/* 회원 삭제: 되돌릴 수 없는 작업이라 맨 아래에 따로 둡니다. 관리자 계정은 삭제할 수 없습니다. */}
       {member.role === "member" && (

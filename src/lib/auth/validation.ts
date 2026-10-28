@@ -29,6 +29,25 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // 제어문자(줄바꿈, 탭 등)는 이름에 넣을 수 없게 합니다.
 const CONTROL_CHARS = /[\u0000-\u001f\u007f]/;
 
+// 비밀번호 규칙 (가입, 비밀번호 재설정 공통). 문제가 없으면 null, 있으면 안내 문구
+export function checkPassword(password: string, passwordConfirm: string): string | null {
+  if (password.length < PASSWORD_MIN) {
+    return `비밀번호는 ${PASSWORD_MIN}자 이상으로 입력해 주세요.`;
+  }
+  if (password.length > PASSWORD_MAX) {
+    return `비밀번호는 ${PASSWORD_MAX}자 이하로 입력해 주세요.`;
+  }
+  if (password !== passwordConfirm) {
+    return "비밀번호 확인이 일치하지 않습니다.";
+  }
+  return null;
+}
+
+// 이메일 모양 검사 (비밀번호 찾기 등에서 사용)
+export function isValidEmail(email: string): boolean {
+  return email.length > 0 && email.length <= 254 && EMAIL_PATTERN.test(email);
+}
+
 export function validateSignup(formData: FormData): SignupValidation {
   const email = String(formData.get("email") ?? "").trim();
   const name = String(formData.get("name") ?? "").trim();
@@ -56,14 +75,9 @@ export function validateSignup(formData: FormData): SignupValidation {
   if (!email || email.length > 254 || !EMAIL_PATTERN.test(email)) {
     return fail("이메일 형식이 올바르지 않습니다.");
   }
-  if (password.length < PASSWORD_MIN) {
-    return fail(`비밀번호는 ${PASSWORD_MIN}자 이상으로 입력해 주세요.`);
-  }
-  if (password.length > PASSWORD_MAX) {
-    return fail(`비밀번호는 ${PASSWORD_MAX}자 이하로 입력해 주세요.`);
-  }
-  if (password !== passwordConfirm) {
-    return fail("비밀번호 확인이 일치하지 않습니다.");
+  const passwordError = checkPassword(password, passwordConfirm);
+  if (passwordError) {
+    return fail(passwordError);
   }
 
   const birthDate = parseBirthDate(birthRaw);

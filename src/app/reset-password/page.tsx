@@ -1,0 +1,37 @@
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { connection } from "next/server";
+import { Suspense } from "react";
+import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
+import { createAuthSupabase } from "@/lib/supabase/auth";
+
+export const metadata: Metadata = {
+  title: "새 비밀번호 설정",
+  robots: { index: false, follow: false },
+};
+
+// /reset-password  (메일 링크를 눌러 임시 로그인이 된 사람만 사용)
+export default function ResetPasswordPage() {
+  return (
+    <div className="mx-auto w-full max-w-sm px-4 py-12">
+      <h1 className="text-2xl font-black">새 비밀번호 설정</h1>
+      <div className="mt-8">
+        <Suspense fallback={<p className="text-muted">확인 중…</p>}>
+          <ResetGate />
+        </Suspense>
+      </div>
+    </div>
+  );
+}
+
+async function ResetGate() {
+  await connection();
+  const supabase = await createAuthSupabase();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/forgot-password?error=link");
+  }
+  return <ResetPasswordForm />;
+}

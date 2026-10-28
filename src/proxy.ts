@@ -47,5 +47,5 @@ export async function proxy(request: NextRequest) {
 
 // 아래 주소에서만 실행 (일반 방문자 페이지에는 영향 없음)
 export const config = {
-  matcher: ["/admin/:path*", "/me/:path*", "/login", "/signup"],
+  matcher: ["/admin/:path*", "/me/:path*", "/login", "/signup", "/reset-password"],
 };

@@ -55,6 +55,12 @@ export default function MemberLoginForm() {
       </button>
 
       <p className="text-center text-sm text-muted">
+        <Link href="/forgot-password" className="font-bold text-accent">
+          비밀번호를 잊으셨나요?
+        </Link>
+      </p>
+
+      <p className="text-center text-sm text-muted">
         아직 회원이 아니신가요?{" "}
         <Link href="/signup" className="font-bold text-accent">
           회원가입

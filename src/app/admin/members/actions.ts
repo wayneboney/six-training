@@ -5,6 +5,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/admin";
+import { sendPasswordResetMail } from "@/lib/auth/password-reset";
 import { AVATAR_BUCKET } from "@/lib/profile/avatar";
 import { toFailure, type ActionResult } from "@/lib/members/rpc-error";
 import { parseBigintId, parseDate, parseInteger, parseNote, parseUuid } from "@/lib/members/validation";
@@ -182,4 +183,36 @@ export async function deleteMemberAction(userId: string): Promise<MemberActionSt
   revalidatePath("/admin/members");
   // redirect는 try/catch 밖에서 호출해야 합니다. 삭제된 회원의 상세 화면은 더 이상 없으므로 목록으로 이동
   redirect("/admin/members?deleted=1");
+}
+
+// 비밀번호 재설정 메일 보내기. 관리자는 새 비밀번호를 정하거나 볼 수 없고, 회원 본인이 메일의 링크로 직접 정합니다.
+// 메일은 이 회원의 가입 이메일로만 갑니다. (이메일은 DB에서 읽으며 화면에서 받은 값은 쓰지 않음)
+export async function sendPasswordResetAction(userId: string): Promise<MemberActionState> {
+  await requireAdmin();
+  const uid = parseUuid(userId);
+  if (!uid) {
+    return BAD_REQUEST;
+  }
+
+  const supabase = await createAuthSupabase();
+  const { data: profile, error } = await supabase.from("profiles").select("email").eq("user_id", uid).maybeSingle();
+  if (error) {
+    return toFailure(error, "회원 이메일 조회");
+  }
+  const email = (profile?.email as string | null | undefined) ?? null;
+  if (!email) {
+    return { ok: false, message: "이 회원의 이메일을 찾을 수 없습니다." };
+  }
+
+  const result = await sendPasswordResetMail(email);
+  if (!result.ok) {
+    return {
+      ok: false,
+      message:
+        result.reason === "rate-limit"
+          ? "메일을 너무 자주 보냈습니다. 잠시 후 다시 시도해 주세요."
+          : "메일을 보내지 못했습니다. 잠시 후 다시 시도해 주세요.",
+    };
+  }
+  return { ok: true, message: `${email}로 비밀번호 재설정 메일을 보냈습니다.` };
 }
