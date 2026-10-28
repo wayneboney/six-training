@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { signup, type SignupState } from "@/app/auth/actions";
-import PrivacyModal from "@/components/auth/PrivacyModal";
+import PrivacyModal from "@/components/PrivacyModal";
 import ContactFields from "@/components/auth/ContactFields";
 import { formatPhone } from "@/lib/profile/contact";
 import { NAME_MAX, PASSWORD_MAX, PASSWORD_MIN } from "@/lib/auth/validation";

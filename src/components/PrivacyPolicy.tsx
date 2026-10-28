@@ -11,7 +11,7 @@ const collected = [
   { item: "프로필 사진 (선택)", purpose: "수업 예약자 목록 등에서 본인 표시", keep: "삭제 요청 또는 회원 정보 삭제 시까지" },
 ];
 
-// 방침 본문. /privacy 페이지와 회원가입의 팝업(모달)에서 같이 씁니다.
+// 방침 본문. PrivacyModal(팝업) 안에서 보여줍니다. 문구를 고치면 푸터와 회원가입 화면 양쪽에 반영됩니다.
 export default function PrivacyPolicy() {
   return (
     <>

@@ -1,11 +1,18 @@
-// "자세히 보기"를 누르면 페이지 이동 없이 개인정보처리방침을 팝업으로 보여줍니다.
+// 버튼을 누르면 페이지 이동 없이 개인정보처리방침을 팝업으로 보여줍니다. (개인정보처리방침은 별도 페이지 없이 모두 이 팝업으로 봅니다)
+// 쓰는 곳: 푸터, 회원가입 동의 문구. 버튼 글자와 모양은 children / className으로 정합니다.
 // <dialog>의 showModal()을 쓰면 배경이 어두워지고, Esc 키와 포커스 가두기를 브라우저가 처리해 줍니다.
 "use client";
 
-import { useRef } from "react";
+import { useRef, type ReactNode } from "react";
 import PrivacyPolicy from "@/components/PrivacyPolicy";
 
-export default function PrivacyModal() {
+export default function PrivacyModal({
+  children = "자세히 보기",
+  className = "font-bold text-accent underline",
+}: {
+  children?: ReactNode;
+  className?: string;
+}) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   return (
@@ -13,9 +20,9 @@ export default function PrivacyModal() {
       <button
         type="button"
         onClick={() => dialogRef.current?.showModal()}
-        className="font-bold text-accent underline"
+        className={className}
       >
-        자세히 보기
+        {children}
       </button>
       <dialog
         ref={dialogRef}
