@@ -41,3 +41,19 @@ select {
   background-position: right 0.85rem center;
   background-color: var(--background);
 }
+
+/* 누를 수 있는 것(링크, 버튼, 선택 목록, 접기/펼치기)에는 마우스 포인터가 손가락 모양이 되게 합니다.
+   Tailwind 4는 버튼의 포인터를 기본 화살표로 바꿔 두었기 때문에 여기서 사이트 전체에 한 번에 지정합니다.
+   @layer base = 개별 클래스(예: cursor-not-allowed)가 필요하면 덮어쓸 수 있는 가장 낮은 우선순위 */
+@layer base {
+  a[href],
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  summary,
+  select:not(:disabled),
+  label[for],
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled) {
+    cursor: pointer;
+  }
+}

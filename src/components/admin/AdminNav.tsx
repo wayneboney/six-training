@@ -29,7 +29,7 @@ export default function AdminNav() {
               href={menu.href}
               aria-current={active ? "page" : undefined}
               className={`rounded-md px-4 py-1.5 text-sm font-bold ${
-                active ? "bg-accent text-white" : "text-muted hover:bg-surface hover:text-foreground"
+                active ? "bg-accent text-white hover:opacity-90" : "text-muted hover:bg-surface hover:text-foreground"
               }`}
             >
               {menu.label}
