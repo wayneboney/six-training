@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/admin/actions";
+import PowerIcon from "@/components/PowerIcon";
 
 // 관리자 화면 위쪽 메뉴 + 로그아웃. (현재 주소를 알아야 해서 브라우저에서 실행되는 컴포넌트)
 // 메뉴가 늘어나면 배열에 한 줄만 추가합니다.
@@ -38,10 +39,15 @@ export default function AdminNav() {
           );
         })}
       </div>
-      {/* 로그아웃: 폼 제출로 서버의 logout 함수를 실행합니다 */}
+      {/* 로그아웃: 폼 제출로 서버의 logout 함수를 실행합니다. 헤더와 같은 전원 버튼 모양 */}
       <form action={logout}>
-        <button type="submit" className="rounded-md border border-line px-3 py-1.5 text-sm font-bold hover:bg-surface">
-          로그아웃
+        <button
+          type="submit"
+          title="로그아웃"
+          aria-label="로그아웃"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-muted hover:border-accent hover:text-accent"
+        >
+          <PowerIcon />
         </button>
       </form>
     </nav>
