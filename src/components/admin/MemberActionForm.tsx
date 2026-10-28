@@ -2,8 +2,9 @@
 // 서버 함수(action)를 실행하고, 처리 중 표시와 성공/실패 메시지를 보여줍니다.
 "use client";
 
-import { useActionState, useEffect, useState, type ReactNode } from "react";
+import { useActionState, useEffect, useRef, useState, type ReactNode } from "react";
 import type { MemberActionState } from "@/app/admin/members/actions";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 type MemberActionFormProps = {
   // 서버 함수. 폼이 제출되면 (이전 상태, 입력값)을 받아 실행됩니다.
@@ -36,6 +37,12 @@ export default function MemberActionForm({
   // 처리 결과(state)는 제출할 때마다 새 객체라서, "이미 닫은 결과"를 기억해 두고 그것과 같으면 숨깁니다.
   // 오류 메시지는 다시 확인할 수 있도록 폼 아래에 계속 남겨 둡니다.
   const [dismissed, setDismissed] = useState<MemberActionState>(undefined);
+  // 확인 팝업: 확인이 필요한 버튼을 누르면 제출을 잠시 멈추고 팝업을 띄웁니다. "확인"을 누르면 같은 버튼을 누른 것처럼 다시 제출합니다.
+  const formRef = useRef<HTMLFormElement>(null);
+  const pendingSubmitter = useRef<HTMLButtonElement | null>(null); // 팝업이 뜨기 전에 누른 버튼
+  const confirmed = useRef(false); // 확인을 마친 제출이면 팝업을 다시 띄우지 않음
+  const [asking, setAsking] = useState<{ message: string; label: string } | null>(null);
+
   const toastVisible = state?.ok === true && dismissed !== state;
   useEffect(() => {
     if (state?.ok !== true) {
@@ -47,13 +54,21 @@ export default function MemberActionForm({
 
   return (
     <form
+      ref={formRef}
       action={formAction}
       onSubmit={(event) => {
-        // 확인창에서 취소하면 제출을 막습니다. (버튼이 여러 개면 누른 버튼의 확인 문구를 씁니다)
+        if (confirmed.current) {
+          confirmed.current = false; // 확인 팝업을 거친 제출 → 그대로 진행
+          return;
+        }
+        // 확인이 필요하면 제출을 막고 팝업을 띄웁니다. (버튼이 여러 개면 누른 버튼의 확인 문구를 씁니다)
         const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
-        const message = modes ? modes.find((mode) => mode.value === submitter?.value)?.confirmMessage : confirmMessage;
-        if (message && !window.confirm(message)) {
+        const mode = modes?.find((m) => m.value === submitter?.value);
+        const message = modes ? mode?.confirmMessage : confirmMessage;
+        if (message) {
           event.preventDefault();
+          pendingSubmitter.current = submitter;
+          setAsking({ message, label: mode?.label ?? submitLabel });
         }
       }}
       className={layout === "inline" ? "flex flex-wrap items-center gap-2" : "space-y-3"}
@@ -109,6 +124,19 @@ export default function MemberActionForm({
           </button>
         </div>
       )}
+
+      <ConfirmDialog
+        open={asking !== null}
+        title={asking?.label ?? "확인"}
+        message={asking?.message ?? ""}
+        confirmLabel={asking?.label ?? "확인"}
+        onCancel={() => setAsking(null)}
+        onConfirm={() => {
+          setAsking(null);
+          confirmed.current = true;
+          formRef.current?.requestSubmit(pendingSubmitter.current ?? undefined);
+        }}
+      />
     </form>
   );
 }

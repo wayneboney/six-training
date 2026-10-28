@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { memberLogout } from "@/app/auth/actions";
 import Avatar from "@/components/Avatar";
+import LogoutButton from "@/components/LogoutButton";
 import PowerIcon from "@/components/PowerIcon";
 import { connection } from "next/server";
 import { getMemberIfSignedIn } from "@/lib/auth/member";
@@ -47,17 +47,8 @@ export default async function AccountLinks() {
           {member.name}님<span className="hidden font-normal text-muted sm:inline"> 환영합니다</span>
         </span>
       </Link>
-      {/* 로그아웃: 데이터를 바꾸는 동작이라 링크(GET)가 아니라 폼(POST)으로 보냅니다. 전원 버튼 모양 */}
-      <form action={memberLogout}>
-        <button
-          type="submit"
-          title="로그아웃"
-          aria-label="로그아웃"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-muted hover:border-accent hover:text-accent"
-        >
-          <PowerIcon />
-        </button>
-      </form>
+      {/* 로그아웃 전원 버튼: 누르면 확인 팝업이 먼저 뜹니다 */}
+      <LogoutButton />
     </div>
   );
 }
