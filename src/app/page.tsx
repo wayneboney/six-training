@@ -33,17 +33,6 @@ export default function Home() {
           >
             체육관 둘러보기
           </Link>
-
-          {/* 외부 사이트로 나갈 때는 <a> + 새 탭(target="_blank")
-              rel="noopener noreferrer" = 새 탭에서 열린 외부 사이트가 우리 페이지를 조작하지 못하게 막는 보안 설정 */}
-          <a
-            href={gym.contact.kakaoChannel}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-md border border-line px-6 py-3 font-bold hover:bg-surface"
-          >
-            카카오톡 문의
-          </a>
         </div>
       </div>
 

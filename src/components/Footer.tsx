@@ -67,11 +67,8 @@ export default function Footer() {
               <dd className="mt-0.5">{gym.contact.phone}</dd>
             </div>
             <div>
-              <dt className="text-xs text-muted/80">온라인 문의</dt>
-              <dd className="mt-0.5 flex flex-wrap gap-x-4 gap-y-1">
-                <a href={gym.contact.kakaoChannel} target="_blank" rel="noopener noreferrer" className={externalLink}>
-                  카카오톡 문의
-                </a>
+              <dt className="text-xs text-muted/80">SNS</dt>
+              <dd className="mt-0.5">
                 <a href={gym.contact.instagram} target="_blank" rel="noopener noreferrer" className={externalLink}>
                   인스타그램
                 </a>
