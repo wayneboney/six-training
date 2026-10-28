@@ -44,9 +44,3 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
   // redirect는 내부적으로 특별한 에러를 던져서 이동시키는 방식이라 try/catch 밖에서 호출해야 합니다.
   redirect(landing);
 }
-
-export async function logout(): Promise<void> {
-  const supabase = await createAuthSupabase();
-  await supabase.auth.signOut();
-  redirect("/admin/login");
-}
