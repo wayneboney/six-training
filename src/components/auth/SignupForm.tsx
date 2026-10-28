@@ -99,7 +99,10 @@ export default function SignupForm() {
         <p className="font-bold text-foreground">개인정보 수집·이용 안내</p>
         <p className="mt-1">
           수집 항목: 이름, 이메일, 생년월일, 성별, 전화번호, (선택) 프로필 사진 / 목적: 회원 확인, 수업 예약·회원권 관리,
-          공지 연락 / 보유 기간: 회원 탈퇴 시까지. 본인과 관리자(코치)만 볼 수 있으며, 동의하지 않으면 가입할 수 없습니다.
+          공지 연락 / 보유 기간: 회원 탈퇴 시까지. 본인과 관리자(코치)만 볼 수 있으며, 동의하지 않으면 가입할 수 없습니다.{" "}
+          <Link href="/privacy" target="_blank" className="font-bold text-accent underline">
+            자세히 보기
+          </Link>
         </p>
         <label className="mt-2 flex items-center gap-2 text-sm text-foreground">
           <input type="checkbox" name="consent" required />
