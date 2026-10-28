@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { signup, type SignupState } from "@/app/auth/actions";
+import PrivacyModal from "@/components/auth/PrivacyModal";
 import ContactFields from "@/components/auth/ContactFields";
 import { formatPhone } from "@/lib/profile/contact";
 import { NAME_MAX, PASSWORD_MAX, PASSWORD_MIN } from "@/lib/auth/validation";
@@ -100,9 +101,7 @@ export default function SignupForm() {
         <p className="mt-1">
           수집 항목: 이름, 이메일, 생년월일, 성별, 전화번호, (선택) 프로필 사진 / 목적: 회원 확인, 수업 예약·회원권 관리,
           공지 연락 / 보유 기간: 삭제 요청 시 또는 마지막 회원권 종료 후 3년. 본인과 관리자(코치)만 볼 수 있으며, 동의하지 않으면 가입할 수 없습니다.{" "}
-          <Link href="/privacy" target="_blank" className="font-bold text-accent underline">
-            자세히 보기
-          </Link>
+          <PrivacyModal />
         </p>
         <label className="mt-2 flex items-center gap-2 text-sm text-foreground">
           <input type="checkbox" name="consent" required />
