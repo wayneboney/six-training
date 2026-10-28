@@ -18,7 +18,8 @@ export type Member = {
 };
 
 // 지금 로그인한 사람의 정보. 로그인하지 않았거나 프로필이 없으면 null
-export async function getCurrentMember(): Promise<Member | null> {
+// cache() = 같은 요청 안에서는 여러 곳(헤더, 페이지 등)에서 불러도 Supabase에는 한 번만 묻습니다. (화면이 느려지는 것을 줄임)
+export const getCurrentMember = cache(async (): Promise<Member | null> => {
   const supabase = await createAuthSupabase();
 
   // getUser() = 쿠키의 토큰을 Supabase 서버에 보내서 진짜 유효한 로그인인지 확인 (쿠키 내용만 믿지 않음)
@@ -55,11 +56,11 @@ export async function getCurrentMember(): Promise<Member | null> {
     role: profile.role as string,
     status: profile.status as string,
   };
-}
+});
 
 // 헤더처럼 모든 페이지에 있는 곳에서 쓰는 가벼운 확인.
 // 로그인 쿠키가 없으면 Supabase에 묻지 않고 바로 null, 문제가 생겨도 일반 화면은 깨지지 않게 합니다.
-export async function getMemberIfSignedIn(): Promise<Member | null> {
+export const getMemberIfSignedIn = cache(async (): Promise<Member | null> => {
   const cookieStore = await cookies();
   const hasAuthCookie = cookieStore.getAll().some((cookie) => /^sb-.+-auth-token/.test(cookie.name));
   if (!hasAuthCookie) {
@@ -71,7 +72,7 @@ export async function getMemberIfSignedIn(): Promise<Member | null> {
     console.error("[auth] 회원 확인 실패 (일반 화면은 그대로 표시)", error);
     return null;
   }
-}
+});
 
 // 로그인하지 않았으면 로그인 화면으로 보냅니다. 회원 전용 페이지 맨 앞에서 호출합니다.
 export async function requireMember(): Promise<Member> {
