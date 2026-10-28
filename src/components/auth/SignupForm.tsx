@@ -21,7 +21,7 @@ export default function SignupForm() {
         <p className="font-bold">인증 메일을 보냈습니다.</p>
         <p className="mt-2 text-sm text-muted">
           {state.email} 로 보낸 메일의 링크를 누르면 가입이 완료됩니다. 메일이 보이지 않으면 스팸함도 확인해 주세요.
-          이미 가입한 이메일이라면 메일이 오지 않으니 로그인하거나 비밀번호 찾기를 이용해 주세요.
+          이미 가입한 이메일이라면 메일이 오지 않으니 로그인해 주세요.
         </p>
       </div>
     );

@@ -12,6 +12,7 @@ import {
 } from "@/app/admin/members/actions";
 import MemberActionForm from "@/components/admin/MemberActionForm";
 import { requireAdmin } from "@/lib/auth/admin";
+import { PASSWORD_RESET_ENABLED } from "@/lib/auth/features";
 import { diffDays, seoulTodayKey } from "@/lib/date";
 import { ageOf, formatPhone, genderLabels, type Gender } from "@/lib/profile/contact";
 import { formatDateTimeToKey, formatHoldRange } from "@/lib/members/format";
@@ -220,7 +221,7 @@ async function MemberDetailView({ params }: { params: PageProps<"/admin/members/
       </section>
 
       {/* 비밀번호 초기화: 관리자가 비밀번호를 정하지 않고, 회원 이메일로 재설정 링크를 보냅니다. */}
-      {member.email && (
+      {PASSWORD_RESET_ENABLED && member.email && (
         <section className="space-y-3 rounded-lg border border-line p-5">
           <div>
             <h2 className="font-bold">비밀번호 초기화</h2>

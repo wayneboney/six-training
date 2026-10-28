@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { PASSWORD_RESET_ENABLED } from "@/lib/auth/features";
 import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
 import { createAuthSupabase } from "@/lib/supabase/auth";
 
@@ -12,6 +13,10 @@ export const metadata: Metadata = {
 
 // /reset-password  (메일 링크를 눌러 임시 로그인이 된 사람만 사용)
 export default function ResetPasswordPage() {
+  // 비밀번호 찾기를 쓰지 않는 동안에는 없는 페이지로 처리합니다. (src/lib/auth/features.ts)
+  if (!PASSWORD_RESET_ENABLED) {
+    notFound();
+  }
   return (
     <div className="mx-auto w-full max-w-sm px-4 py-12">
       <h1 className="text-2xl font-black">새 비밀번호 설정</h1>

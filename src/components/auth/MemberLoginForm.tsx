@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
+import { PASSWORD_RESET_ENABLED } from "@/lib/auth/features";
 import { memberLogin, type MemberLoginState } from "@/app/auth/actions";
 
 const inputClass = "w-full rounded-md border border-line px-3 py-2 focus:border-accent focus:outline-none";
@@ -54,11 +55,13 @@ export default function MemberLoginForm() {
         {pending ? "로그인 중…" : "로그인"}
       </button>
 
-      <p className="text-center text-sm text-muted">
-        <Link href="/forgot-password" className="font-bold text-accent">
-          비밀번호를 잊으셨나요?
-        </Link>
-      </p>
+      {PASSWORD_RESET_ENABLED && (
+        <p className="text-center text-sm text-muted">
+          <Link href="/forgot-password" className="font-bold text-accent">
+            비밀번호를 잊으셨나요?
+          </Link>
+        </p>
+      )}
 
       <p className="text-center text-sm text-muted">
         아직 회원이 아니신가요?{" "}

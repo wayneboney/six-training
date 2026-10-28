@@ -5,6 +5,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/admin";
+import { PASSWORD_RESET_ENABLED } from "@/lib/auth/features";
 import { sendPasswordResetMail } from "@/lib/auth/password-reset";
 import { AVATAR_BUCKET } from "@/lib/profile/avatar";
 import { toFailure, type ActionResult } from "@/lib/members/rpc-error";
@@ -189,6 +190,9 @@ export async function deleteMemberAction(userId: string): Promise<MemberActionSt
 // 메일은 이 회원의 가입 이메일로만 갑니다. (이메일은 DB에서 읽으며 화면에서 받은 값은 쓰지 않음)
 export async function sendPasswordResetAction(userId: string): Promise<MemberActionState> {
   await requireAdmin();
+  if (!PASSWORD_RESET_ENABLED) {
+    return { ok: false, message: "비밀번호 초기화는 아직 사용할 수 없습니다." };
+  }
   const uid = parseUuid(userId);
   if (!uid) {
     return BAD_REQUEST;

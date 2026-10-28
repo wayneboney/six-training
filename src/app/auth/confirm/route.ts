@@ -2,10 +2,16 @@
 // token_hash를 확인해서 "비밀번호를 바꿀 수 있는 임시 로그인"을 만들고 /reset-password로 보냅니다.
 // (메일을 요청한 브라우저와 링크를 누른 브라우저가 달라도 동작합니다)
 import { NextResponse, type NextRequest } from "next/server";
+import { PASSWORD_RESET_ENABLED } from "@/lib/auth/features";
 import { createAuthSupabase } from "@/lib/supabase/auth";
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
+  // 비밀번호 찾기를 쓰지 않는 동안에는 처리하지 않습니다. (src/lib/auth/features.ts)
+  if (!PASSWORD_RESET_ENABLED) {
+    return NextResponse.redirect(`${origin}/login`);
+  }
+
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type");
 

@@ -2,6 +2,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { PASSWORD_RESET_ENABLED } from "@/lib/auth/features";
 import { landingPathAfterLogin } from "@/lib/auth/landing";
 import { sendPasswordResetMail } from "@/lib/auth/password-reset";
 import { checkPassword, isValidEmail } from "@/lib/auth/validation";
@@ -12,6 +13,9 @@ export type ResetState = { error: string } | undefined;
 
 // 비밀번호 찾기: 가입된 이메일인지와 상관없이 같은 안내를 보여줍니다. (가입 여부가 노출되지 않게)
 export async function requestPasswordReset(_prev: ForgotState, formData: FormData): Promise<ForgotState> {
+  if (!PASSWORD_RESET_ENABLED) {
+    return { status: "error", error: "비밀번호 찾기는 아직 사용할 수 없습니다.", email: "" };
+  }
   const email = String(formData.get("email") ?? "").trim();
   if (!isValidEmail(email)) {
     return { status: "error", error: "이메일 형식이 올바르지 않습니다.", email };
@@ -28,6 +32,9 @@ export async function requestPasswordReset(_prev: ForgotState, formData: FormDat
 
 // 새 비밀번호 저장: 메일 링크로 만들어진 임시 로그인 상태에서만 동작합니다.
 export async function updatePassword(_prev: ResetState, formData: FormData): Promise<ResetState> {
+  if (!PASSWORD_RESET_ENABLED) {
+    return { error: "비밀번호 변경은 아직 사용할 수 없습니다." };
+  }
   const password = String(formData.get("password") ?? "");
   const passwordConfirm = String(formData.get("passwordConfirm") ?? "");
   const invalid = checkPassword(password, passwordConfirm);

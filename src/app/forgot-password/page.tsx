@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { PASSWORD_RESET_ENABLED } from "@/lib/auth/features";
 import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
 
 export const metadata: Metadata = {
@@ -9,6 +11,10 @@ export const metadata: Metadata = {
 
 // /forgot-password  (?error=link → 재설정 링크가 만료/사용된 경우)
 export default function ForgotPasswordPage({ searchParams }: PageProps<"/forgot-password">) {
+  // 비밀번호 찾기를 쓰지 않는 동안에는 없는 페이지로 처리합니다. (src/lib/auth/features.ts)
+  if (!PASSWORD_RESET_ENABLED) {
+    notFound();
+  }
   return (
     <div className="mx-auto w-full max-w-sm px-4 py-12">
       <h1 className="text-2xl font-black">비밀번호 찾기</h1>
