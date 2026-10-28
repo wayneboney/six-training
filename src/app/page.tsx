@@ -5,6 +5,7 @@ import WodDetail from "@/components/wod/WodDetail";
 import { gym } from "@/data/gym";
 import type { Wod } from "@/data/wods";
 import { getAdminIfSignedIn } from "@/lib/auth/admin";
+import { getMemberIfSignedIn } from "@/lib/auth/member";
 import { seoulTodayKey } from "@/lib/date";
 import { getWods } from "@/lib/wods/repository";
 
@@ -46,26 +47,39 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 오늘의 WOD */}
-      <section className="border-t border-line bg-surface">
-        <div className="mx-auto max-w-5xl px-4 py-14">
-          <div className="mb-6 flex items-end justify-between gap-4">
-            <div>
-              <p className="text-sm font-bold tracking-widest text-accent">TODAY</p>
-              <h2 className="mt-1 text-2xl font-black sm:text-3xl">오늘의 WOD</h2>
-            </div>
-            <Link href="/wod" className="shrink-0 text-sm font-bold text-muted hover:text-accent">
-              WOD 달력 보기 →
-            </Link>
-          </div>
-
-          {/* DB를 읽는 동안 안내 문구를 먼저 보여주고, 다 읽으면 바꿔 끼웁니다 */}
-          <Suspense fallback={<p className="text-muted">오늘의 WOD를 불러오는 중입니다…</p>}>
-            <TodayWod />
-          </Suspense>
-        </div>
-      </section>
+      {/* 오늘의 WOD: 로그인한 사람에게만 보입니다. 로그인 확인이 끝날 때까지는 아무것도 보여주지 않습니다. */}
+      <Suspense fallback={null}>
+        <TodayWodSection />
+      </Suspense>
     </>
+  );
+}
+
+// "오늘의 WOD" 영역 전체. 로그인하지 않았으면 영역 자체를 그리지 않습니다.
+async function TodayWodSection() {
+  await connection();
+  if (!(await getMemberIfSignedIn())) {
+    return null;
+  }
+  return (
+    <section className="border-t border-line bg-surface">
+      <div className="mx-auto max-w-5xl px-4 py-14">
+        <div className="mb-6 flex items-end justify-between gap-4">
+          <div>
+            <p className="text-sm font-bold tracking-widest text-accent">TODAY</p>
+            <h2 className="mt-1 text-2xl font-black sm:text-3xl">오늘의 WOD</h2>
+          </div>
+          <Link href="/wod" className="shrink-0 text-sm font-bold text-muted hover:text-accent">
+            WOD 달력 보기 →
+          </Link>
+        </div>
+
+        {/* DB를 읽는 동안 안내 문구를 먼저 보여주고, 다 읽으면 바꿔 끼웁니다 */}
+        <Suspense fallback={<p className="text-muted">오늘의 WOD를 불러오는 중입니다…</p>}>
+          <TodayWod />
+        </Suspense>
+      </div>
+    </section>
   );
 }
 

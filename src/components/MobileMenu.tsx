@@ -4,10 +4,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { navItems } from "@/data/navigation";
+import type { NavItem } from "@/data/navigation";
 
 // MobileMenu = 화면이 좁을 때(모바일) 보이는 ☰ 버튼과 펼침 메뉴
-export default function MobileMenu() {
+export default function MobileMenu({ items }: { items: NavItem[] }) {
   // useState = 화면이 기억하는 값(상태). 이 값이 바뀌면 React가 화면을 자동으로 다시 그립니다.
   // open: 현재 값 (처음엔 false = 닫힘), setOpen: 값을 바꾸는 함수
   const [open, setOpen] = useState(false);
@@ -34,7 +34,7 @@ export default function MobileMenu() {
           className="absolute inset-x-0 top-full border-b border-line bg-background"
         >
           <ul className="mx-auto flex max-w-5xl flex-col px-4 py-2">
-            {navItems.map((item) => (
+            {items.map((item) => (
               <li key={item.href}>
                 {/* 메뉴를 누르면 페이지 이동과 함께 메뉴를 닫습니다 */}
                 <Link

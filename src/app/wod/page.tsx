@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import WodCalendar from "@/components/wod/WodCalendar";
 import { parseDateKey, seoulTodayKey, toDateKey } from "@/lib/date";
 import { getAdminIfSignedIn } from "@/lib/auth/admin";
+import { requireMember } from "@/lib/auth/member";
 import { getHolidays } from "@/lib/holidays/repository";
 import { getWods } from "@/lib/wods/repository";
 
@@ -43,6 +44,8 @@ export default function WodPage() {
 async function WodSection() {
   // connection() = "여기부터는 빌드할 때가 아니라 방문자가 접속했을 때 실행"하라는 표시
   await connection();
+  // 로그인한 회원만 볼 수 있습니다. 로그인하지 않았으면 로그인 화면으로 보냅니다. (proxy.ts가 먼저 막지만 여기서도 확인)
+  await requireMember();
 
   // 조회 기간: 오늘이 속한 달 기준 6개월 전 1일 ~ 3개월 후 말일 (한국 시간 기준)
   const { year, month } = parseDateKey(seoulTodayKey());

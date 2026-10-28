@@ -2,12 +2,17 @@
 // Java의 Servlet Filter와 비슷한 역할입니다.
 //
 // 여기서는 관리자 화면(/admin)과 회원 화면(/me, /login, /signup) 요청마다 로그인 쿠키(토큰)가 만료되기 전에 갱신만 합니다.
+// 로그인 여부만 보고 WOD, 수업 예약 주소를 로그인 화면으로 보냅니다. (로그인 확인만 하고, 관리자 같은 권한 검사는 하지 않음)
 // ⚠️ 권한 검사는 여기서 하지 않습니다. 실제 검사는 각 페이지와 Server Action의 requireAdmin()에서 합니다.
 //    (Next.js 문서 권장: proxy는 빠른 사전 처리용이고, 인증/권한의 최종 판단 장소가 아님)
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
+// 로그인해야 볼 수 있는 주소
+const MEMBER_ONLY_PATHS = ["/wod", "/reserve"];
+
 export async function proxy(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
   let response = NextResponse.next({ request });
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -40,12 +45,20 @@ export async function proxy(request: NextRequest) {
   });
 
   // 이 호출이 토큰을 확인하고, 만료가 가까우면 갱신해서 위 setAll로 쿠키를 다시 씁니다.
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // 로그인한 회원만 볼 수 있는 화면(WOD, 수업 예약)은 로그인하지 않았으면 로그인 화면으로 보냅니다.
+  // 각 페이지도 스스로 한 번 더 확인합니다. (여기는 서버가 화면을 만들기 전에 막는 1차 관문)
+  if (!user && MEMBER_ONLY_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`))) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
 
   return response;
 }
 
 // 아래 주소에서만 실행 (일반 방문자 페이지에는 영향 없음)
 export const config = {
-  matcher: ["/admin/:path*", "/me/:path*", "/login", "/signup", "/reset-password"],
+  matcher: ["/admin/:path*", "/me/:path*", "/login", "/signup", "/reset-password", "/wod/:path*", "/reserve/:path*"],
 };

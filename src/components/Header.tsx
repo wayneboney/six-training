@@ -1,10 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
-import AccountLinks from "@/components/AccountLinks";
-import MobileMenu from "@/components/MobileMenu";
+import HeaderMenus, { HeaderMenusFallback } from "@/components/HeaderMenus";
 import { gym } from "@/data/gym";
-import { navItems } from "@/data/navigation";
 
 // Header = 모든 페이지 맨 위에 나오는 로고 + 메뉴
 // 이 컴포넌트에는 "use client"가 없어서 서버에서 HTML로 만들어집니다.
@@ -30,24 +28,10 @@ export default function Header() {
         </Link>
 
         <div className="flex items-center gap-4 sm:gap-8">
-          {/* PC 메뉴: hidden = 기본 숨김, sm:flex = 640px 이상에서만 보임 */}
-          <nav className="hidden items-center gap-6 text-sm text-muted sm:flex">
-            {navItems.map((item) => (
-              // key = 반복으로 만든 항목마다 붙이는 고유값 (React가 항목을 구분하는 데 사용)
-              <Link key={item.href} href={item.href} className="hover:text-foreground">
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-
-          {/* 계정 링크: 로그인 전 [로그인], 로그인 후 [내 정보] (관리자는 [관리자]도) — PC, 모바일 공통
-              fallback={null} = 확인하는 동안 아무것도 안 보여줌 */}
-          <Suspense fallback={null}>
-            <AccountLinks />
+          {/* 메뉴 + 계정 링크 + 모바일 메뉴. 로그인한 사람에게만 WOD, 수업 예약 메뉴가 보입니다. */}
+          <Suspense fallback={<HeaderMenusFallback />}>
+            <HeaderMenus />
           </Suspense>
-
-          {/* 모바일 메뉴: 640px 미만에서만 보임 */}
-          <MobileMenu />
         </div>
       </div>
     </header>
