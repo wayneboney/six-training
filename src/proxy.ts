@@ -49,10 +49,17 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // 로그인한 회원만 볼 수 있는 화면(WOD, 수업 예약)은 로그인하지 않았으면 로그인 화면으로 보냅니다.
-  // 각 페이지도 스스로 한 번 더 확인합니다. (여기는 서버가 화면을 만들기 전에 막는 1차 관문)
-  if (!user && MEMBER_ONLY_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`))) {
-    return NextResponse.redirect(new URL("/login", request.url));
+  // 회원권이 유효한 회원(과 관리자)만 볼 수 있는 화면(WOD, 수업 예약)을 서버가 화면을 만들기 전에 막는 1차 관문입니다.
+  //   로그인 안 함 → 로그인 화면 / 로그인했지만 회원권이 유효하지 않음 → 내 정보 화면
+  // 각 페이지(requireContentAccess)와 DB 규칙도 같은 조건으로 한 번씩 더 확인합니다.
+  if (MEMBER_ONLY_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`))) {
+    if (!user) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+    const { data: allowed, error } = await supabase.rpc("can_view_member_content");
+    if (error || allowed !== true) {
+      return NextResponse.redirect(new URL("/me", request.url));
+    }
   }
 
   return response;

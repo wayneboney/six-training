@@ -4,7 +4,7 @@ import { connection } from "next/server";
 import AccountLinks from "@/components/AccountLinks";
 import MobileMenu from "@/components/MobileMenu";
 import { navItems, publicNavItems, type NavItem } from "@/data/navigation";
-import { getMemberIfSignedIn } from "@/lib/auth/member";
+import { getMemberIfSignedIn, hasContentAccess } from "@/lib/auth/member";
 
 // 헤더 오른쪽 전체(PC 메뉴 + 계정 링크 + 모바일 메뉴).
 // 로그인 여부에 따라 메뉴가 달라지므로 요청 시점에 채웁니다. Header에서 <Suspense>로 감싸서 쓰세요.
@@ -34,8 +34,10 @@ export function HeaderMenusFallback() {
 
 export default async function HeaderMenus() {
   await connection();
-  const signedIn = (await getMemberIfSignedIn()) !== null;
-  const items = signedIn ? navItems : publicNavItems;
+  // WOD, 수업 예약 메뉴는 회원권이 유효한 회원(과 관리자)에게만 보입니다.
+  const member = await getMemberIfSignedIn();
+  const canView = member !== null && (await hasContentAccess(member.userId));
+  const items = canView ? navItems : publicNavItems;
 
   return (
     <>

@@ -6,7 +6,7 @@ import LinkPendingOverlay from "@/components/reserve/LinkPendingOverlay";
 import ScrollToTarget from "@/components/reserve/ScrollToTarget";
 import TodayButton from "@/components/reserve/TodayButton";
 import { classLabelsKo } from "@/data/timetable";
-import { requireMember } from "@/lib/auth/member";
+import { requireContentAccess } from "@/lib/auth/member";
 import { addDaysToKey, parseDateKey, seoulTodayKey, weekdayLabels } from "@/lib/date";
 import { getHolidays } from "@/lib/holidays/repository";
 import {
@@ -51,7 +51,7 @@ function hasStarted(date: string, time: string): boolean {
 
 async function ReserveContent({ searchParams }: { searchParams: PageProps<"/reserve">["searchParams"] }) {
   await connection(); // 현재 시각과 로그인 정보는 요청할 때마다 다름
-  const member = await requireMember(); // 로그인 안 했으면 /login 으로 이동
+  const member = await requireContentAccess(); // 로그인 안 했으면 /login, 회원권이 유효하지 않으면 /me 로 이동
   const isAdmin = member.role === "admin";
 
   const today = seoulTodayKey();

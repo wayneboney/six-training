@@ -1,7 +1,7 @@
 // WOD 데이터를 DB에서 읽어 오는 곳. (Spring의 Repository/DAO 역할)
 // 화면 코드는 이 함수만 부르고, DB 종류나 SQL은 몰라도 됩니다.
 import "server-only";
-import { createServerSupabase } from "@/lib/supabase/server";
+import { createAuthSupabase } from "@/lib/supabase/auth";
 import { toWods, type WodRow } from "@/lib/wods/mapper";
 import type { Wod } from "@/data/wods";
 
@@ -15,7 +15,8 @@ export class WodLoadError extends Error {
 
 // from ~ to 기간의 WOD를 날짜순으로 가져옵니다. (날짜는 "YYYY-MM-DD")
 export async function getWods(from: string, to: string): Promise<Wod[]> {
-  const supabase = createServerSupabase();
+  // 로그인한 사용자의 권한으로 조회합니다. DB 규칙(RLS)이 로그인하지 않은 요청은 막아서, 로그인하지 않으면 빈 결과가 나옵니다.
+  const supabase = await createAuthSupabase();
 
   // select ... from wods where wod_date between from and to order by wod_date
   const { data, error } = await supabase

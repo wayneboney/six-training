@@ -6,7 +6,7 @@ import { memberLogout } from "@/app/auth/actions";
 import { addMyHoldAction, cancelMyHoldAction } from "@/app/me/actions";
 import MemberActionForm from "@/components/admin/MemberActionForm";
 import ProfileForm from "@/components/auth/ProfileForm";
-import { requireMember } from "@/lib/auth/member";
+import { hasContentAccess, requireMember } from "@/lib/auth/member";
 import { addDaysToKey, diffDays, seoulTodayKey } from "@/lib/date";
 import { formatHoldRange } from "@/lib/members/format";
 import { createAuthSupabase } from "@/lib/supabase/auth";
@@ -49,6 +49,7 @@ async function MyInfo() {
   const member = await requireMember(); // 로그인 안 했으면 /login 으로 이동
 
   const supabase = await createAuthSupabase();
+  const canViewContent = await hasContentAccess(member.userId);
 
   // 상태 이름(승인대기/활동/비활동)은 공통코드에서 읽습니다. 이름을 바꿔도 코드 수정이 필요 없음
   const { data: codeRow } = await supabase
@@ -114,6 +115,12 @@ async function MyInfo() {
           <p className="mt-3 text-sm text-muted">회원권이 종료되었습니다. 코치에게 재등록을 문의해 주세요.</p>
         )}
       </section>
+
+      {!canViewContent && (
+        <p role="status" className="rounded-md border border-line bg-surface px-3 py-2 text-sm text-muted">
+          WOD와 수업 예약은 회원권이 유효한 회원만 이용할 수 있습니다. 코치에게 회원권 등록을 문의해 주세요.
+        </p>
+      )}
 
       {(!member.phone || !member.birthDate || !member.gender) && (
         <p role="status" className="rounded-md bg-accent-soft px-3 py-2 text-sm text-accent">

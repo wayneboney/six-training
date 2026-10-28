@@ -5,7 +5,7 @@ import WodDetail from "@/components/wod/WodDetail";
 import { gym } from "@/data/gym";
 import type { Wod } from "@/data/wods";
 import { getAdminIfSignedIn } from "@/lib/auth/admin";
-import { getMemberIfSignedIn } from "@/lib/auth/member";
+import { getMemberIfSignedIn, hasContentAccess } from "@/lib/auth/member";
 import { seoulTodayKey } from "@/lib/date";
 import { getWods } from "@/lib/wods/repository";
 
@@ -47,7 +47,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 오늘의 WOD: 로그인한 사람에게만 보입니다. 로그인 확인이 끝날 때까지는 아무것도 보여주지 않습니다. */}
+      {/* 오늘의 WOD: 회원권이 유효한 회원(과 관리자)에게만 보입니다. 확인이 끝날 때까지는 아무것도 보여주지 않습니다. */}
       <Suspense fallback={null}>
         <TodayWodSection />
       </Suspense>
@@ -55,10 +55,11 @@ export default function Home() {
   );
 }
 
-// "오늘의 WOD" 영역 전체. 로그인하지 않았으면 영역 자체를 그리지 않습니다.
+// "오늘의 WOD" 영역 전체. 볼 수 없는 사람에게는 영역 자체를 그리지 않습니다.
 async function TodayWodSection() {
   await connection();
-  if (!(await getMemberIfSignedIn())) {
+  const member = await getMemberIfSignedIn();
+  if (!member || !(await hasContentAccess(member.userId))) {
     return null;
   }
   return (
