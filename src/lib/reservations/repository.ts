@@ -38,6 +38,7 @@ export type Attendee = {
   guestLabel: string | null; // 회원이 아닌 예약자(드랍인/체험)의 구분. 회원이면 null
   mvpRank: number | null; // 지난달 MVP 순위(1~3). 순위 밖이면 null
   attended: boolean | null; // 출석 처리됨 여부. 관리자에게만 값이 있음 (그 외는 null)
+  absent: boolean | null; // 결석 처리됨 여부. 관리자에게만 값이 있음
 };
 
 // 지난달 MVP 1~3위 (출석 일수 순. 동점이면 같은 순위). 예약 화면 상단 안내용
@@ -146,6 +147,7 @@ export async function getAttendees(from: string, to: string): Promise<Attendee[]
     guest_label: string | null;
     mvp_rank: number | null;
     attended: boolean | null;
+    absent: boolean | null;
   }[];
   return rows.map((row) => ({
     slotId: row.slot_id,
@@ -158,6 +160,7 @@ export async function getAttendees(from: string, to: string): Promise<Attendee[]
     reservationId: row.reservation_id,
     guestLabel: row.guest_label,
     attended: row.attended ?? null,
+    absent: row.absent ?? null,
     mvpRank: row.mvp_rank ?? null, // 아직 SQL(9-9)을 실행하기 전에는 값이 없어서 null로 처리
   }));
 }

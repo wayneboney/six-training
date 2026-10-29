@@ -87,8 +87,8 @@ export async function markAttendanceAction(reservationId: number): Promise<Reser
   return { ok: true, message: "출석 처리했습니다." };
 }
 
-// 관리자: 출석 취소 (실수로 누른 경우. 수업이 끝나기 전까지만 가능)
-export async function unmarkAttendanceAction(reservationId: number): Promise<ReserveActionState> {
+// 관리자: 결석 처리 (수업이 시작된 뒤부터 언제든. 이미 출석으로 기록된 예약이면 출석 일수가 1일 줄어듦)
+export async function markAbsentAction(reservationId: number): Promise<ReserveActionState> {
   await requireAdmin();
   const id = parseBigintId(reservationId);
   if (id === null) {
@@ -96,12 +96,29 @@ export async function unmarkAttendanceAction(reservationId: number): Promise<Res
   }
 
   const supabase = await createAuthSupabase();
-  const { error } = await supabase.rpc("admin_unmark_attendance", { p_reservation_id: id });
+  const { error } = await supabase.rpc("admin_mark_absent", { p_reservation_id: id });
   if (error) {
-    return toFailure(error, "출석 취소");
+    return toFailure(error, "결석 처리");
   }
   revalidatePath("/reserve");
-  return { ok: true, message: "출석을 취소했습니다." };
+  return { ok: true, message: "결석 처리했습니다." };
+}
+
+// 관리자: 결석 취소 (수업이 이미 끝났다면 되돌린 즉시 출석으로 기록됨)
+export async function unmarkAbsentAction(reservationId: number): Promise<ReserveActionState> {
+  await requireAdmin();
+  const id = parseBigintId(reservationId);
+  if (id === null) {
+    return BAD_REQUEST;
+  }
+
+  const supabase = await createAuthSupabase();
+  const { error } = await supabase.rpc("admin_unmark_absent", { p_reservation_id: id });
+  if (error) {
+    return toFailure(error, "결석 취소");
+  }
+  revalidatePath("/reserve");
+  return { ok: true, message: "결석을 취소했습니다." };
 }
 
 // 관리자: 그 날짜의 수업 정원을 20명 또는 30명으로 변경

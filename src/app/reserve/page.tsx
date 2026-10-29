@@ -59,7 +59,7 @@ function hasStarted(date: string, time: string): boolean {
   return startAtOf(date, time) <= Date.now();
 }
 
-// 수업 종료 시각(한국 시간)이 지났는지. 종료 시각이 없는 수업은 시작 1시간 뒤로 봅니다. (DB의 자동 출석 기준과 같음)
+// 수업 종료 시각(한국 시간). 종료 시각이 없는 수업은 시작 1시간 뒤로 봅니다. (DB의 자동 출석 기준과 같음)
 function endAtOf(date: string, startTime: string, endTime: string | null): number {
   return endTime ? startAtOf(date, endTime) : startAtOf(date, startTime) + 60 * 60 * 1000;
 }

@@ -4,10 +4,11 @@ import {
   adminAddGuestAction,
   adminCancelReservationAction,
   cancelReservationAction,
+  markAbsentAction,
   markAttendanceAction,
   reserveAction,
   setCapacityAction,
-  unmarkAttendanceAction,
+  unmarkAbsentAction,
 } from "@/app/reserve/actions";
 import MemberActionForm from "@/components/admin/MemberActionForm";
 import Avatar from "@/components/Avatar";
@@ -21,9 +22,9 @@ import type { Attendee, ClassSession } from "@/lib/reservations/repository";
 type ClassCardProps = {
   session: ClassSession;
   started: boolean; // 수업이 이미 시작했는지 (시작했으면 예약/취소 불가)
-  ended: boolean; // 수업이 끝났는지 (끝나면 출석 취소 불가, 미처리 예약자는 자동 출석)
+  ended: boolean; // 수업이 끝났는지
   startAt: number; // 수업 시작 시각(밀리초). 이 시각이 되면 출석 버튼이 저절로 나타남
-  endAt: number; // 수업 종료 시각(밀리초). 이 시각이 되면 출석 취소 버튼이 저절로 사라짐
+  endAt: number; // 수업 종료 시각(밀리초). 이 시각이 되면 결석 버튼이 저절로 나타남
   isAdmin: boolean;
   readOnly?: boolean; // 지난 날짜: 예약/취소/정원 변경 버튼 없이 예약자 목록만 볼 수 있음 (목록은 다른 날짜처럼 접어 둠)
   attendees: Attendee[]; // 이 수업의 예약 + 대기 (신청 순서). 회원/관리자 모두에게 보임
@@ -222,9 +223,9 @@ function AttendeeList({
   numbered?: boolean;
   readOnly?: boolean;
   started?: boolean; // 수업이 시작했는지 (시작한 뒤에 출석 버튼이 나옴)
-  ended?: boolean; // 수업이 끝났는지 (끝나면 출석 취소 버튼이 사라짐)
+  ended?: boolean; // 수업이 끝났는지 (끝난 뒤에 결석 버튼이 나옴)
   startAt?: number; // 시작 시각(밀리초): 이때 출석 버튼이 저절로 나타남 (새로고침 불필요)
-  endAt?: number; // 종료 시각(밀리초): 이때 출석 취소 버튼이 저절로 사라짐
+  endAt?: number; // 종료 시각(밀리초): 이때 결석 버튼이 저절로 나타남
 }) {
   return (
     <div>
@@ -239,13 +240,15 @@ function AttendeeList({
               <span className={a.isMe ? "font-bold" : ""}>{displayName(a)}</span>
               {a.isMe && <span className="rounded bg-accent px-1.5 py-0.5 text-[10px] font-bold text-white">나</span>}
             </span>
-            {/* 관리자 버튼: 예약 번호가 관리자에게만 오므로 관리자에게만 보입니다.
-                출석: 수업이 시작된 뒤 누릅니다(회원만. 드랍인/체험은 출석 일수를 기록하지 않음). 끝날 때까지 누르지 않으면 수업 종료 후 자동 출석됩니다.
-                출석 취소: 실수로 눌렀을 때. 수업이 끝나기 전까지만 */}
+            {/* 관리자 버튼: 예약 번호가 관리자에게만 오므로 관리자에게만 보입니다. (회원만 대상: 대기자와 드랍인/체험은 출석 일수를 기록하지 않음)
+                수업 중: 시작되면 [출석]이 나타납니다. 끝날 때까지 누르지 않으면 수업 종료 후 자동으로 출석 처리됩니다.
+                수업이 끝난 뒤: [결석]이 나타납니다. 안 온 회원에게 누르면 출석 일수가 1일 줄어듭니다. (끝난 지 며칠 지나도 가능)
+                결석: "결석" + [결석 취소] */}
             {a.reservationId !== null && !readOnly && (
               <span className="flex flex-wrap items-center gap-2">
                 {!numbered && !a.guestLabel && a.attended && <span className="text-xs font-bold text-accent">✔ 출석</span>}
-                {!numbered && !a.guestLabel && !a.attended && (
+                {!numbered && !a.guestLabel && a.absent && <span className="text-xs font-bold text-muted">결석</span>}
+                {!numbered && !a.guestLabel && !a.attended && !a.absent && (
                   <TimeGate initial={started} showFrom={startAt}>
                     <MemberActionForm
                       action={markAttendanceAction.bind(null, a.reservationId)}
@@ -255,16 +258,24 @@ function AttendeeList({
                     />
                   </TimeGate>
                 )}
-                {!numbered && !a.guestLabel && a.attended && (
-                  <TimeGate initial={!ended} hideAt={endAt}>
+                {!numbered && !a.guestLabel && !a.absent && (
+                  <TimeGate initial={ended} showFrom={endAt}>
                     <MemberActionForm
-                      action={unmarkAttendanceAction.bind(null, a.reservationId)}
-                      submitLabel="출석 취소"
-                      pendingLabel="취소 중…"
-                      confirmMessage={`${displayName(a)}님의 출석을 취소할까요?`}
+                      action={markAbsentAction.bind(null, a.reservationId)}
+                      submitLabel="결석"
+                      pendingLabel="처리 중…"
+                      confirmMessage={`${displayName(a)}님을 결석 처리할까요?${a.attended ? "\n이미 출석으로 기록되어 있어서 출석 일수가 1일 줄어듭니다." : ""}`}
                       layout="inline"
                     />
                   </TimeGate>
+                )}
+                {!numbered && !a.guestLabel && a.absent && (
+                  <MemberActionForm
+                    action={unmarkAbsentAction.bind(null, a.reservationId)}
+                    submitLabel="결석 취소"
+                    pendingLabel="취소 중…"
+                    layout="inline"
+                  />
                 )}
                 <MemberActionForm
                   action={adminCancelReservationAction.bind(null, a.reservationId)}
