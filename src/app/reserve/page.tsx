@@ -2,6 +2,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import ClassCard from "@/components/reserve/ClassCard";
+import ExpandAllButtons from "@/components/reserve/ExpandAllButtons";
 import LinkPendingOverlay from "@/components/reserve/LinkPendingOverlay";
 import ScrollToTarget from "@/components/reserve/ScrollToTarget";
 import TodayButton from "@/components/reserve/TodayButton";
@@ -219,13 +220,17 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
 
       {/* 선택한 날의 수업: 제목과 카드 목록을 한 묶음으로 두고, 묶음 안에서만 간격을 줍니다. (제목이 카드와 겹치지 않게) */}
       <section className="space-y-3">
-        <h2 className="flex flex-wrap items-center gap-2 text-lg font-black leading-tight">
-          <span>{selectedLabel} 수업</span>
-          {selected === today && (
-            <span className="rounded bg-accent px-2 py-0.5 text-xs font-bold text-white">오늘</span>
-          )}
-          {isPastDay && <span className="text-xs font-normal text-muted">지난 수업 (예약자만 볼 수 있음)</span>}
-        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="flex flex-wrap items-center gap-2 text-lg font-black leading-tight">
+            <span>{selectedLabel} 수업</span>
+            {selected === today && (
+              <span className="rounded bg-accent px-2 py-0.5 text-xs font-bold text-white">오늘</span>
+            )}
+            {isPastDay && <span className="text-xs font-normal text-muted">지난 수업 (예약자만 볼 수 있음)</span>}
+          </h2>
+          {/* 수업이 여러 개일 때 예약자 목록을 한꺼번에 펼치거나 접기 */}
+          {sessions.length > 1 && <ExpandAllButtons />}
+        </div>
         {sessions.length === 0 ? (
           <p className="rounded-lg bg-surface p-8 text-center text-muted">이 날은 예약할 수 있는 수업이 없습니다.</p>
         ) : (

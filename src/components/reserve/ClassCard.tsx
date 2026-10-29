@@ -181,7 +181,7 @@ export default function ClassCard({
         // 예약한 사람이 없으면 펼칠 내용이 없으므로 "예약자 0명"만 보여줍니다.
         <p className="border-t border-line pt-3 text-sm font-bold">예약자 0명</p>
       ) : (
-        <details className="border-t border-line pt-3">
+        <details data-attendees className="border-t border-line pt-3">
           <summary className="cursor-pointer text-sm font-bold">
             예약자 {confirmed.length}명{waiting.length > 0 && ` · 대기 ${waiting.length}명`}
           </summary>
