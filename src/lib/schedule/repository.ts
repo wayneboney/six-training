@@ -14,23 +14,24 @@ function hhmm(time: string): string {
   return time.slice(0, 5);
 }
 
-type SlotRow = { weekday: number; start_time: string; class_type: string };
+type SlotRow = { weekday: number; start_time: string; end_time: string | null; class_type: string };
 
-// 박스 소개의 시간표: 시작 시각마다 한 줄, 요일마다 한 칸.
+// 박스 소개의 시간표: (시작 - 종료) 시각마다 한 줄, 요일마다 한 칸. 줄 이름은 "06:45 - 07:45"
 //   수업이 없는 칸은 CLOSE로 보여줍니다. 브레이크 타임 줄은 운영 시간 설정(openingHours)에서 넣습니다.
-//   오픈짐만 있는 줄은 "08:00~"처럼 시각 뒤에 ~를 붙입니다. (그 시각부터 자유롭게 이용)
+//   종료 시각을 아직 정하지 않은 수업은 시작 시각만 보여주고, 오픈짐만 있는 줄은 "08:00~"처럼 ~를 붙입니다.
 export async function getPublicTimetable(): Promise<TimeSlot[]> {
   const supabase = createServerSupabase();
   const { data, error } = await supabase
     .from("class_slots")
-    .select("weekday, start_time, class_type")
+    .select("weekday, start_time, end_time, class_type")
     .order("start_time", { ascending: true })
     .overrideTypes<SlotRow[], { merge: false }>();
   if (error) {
     throw error;
   }
 
-  const rows = new Map<string, Partial<Record<DayKey, ClassType>>>();
+  // 줄 = 시작 시각 + 종료 시각. 같은 시작/종료 시각의 수업은 한 줄에 요일별로 모읍니다.
+  const rows = new Map<string, { start: string; end: string | null; cells: Partial<Record<DayKey, ClassType>> }>();
   for (const slot of data) {
     const dayKey = dayKeyByWeekday[slot.weekday];
     const type = slot.class_type;
@@ -38,24 +39,32 @@ export async function getPublicTimetable(): Promise<TimeSlot[]> {
       console.warn("[schedule] 시간표에 보여주지 않는 수업 종류/요일 제외", slot);
       continue;
     }
-    const time = hhmm(slot.start_time);
-    rows.set(time, { ...rows.get(time), [dayKey]: type });
+    const start = hhmm(slot.start_time);
+    const end = slot.end_time ? hhmm(slot.end_time) : null;
+    const key = `${start}|${end ?? ""}`;
+    const row = rows.get(key) ?? { start, end, cells: {} };
+    row.cells[dayKey] = type;
+    rows.set(key, row);
   }
 
   // 브레이크 타임 줄 (예: 13:30). 수업이 없는 시간대라서 운영 시간 설정에서 가져옵니다.
-  const breakStart = openingHours.breakTime.split(" ")[0];
-  if (!rows.has(breakStart)) {
-    rows.set(breakStart, { MON: "BREAK", TUE: "BREAK", WED: "BREAK", THU: "BREAK", FRI: "BREAK" });
-  }
+  const [breakStart, breakEnd] = openingHours.breakTime.split(" - ");
+  const breakKey = `${breakStart}|${breakEnd}`;
+  rows.set(breakKey, {
+    start: breakStart,
+    end: breakEnd,
+    cells: { MON: "BREAK", TUE: "BREAK", WED: "BREAK", THU: "BREAK", FRI: "BREAK" },
+  });
 
-  return [...rows.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([time, cells]) => {
+  return [...rows.values()]
+    .sort((a, b) => (a.start + (a.end ?? "")).localeCompare(b.start + (b.end ?? "")))
+    .map(({ start, end, cells }) => {
       const classes = Object.fromEntries(days.map((d) => [d.key, cells[d.key] ?? "CLOSE"])) as Record<DayKey, ClassType>;
       const used = Object.values(cells);
       const openGymOnly = used.length > 0 && used.every((type) => type === "OPEN_GYM");
-      const breakOnly = used.length > 0 && used.every((type) => type === "BREAK");
-      return { time: openGymOnly || breakOnly ? `${time}~` : time, classes };
+      // 종료 시각이 있으면 "시작 - 종료", 없으면 시작 시각만(오픈짐만 있는 줄은 "08:00~")
+      const time = end ? `${start} - ${end}` : openGymOnly ? `${start}~` : start;
+      return { time, classes };
     });
 }
 
@@ -63,6 +72,7 @@ export type AdminSlot = {
   id: number;
   weekday: number; // 1=월 ... 6=토
   startTime: string; // "HH:MM"
+  endTime: string | null; // "HH:MM" (아직 정하지 않았으면 null)
   classType: string;
   capacity: number;
   booked: number; // 오늘 이후 예약/대기 건수
@@ -73,11 +83,14 @@ export async function listAdminSlots(): Promise<AdminSlot[]> {
 
   const { data: slots, error } = await supabase
     .from("class_slots")
-    .select("id, weekday, start_time, class_type, capacity")
+    .select("id, weekday, start_time, end_time, class_type, capacity")
     .eq("is_active", true)
     .order("weekday", { ascending: true })
     .order("start_time", { ascending: true })
-    .overrideTypes<{ id: number; weekday: number; start_time: string; class_type: string; capacity: number }[], { merge: false }>();
+    .overrideTypes<
+      { id: number; weekday: number; start_time: string; end_time: string | null; class_type: string; capacity: number }[],
+      { merge: false }
+    >();
   if (error) {
     throw error;
   }
@@ -92,6 +105,7 @@ export async function listAdminSlots(): Promise<AdminSlot[]> {
     id: s.id,
     weekday: s.weekday,
     startTime: hhmm(s.start_time),
+    endTime: s.end_time ? hhmm(s.end_time) : null,
     classType: s.class_type,
     capacity: s.capacity,
     booked: bookedBySlot.get(s.id) ?? 0,

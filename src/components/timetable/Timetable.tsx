@@ -58,7 +58,7 @@ export default async function Timetable() {
       <table className="hidden w-full table-fixed border-separate border-spacing-1 text-center sm:table">
         <thead>
           <tr>
-            <th className="w-20" />
+            <th className="w-36" />
             {days.map((day) => (
               <th
                 key={day.key}
@@ -74,7 +74,7 @@ export default async function Timetable() {
         <tbody>
           {timetable.map((slot) => (
             <tr key={slot.time}>
-              <th className="rounded bg-foreground py-3 text-sm font-bold text-white">{slot.time}</th>
+              <th className="rounded bg-foreground px-1 py-3 text-sm font-bold text-white">{slot.time}</th>
               {/* colSpan = 합쳐진 칸 수만큼 가로로 차지 */}
               {mergeWeekdays(slot.classes).map((cell, index) => (
                 <td

@@ -47,7 +47,7 @@ async function ScheduleAdmin() {
           (순서: 시간표 설정 → Program 등록 → 회원 예약)
         </p>
         <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-muted">
-          <li>예약이 있는 수업은 시작 시각과 종류를 바꿀 수 없습니다. 정원만 바꿀 수 있고, 바꾸려면 수업을 삭제한 뒤 새로 추가하세요.</li>
+          <li>예약이 있는 수업은 시작 시각과 종류를 바꿀 수 없습니다. 종료 시각과 정원은 바꿀 수 있고, 시작 시각을 바꾸려면 수업을 삭제한 뒤 새로 추가하세요.</li>
           <li>수업을 삭제하면 시작하지 않은 오늘 이후의 예약/대기가 모두 취소됩니다. 지난 수업의 예약 기록은 남습니다.</li>
           <li>이 정원은 기본값입니다. 특정 날짜만 20명 ↔ 30명으로 바꾸려면 수업 예약 화면에서 변경하세요.</li>
         </ul>
@@ -89,6 +89,11 @@ async function ScheduleAdmin() {
                     시작 시각
                   </label>
                   <input id={`new-time-${weekday}`} name="startTime" type="time" required className={fieldClass} />
+                  <span aria-hidden="true">-</span>
+                  <label className="sr-only" htmlFor={`new-end-${weekday}`}>
+                    종료 시각
+                  </label>
+                  <input id={`new-end-${weekday}`} name="endTime" type="time" required className={fieldClass} />
                   <select name="classType" aria-label="수업 종류" defaultValue="CROSSFIT" className={fieldClass}>
                     {(Object.keys(classLabelsKo) as (keyof typeof classLabelsKo)[]).map((type) => (
                       <option key={type} value={type}>

@@ -37,7 +37,7 @@ export default function TimetableMobile({ timetable }: { timetable: TimeSlot[] }
           const type = slot.classes[selected];
           return (
             <li key={slot.time} className="flex gap-1">
-              <span className="w-20 shrink-0 rounded bg-foreground py-3 text-center text-sm font-bold text-white">
+              <span className="w-32 shrink-0 rounded bg-foreground px-1 py-3 text-center text-sm font-bold text-white">
                 {slot.time}
               </span>
               <span

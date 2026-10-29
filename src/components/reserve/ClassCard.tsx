@@ -58,7 +58,7 @@ export default function ClassCard({
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-3">
-          <span className="text-xl font-black">{s.startTime}</span>
+          <span className="text-xl font-black">{s.endTime ? `${s.startTime} - ${s.endTime}` : s.startTime}</span>
           <span className={`rounded px-2 py-0.5 text-xs font-bold ${typeBadge[s.classType]}`}>
             {classLabelsKo[s.classType]}
           </span>

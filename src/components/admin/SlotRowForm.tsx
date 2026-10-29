@@ -31,6 +31,19 @@ export default function SlotRowForm({ slot }: { slot: AdminSlot }) {
           defaultValue={slot.startTime}
           className={fieldClass}
         />
+        <span aria-hidden="true">-</span>
+        <label className="sr-only" htmlFor={`end-${slot.id}`}>
+          종료 시각
+        </label>
+        <input
+          key={`e-${slot.endTime ?? ""}`}
+          id={`end-${slot.id}`}
+          name="endTime"
+          type="time"
+          required
+          defaultValue={slot.endTime ?? undefined}
+          className={fieldClass}
+        />
         <select
           key={`c-${slot.classType}`}
           name="classType"
@@ -60,8 +73,9 @@ export default function SlotRowForm({ slot }: { slot: AdminSlot }) {
       </MemberActionForm>
 
       <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
+        {slot.endTime === null && <span className="font-bold text-accent">종료 시각을 입력해 주세요 ·</span>}
         {slot.booked > 0 ? (
-          <span>오늘 이후 예약/대기 {slot.booked}건 (시간·종류는 바꿀 수 없고, 삭제하면 모두 취소됩니다)</span>
+          <span>오늘 이후 예약/대기 {slot.booked}건 (시작 시각·종류는 바꿀 수 없고, 삭제하면 모두 취소됩니다)</span>
         ) : (
           <span>오늘 이후 예약 없음</span>
         )}
@@ -71,8 +85,8 @@ export default function SlotRowForm({ slot }: { slot: AdminSlot }) {
           pendingLabel="삭제 중…"
           confirmMessage={
             slot.booked > 0
-              ? `${slot.startTime} ${classLabelsKo[slot.classType as keyof typeof classLabelsKo] ?? slot.classType} 수업을 삭제할까요?\n오늘 이후 예약/대기 ${slot.booked}건이 모두 취소됩니다. 되돌릴 수 없습니다.`
-              : `${slot.startTime} ${classLabelsKo[slot.classType as keyof typeof classLabelsKo] ?? slot.classType} 수업을 삭제할까요?`
+              ? `${slot.endTime ? `${slot.startTime} - ${slot.endTime}` : slot.startTime} ${classLabelsKo[slot.classType as keyof typeof classLabelsKo] ?? slot.classType} 수업을 삭제할까요?\n오늘 이후 예약/대기 ${slot.booked}건이 모두 취소됩니다. 되돌릴 수 없습니다.`
+              : `${slot.endTime ? `${slot.startTime} - ${slot.endTime}` : slot.startTime} ${classLabelsKo[slot.classType as keyof typeof classLabelsKo] ?? slot.classType} 수업을 삭제할까요?`
           }
           layout="inline"
         />

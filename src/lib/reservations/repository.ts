@@ -7,6 +7,7 @@ export type ClassSession = {
   slotId: number;
   classDate: string; // YYYY-MM-DD
   startTime: string; // "HH:MM"
+  endTime: string | null; // "HH:MM" (종료 시각을 아직 정하지 않은 수업은 null)
   classType: "CROSSFIT" | "HYROX" | "OPEN_GYM" | "COACH_TRAINING";
   capacity: number;
   confirmedCount: number;
@@ -41,6 +42,7 @@ type ScheduleRow = {
   slot_id: number;
   class_date: string;
   start_time: string;
+  end_time: string | null;
   class_type: ClassSession["classType"];
   capacity: number;
   confirmed_count: number;
@@ -64,6 +66,7 @@ export async function getSchedule(from: string, to: string): Promise<ClassSessio
     slotId: row.slot_id,
     classDate: row.class_date,
     startTime: hhmm(row.start_time),
+    endTime: row.end_time ? hhmm(row.end_time) : null,
     classType: row.class_type,
     capacity: row.capacity,
     confirmedCount: row.confirmed_count,

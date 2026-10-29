@@ -31,7 +31,12 @@ export default function MemberActionForm({
   layout = "stack",
   children,
 }: MemberActionFormProps) {
-  const [state, formAction, pending] = useActionState<MemberActionState, FormData>(action, undefined);
+  // 마지막으로 제출한 입력값. React는 제출이 끝나면 입력칸을 비우는데, 실패했을 때는 사용자가 다시 입력하지 않도록 아래에서 되돌려 놓습니다.
+  const lastSubmitted = useRef<FormData | null>(null);
+  const [state, formAction, pending] = useActionState<MemberActionState, FormData>(async (prev, formData) => {
+    lastSubmitted.current = formData;
+    return action(prev, formData);
+  }, undefined);
 
   // 성공 메시지는 화면 아래에 잠깐 떴다가 5초 뒤 저절로 사라지는 알림(toast)으로 보여줍니다.
   // 처리 결과(state)는 제출할 때마다 새 객체라서, "이미 닫은 결과"를 기억해 두고 그것과 같으면 숨깁니다.
@@ -42,6 +47,25 @@ export default function MemberActionForm({
   const pendingSubmitter = useRef<HTMLButtonElement | null>(null); // 팝업이 뜨기 전에 누른 버튼
   const confirmed = useRef(false); // 확인을 마친 제출이면 팝업을 다시 띄우지 않음
   const [asking, setAsking] = useState<{ message: string; label: string } | null>(null);
+
+  // 실패하면 입력했던 값을 입력칸에 다시 채웁니다. (글자, 시간, 숫자, 날짜, 선택 상자. 체크/라디오는 제외)
+  useEffect(() => {
+    const form = formRef.current;
+    if (!state || state.ok || !form || !lastSubmitted.current) {
+      return;
+    }
+    for (const [name, value] of lastSubmitted.current.entries()) {
+      const field = form.elements.namedItem(name);
+      if (typeof value !== "string") {
+        continue;
+      }
+      if (field instanceof HTMLSelectElement || field instanceof HTMLTextAreaElement) {
+        field.value = value;
+      } else if (field instanceof HTMLInputElement && !["checkbox", "radio", "file", "hidden", "password"].includes(field.type)) {
+        field.value = value;
+      }
+    }
+  }, [state]);
 
   const toastVisible = state?.ok === true && dismissed !== state;
   useEffect(() => {

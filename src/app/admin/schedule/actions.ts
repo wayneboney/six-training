@@ -23,14 +23,21 @@ function parseTime(value: FormDataEntryValue | null): string | null {
 }
 
 // 폼 값 공통 검증: 시작 시각, 종류, 기본 정원
-type SlotForm = { ok: true; time: string; type: string; capacity: number } | { ok: false; message: string };
+type SlotForm = { ok: true; time: string; endTime: string; type: string; capacity: number } | { ok: false; message: string };
 
 function parseSlotForm(formData: FormData): SlotForm {
   const time = parseTime(formData.get("startTime"));
+  const endTime = parseTime(formData.get("endTime"));
   const type = formData.get("classType");
   const capacity = parseInteger(formData.get("capacity"));
   if (!time) {
     return { ok: false, message: "시작 시각을 입력해 주세요. (예: 19:00)" };
+  }
+  if (!endTime) {
+    return { ok: false, message: "종료 시각을 입력해 주세요. (예: 20:00)" };
+  }
+  if (endTime <= time) {
+    return { ok: false, message: "종료 시각은 시작 시각보다 늦어야 합니다." };
   }
   if (typeof type !== "string" || !CLASS_TYPES.includes(type)) {
     return { ok: false, message: "수업 종류를 선택해 주세요." };
@@ -38,7 +45,7 @@ function parseSlotForm(formData: FormData): SlotForm {
   if (capacity === null || capacity < 1 || capacity > 200) {
     return { ok: false, message: "정원은 1~200명으로 입력해 주세요." };
   }
-  return { ok: true, time, type, capacity };
+  return { ok: true, time, endTime, type, capacity };
 }
 
 function refresh() {
@@ -66,6 +73,7 @@ export async function addSlotAction(
   const { error } = await supabase.rpc("admin_add_class_slot", {
     p_weekday: weekday,
     p_start_time: parsed.time,
+    p_end_time: parsed.endTime,
     p_class_type: parsed.type,
     p_capacity: parsed.capacity,
   });
@@ -73,7 +81,7 @@ export async function addSlotAction(
     return toFailure(error, "수업 추가");
   }
   refresh();
-  return { ok: true, message: `${parsed.time} 수업을 추가했습니다.` };
+  return { ok: true, message: `${parsed.time} - ${parsed.endTime} 수업을 추가했습니다.` };
 }
 
 // 수업 수정 (시작 시각, 종류, 기본 정원)
@@ -96,6 +104,7 @@ export async function updateSlotAction(
   const { error } = await supabase.rpc("admin_update_class_slot", {
     p_slot_id: id,
     p_start_time: parsed.time,
+    p_end_time: parsed.endTime,
     p_class_type: parsed.type,
     p_capacity: parsed.capacity,
   });
