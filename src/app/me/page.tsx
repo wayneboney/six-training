@@ -4,8 +4,10 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { memberLogout } from "@/app/auth/actions";
 import { addMyHoldAction, cancelMyHoldAction } from "@/app/me/actions";
+import AttendanceStats from "@/components/AttendanceStats";
 import MemberActionForm from "@/components/admin/MemberActionForm";
 import ProfileForm from "@/components/auth/ProfileForm";
+import { getMyAttendance } from "@/lib/attendance/repository";
 import { hasContentAccess, requireMember } from "@/lib/auth/member";
 import { addDaysToKey, diffDays, seoulTodayKey } from "@/lib/date";
 import { formatHoldRange } from "@/lib/members/format";
@@ -88,6 +90,7 @@ async function MyInfo() {
       holds = holdRows;
     }
   }
+  const attendance = member.role === "member" ? await getMyAttendance() : null; // 일반회원만 (관리자는 수업 예약을 하지 않음)
   const today = seoulTodayKey();
   const tomorrow = addDaysToKey(today, 1);
   // 신청 가능 여부: 이용 중인 일반회원이고 남은 홀딩 일수와 횟수가 있어야 함 (최종 판단은 DB)
@@ -115,6 +118,16 @@ async function MyInfo() {
           <p className="mt-3 text-sm text-muted">회원권이 종료되었습니다. 코치에게 재등록을 문의해 주세요.</p>
         )}
       </section>
+
+      {attendance && (
+        <section className="rounded-md border border-line p-5">
+          <h2 className="font-bold">내 출석</h2>
+          <div className="mt-2">
+            <AttendanceStats count={attendance} />
+          </div>
+          <p className="mt-2 text-xs text-muted">출석은 하루에 수업을 여러 번 들어도 1일로 세고, 한 번 기록되면 줄어들지 않습니다.</p>
+        </section>
+      )}
 
       {!canViewContent && (
         <p role="status" className="rounded-md border border-line bg-surface px-3 py-2 text-sm text-muted">

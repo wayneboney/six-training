@@ -2,12 +2,14 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { adjustDaysAction, cancelHoldAction, registerMembershipAction } from "@/app/admin/members/actions";
+import AttendanceStats from "@/components/AttendanceStats";
 import MemberActionForm from "@/components/admin/MemberActionForm";
 import { requireAdmin } from "@/lib/auth/admin";
 import { seoulTodayKey } from "@/lib/date";
 import Avatar from "@/components/Avatar";
 import { medalEmoji, medalOf } from "@/lib/mvp";
 import Pagination from "@/components/Pagination";
+import { getAttendanceSummary, type AttendanceCount } from "@/lib/attendance/repository";
 import { sortMembersByName } from "@/lib/members/sort";
 import { formatPhone } from "@/lib/profile/contact";
 import { formatDateTimeToKey } from "@/lib/members/format";
@@ -75,6 +77,7 @@ async function MemberList({ searchParams }: { searchParams: PageProps<"/admin/me
   let truncated = false;
   let statuses: CodeOption[] = [];
   let plans: PlanOption[] = [];
+  let attendance = new Map<string, AttendanceCount>(); // 회원별 출석 일수 (조회 실패 시 빈 목록)
   let mvp = new Map<string, { days: number; rank: number }>(); // 지난달 MVP 1~3위 회원 → 출석 일수, 순위
   try {
     const result = await listMembers(today);
@@ -82,6 +85,7 @@ async function MemberList({ searchParams }: { searchParams: PageProps<"/admin/me
     truncated = result.truncated;
     statuses = await getActiveCodes("STATUS");
     plans = await getActivePlans();
+    attendance = await getAttendanceSummary();
     mvp = await getLastMonthMvp(); // 실패해도 빈 목록 (딱지만 안 보임)
   } catch (error) {
     console.error("[admin] 회원 목록 조회 실패", error);
@@ -200,7 +204,7 @@ async function MemberList({ searchParams }: { searchParams: PageProps<"/admin/me
       ) : (
         <ul className="divide-y divide-line rounded-lg border border-line">
           {pageRows.map((m) => (
-            <MemberItem key={m.userId} member={m} presence={presenceOf(m)} statusLabel={statusName.get(m.status) ?? m.status} plans={plans} today={today} mvp={mvp.get(m.userId) ?? null} />
+            <MemberItem key={m.userId} member={m} presence={presenceOf(m)} statusLabel={statusName.get(m.status) ?? m.status} plans={plans} today={today} mvp={mvp.get(m.userId) ?? null} attendance={m.role === "member" ? (attendance.get(m.userId) ?? { thisMonth: 0, lastMonth: 0, total: 0 }) : null} />
           ))}
         </ul>
       )}
@@ -219,12 +223,14 @@ function MemberItem({
   plans,
   today,
   mvp,
+  attendance,
 }: {
   member: MemberRow;
   presence: Presence;
   statusLabel: string;
   plans: PlanOption[];
   today: string;
+  attendance: AttendanceCount | null; // 일반회원의 출석 일수 (관리자는 null)
   mvp: { days: number; rank: number } | null; // 지난달 MVP 1~3위이면 출석 일수와 순위
 }) {
   const isMember = m.role === "member";
@@ -282,6 +288,8 @@ function MemberItem({
           상세
         </Link>
       </div>
+
+      {attendance && <AttendanceStats count={attendance} />}
 
       {/* 홀딩 현황: 홀딩은 회원이 직접 등록하고, 관리자는 확인과 해제만 합니다 */}
       {m.hold && (

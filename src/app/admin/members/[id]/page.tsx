@@ -11,7 +11,9 @@ import {
   updateMemberAction,
 } from "@/app/admin/members/actions";
 import Avatar from "@/components/Avatar";
+import AttendanceStats from "@/components/AttendanceStats";
 import MemberActionForm from "@/components/admin/MemberActionForm";
+import { getAttendanceSummary, type AttendanceCount } from "@/lib/attendance/repository";
 import { requireAdmin } from "@/lib/auth/admin";
 import { PASSWORD_RESET_ENABLED } from "@/lib/auth/features";
 import { diffDays, seoulTodayKey } from "@/lib/date";
@@ -63,12 +65,16 @@ async function MemberDetailView({ params }: { params: PageProps<"/admin/members/
   let roles: CodeOption[] = [];
   let statuses: CodeOption[] = [];
   let plans: PlanOption[] = [];
+  let attendanceCount: AttendanceCount | null = null; // 출석 일수 (일반회원만, 조회 실패하면 표시 안 함)
   let failed = false;
   try {
     member = await getMemberDetail(userId);
     roles = await getActiveCodes("ROLE");
     statuses = await getActiveCodes("STATUS");
     plans = await getActivePlans();
+    if (member?.role === "member") {
+      attendanceCount = (await getAttendanceSummary()).get(userId) ?? { thisMonth: 0, lastMonth: 0, total: 0 };
+    }
   } catch (error) {
     console.error("[admin] 회원 상세 조회 실패", error);
     failed = true;
@@ -122,6 +128,16 @@ async function MemberDetailView({ params }: { params: PageProps<"/admin/members/
           </p>
         </div>
       </section>
+
+      {attendanceCount && (
+        <section className="rounded-lg border border-line p-5">
+          <h2 className="font-bold">출석</h2>
+          <div className="mt-2">
+            <AttendanceStats count={attendanceCount} />
+          </div>
+          <p className="mt-2 text-xs text-muted">하루에 수업을 여러 번 들어도 1일로 세고, 수업(시간표)을 지워도 줄어들지 않습니다.</p>
+        </section>
+      )}
 
       {/* 승인 = 회원권 등록 */}
       <section className="rounded-lg border border-line p-5">

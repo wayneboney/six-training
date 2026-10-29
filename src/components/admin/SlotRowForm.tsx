@@ -98,7 +98,7 @@ export default function SlotRowForm({ slot }: { slot: AdminSlot }) {
         action={deleteSlotAction.bind(null, slot.id)}
         submitLabel="삭제"
         pendingLabel="삭제 중…"
-        confirmMessage={`${slot.endTime ? `${slot.startTime} - ${slot.endTime}` : slot.startTime} ${classLabelsKo[slot.classType as keyof typeof classLabelsKo] ?? slot.classType} 수업을 삭제할까요?\n이 수업의 예약 기록이 지난 수업까지 모두 함께 삭제되며, 되돌릴 수 없습니다.${slot.booked > 0 ? `\n(오늘 이후 예약/대기 ${slot.booked}건 포함)` : ""}`}
+        confirmMessage={`${slot.endTime ? `${slot.startTime} - ${slot.endTime}` : slot.startTime} ${classLabelsKo[slot.classType as keyof typeof classLabelsKo] ?? slot.classType} 수업을 삭제할까요?\n이 수업의 예약 기록이 지난 수업까지 모두 함께 삭제되며, 되돌릴 수 없습니다.\n(회원의 출석 일수는 줄어들지 않습니다.)${slot.booked > 0 ? `\n(오늘 이후 예약/대기 ${slot.booked}건 포함)` : ""}`}
         layout="contents"
       />
 
