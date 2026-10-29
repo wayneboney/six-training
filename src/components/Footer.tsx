@@ -24,10 +24,11 @@ export default function Footer() {
             <Image src="/logo.png" alt={gym.name} width={345} height={133} className="h-8 w-auto" />
           </Link>
           <p className="text-lg font-black">{gym.slogan}</p>
-          <p className="text-sm leading-relaxed text-muted">
-            다양한 기능성 움직임을 높은 강도로 수행하는 그룹 트레이닝 박스입니다. 처음 오시는 분도 코치가 동작부터
-            차근차근 지도합니다.
-          </p>
+          <ul className="space-y-1 text-sm text-muted">
+            {gym.highlights.map((text) => (
+              <li key={text}>{text}</li>
+            ))}
+          </ul>
         </section>
 
         {/* 바로가기: 로그인 없이 볼 수 있는 메뉴만 */}

@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     // 예: 소개 페이지 → "체육관 소개 | SIX Training"
     template: `%s | ${gym.name}`,
   },
-  description: `${gym.name} - ${gym.slogan}`,
+  description: `${gym.name} - ${gym.slogan}. ${gym.highlights.join(", ")}`,
 };
 
 // RootLayout = 모든 페이지를 감싸는 최상위 틀 (JSP의 공통 템플릿 역할)

@@ -20,10 +20,17 @@ export default function Home() {
         {/* sm:text-6xl = 화면이 640px 이상일 때만 글자를 더 크게 (모바일 우선 설계) */}
         <h1 className="text-4xl font-black leading-tight sm:text-6xl">{gym.slogan}</h1>
 
-        <p className="max-w-xl text-lg text-muted">
-          처음 오시는 분도 코치가 동작부터 차근차근 지도합니다. 체력에 상관없이 누구나 시작할 수
-          있습니다.
-        </p>
+        {/* 대표 소개 문구 (src/data/gym.ts의 highlights) */}
+        <ul className="space-y-2 text-lg text-muted">
+          {gym.highlights.map((text) => (
+            <li key={text} className="flex items-start gap-2">
+              <span aria-hidden="true" className="font-bold text-accent">
+                ✓
+              </span>
+              {text}
+            </li>
+          ))}
+        </ul>
 
         <div className="flex flex-wrap gap-3">
           {/* 사이트 안의 페이지로 이동할 때는 <Link> */}
