@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import PriceList from "@/components/PriceList";
 import Section from "@/components/Section";
 import Timetable from "@/components/timetable/Timetable";
-import { gym, instagramUrl } from "@/data/gym";
+import { gym, googleMapEmbedUrl, instagramUrl } from "@/data/gym";
 
 // 탭 제목이 layout.tsx의 template 규칙에 따라 "박스 소개 | SIX Training"이 됩니다.
 export const metadata: Metadata = {
@@ -79,30 +78,17 @@ export default function AboutPage() {
       </Section>
 
       <Section title="오시는 길">
-        {/* 네이버 지도 캡처 이미지. 누르면 네이버 지도 장소 페이지가 새 탭으로 열립니다.
-            group = 마우스를 올렸을 때 안쪽 요소(안내 문구)의 모양을 함께 바꾸기 위한 표시 */}
-        <a
-          href={gym.contact.naverPlace}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group relative mb-4 block overflow-hidden rounded-lg border border-line"
-        >
-          {/* width/height = 원본 크기(2000x1163). 실제 표시 크기는 w-full로 화면 너비에 맞추고 높이는 비율대로 자동 계산
-              sizes = 화면 너비별로 실제 표시되는 크기를 알려 줘서, Next.js가 알맞은 크기의 이미지를 골라 보내게 합니다 */}
-          <Image
-            src="/map.webp"
-            alt={`${gym.name} 위치 지도 (6호선 광흥창역 근처)`}
-            width={2000}
-            height={1163}
-            // 모바일은 1.6배로 확대해서 보여주므로 화면 너비의 160% 크기 이미지를 받아야 선명합니다.
-            sizes="(min-width: 1024px) 992px, (min-width: 640px) 100vw, 160vw"
-            // 모바일: 마커(가로 42% 지점)를 중심으로 1.6배 확대, PC(sm 이상): 원본 그대로 + 마우스 올리면 살짝 확대
-            className="aspect-[4/3] h-auto w-full origin-[42%_50%] scale-[1.6] object-cover object-[42%_50%] sm:aspect-auto sm:scale-100 sm:transition sm:group-hover:scale-[1.02]"
+        {/* 구글 지도(주소 검색 결과를 그대로 보여주는 지도). 아래 "네이버 지도에서 보기" 버튼으로 네이버 지도도 열 수 있습니다.
+            loading="lazy" = 화면에 가까워질 때 불러와서 처음 표시가 느려지지 않게 함 */}
+        <div className="mb-4 overflow-hidden rounded-lg border border-line">
+          <iframe
+            title={`${gym.name} 위치 지도 (구글 지도)`}
+            src={googleMapEmbedUrl(gym.contact.address)}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            className="block aspect-[4/3] w-full sm:aspect-[16/9]"
           />
-          <span className="absolute bottom-3 right-3 rounded-md bg-background/90 px-3 py-1.5 text-xs font-bold shadow group-hover:text-accent">
-            네이버 지도에서 크게 보기 ↗
-          </span>
-        </a>
+        </div>
         <div className="rounded-lg bg-surface p-6">
           <p>{gym.contact.address}</p>
           <p className="mt-1 text-muted">전화 {gym.contact.phone}</p>

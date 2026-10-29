@@ -67,6 +67,13 @@ export const gym = {
   },
 };
 
+// 주소로 구글 지도 삽입(iframe) 주소를 만듭니다. 지도 키 없이 주소 검색 결과를 보여주는 방식입니다.
+// 건물 호수(예: "B1층")는 검색을 방해할 수 있어 도로명 주소까지만 씁니다.
+export function googleMapEmbedUrl(address: string): string {
+  const roadAddress = address.replace(/\s+B?\d+층$/i, "");
+  return `https://www.google.com/maps?q=${encodeURIComponent(roadAddress)}&hl=ko&output=embed`;
+}
+
 // 인스타그램 아이디로 프로필 주소를 만듭니다. 예: "steel.yoon" → "https://www.instagram.com/steel.yoon/"
 // encodeURIComponent = 아이디에 특수문자가 섞여도 안전한 URL이 되도록 인코딩 (Java의 URLEncoder.encode)
 export function instagramUrl(id: string): string {
