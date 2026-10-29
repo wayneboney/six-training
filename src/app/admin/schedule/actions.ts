@@ -144,6 +144,7 @@ export type SlotBooking = {
   status: "confirmed" | "waiting";
   name: string;
   guestLabel: string | null; // 드랍인/체험이면 그 이름, 회원이면 null
+  avatarUrl: string | null; // 프로필 사진 (게스트나 사진이 없으면 null → 기본 실루엣)
 };
 
 export type SlotBookingsResult = { ok: true; bookings: SlotBooking[] } | { ok: false; message: string };
@@ -159,7 +160,7 @@ export async function listSlotBookingsAction(slotId: number): Promise<SlotBookin
   const supabase = await createAuthSupabase();
   const { data, error } = await supabase
     .from("reservations")
-    .select("class_date, status, guest_name, guest_type, profiles(name)")
+    .select("class_date, status, guest_name, guest_type, profiles(name, avatar_url)")
     .eq("slot_id", id)
     .gte("class_date", seoulTodayKey())
     .neq("status", "cancelled")
@@ -171,7 +172,7 @@ export async function listSlotBookingsAction(slotId: number): Promise<SlotBookin
         status: "confirmed" | "waiting";
         guest_name: string | null;
         guest_type: string | null;
-        profiles: { name: string } | null;
+        profiles: { name: string; avatar_url: string | null } | null;
       }[],
       { merge: false }
     >();
@@ -194,6 +195,7 @@ export async function listSlotBookingsAction(slotId: number): Promise<SlotBookin
       classDate: row.class_date,
       status: row.status,
       name: row.profiles?.name ?? row.guest_name ?? "(이름 없음)",
+      avatarUrl: row.profiles?.avatar_url ?? null,
       guestLabel: row.guest_type ? (guestNames.get(row.guest_type) ?? row.guest_type) : null,
     })),
   };

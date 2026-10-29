@@ -3,6 +3,7 @@
 // 목록은 눌렀을 때 서버에서 불러옵니다. 팝업은 접힌 아코디언(overflow 숨김) 안에서도 잘리지 않도록 화면 기준(fixed)으로 위치를 잡습니다.
 "use client";
 
+import Avatar from "@/components/Avatar";
 import { useEffect, useRef, useState } from "react";
 import { listSlotBookingsAction, type SlotBooking } from "@/app/admin/schedule/actions";
 import { formatDateKey } from "@/lib/date";
@@ -121,6 +122,7 @@ export default function SlotBookingsButton({ slotId, label }: { slotId: number; 
                 <ul className="mt-0.5 space-y-0.5">
                   {group.items.map((item, index) => (
                     <li key={`${index}-${item.name}`} className="flex items-center gap-1.5">
+                      <Avatar url={item.avatarUrl} name={item.name} size={24} />
                       <span>{item.name}</span>
                       {item.guestLabel && <span className="rounded bg-accent-soft px-1 text-xs font-bold text-accent">{item.guestLabel}</span>}
                       {item.status === "waiting" && <span className="rounded border border-line px-1 text-xs text-muted">대기</span>}
