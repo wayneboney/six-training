@@ -16,7 +16,8 @@ type MemberActionFormProps = {
   // 버튼이 둘 이상일 때(예: 추가 / 차감). 누른 버튼의 value가 폼 값 "mode"로 서버에 전달됩니다.
   modes?: { value: string; label: string; confirmMessage?: string; outline?: boolean }[];
   // "inline": 입력칸 + 버튼을 한 줄에 (홀딩 취소처럼 입력칸이 없는 경우), 기본은 세로로 쌓임
-  layout?: "stack" | "inline";
+  // "contents": 폼 자체는 모양이 없고 안의 요소들이 바깥 상자(flex)에 바로 놓임. 서로 다른 폼의 버튼을 한 줄에 나란히 놓을 때 (시간표 수업 줄)
+  layout?: "stack" | "inline" | "contents";
   children?: ReactNode; // 입력칸들
 };
 
@@ -95,7 +96,7 @@ export default function MemberActionForm({
           setAsking({ message, label: mode?.label ?? submitLabel });
         }
       }}
-      className={layout === "inline" ? "flex flex-wrap items-center gap-2" : "space-y-3"}
+      className={layout === "inline" ? "flex flex-wrap items-center gap-2" : layout === "contents" ? "contents" : "space-y-3"}
     >
       {children}
 
@@ -126,7 +127,7 @@ export default function MemberActionForm({
 
       {/* 실패: 폼 아래에 계속 표시 */}
       {state && !state.ok && (
-        <p role="alert" className="rounded-md bg-accent-soft px-3 py-2 text-sm font-bold text-accent">
+        <p role="alert" className="w-full rounded-md bg-accent-soft px-3 py-2 text-sm font-bold text-accent">
           {state.message}
         </p>
       )}

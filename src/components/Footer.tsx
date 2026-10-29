@@ -17,14 +17,14 @@ const externalLink = "hover:text-foreground hover:underline";
 export default function Footer() {
   return (
     <footer className="border-t border-line bg-surface">
-      <div className="mx-auto grid max-w-5xl gap-10 px-4 py-12 sm:grid-cols-[1.4fr_1fr_1.4fr]">
+      <div className="mx-auto grid max-w-5xl gap-3 px-4 py-5 sm:grid-cols-[1.4fr_1fr_1.4fr] sm:gap-10 sm:py-12">
         {/* 소개 */}
-        <section aria-label={`${gym.name} 소개`} className="space-y-3">
+        <section aria-label={`${gym.name} 소개`} className="flex items-center gap-3 sm:block sm:space-y-3">
           <Link href="/" aria-label={`${gym.name} 홈으로`} className="inline-block">
-            <Image src="/logo.png" alt={gym.name} width={345} height={133} className="h-8 w-auto" />
+            <Image src="/logo.png" alt={gym.name} width={345} height={133} className="h-6 w-auto sm:h-8" />
           </Link>
-          <p className="text-lg font-black">{gym.slogan}</p>
-          <ul className="space-y-1 text-sm text-muted">
+          <p className="text-sm font-black sm:text-lg">{gym.slogan}</p>
+          <ul className="hidden space-y-1 text-sm text-muted sm:block">
             {gym.highlights.map((text) => (
               <li key={text}>{text}</li>
             ))}
@@ -32,7 +32,7 @@ export default function Footer() {
         </section>
 
         {/* 바로가기: 로그인 없이 볼 수 있는 메뉴만 */}
-        <nav aria-label="바로가기" className="space-y-3">
+        <nav aria-label="바로가기" className="hidden space-y-3 sm:block">
           <FooterHeading>바로가기</FooterHeading>
           <ul className="space-y-2 text-sm text-muted">
             {publicNavItems.map((item) => (
@@ -47,11 +47,14 @@ export default function Footer() {
 
         {/* 문의, 위치 */}
         <section aria-label="문의 및 위치" className="space-y-3">
-          <FooterHeading>문의 · 위치</FooterHeading>
-          <dl className="space-y-3 text-sm text-muted">
-            <div>
-              <dt className="text-xs text-muted/80">주소</dt>
-              <dd className="mt-0.5">
+          <div className="hidden sm:block">
+            <FooterHeading>문의 · 위치</FooterHeading>
+          </div>
+          {/* 모바일: 주소 한 줄 + 전화/인스타그램 한 줄로 줄여서 보여줍니다. 항목 이름(주소, 전화…)은 PC에서만 */}
+          <dl className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted sm:block sm:space-y-3 sm:text-sm">
+            <div className="basis-full">
+              <dt className="sr-only text-xs text-muted/80 sm:not-sr-only">주소</dt>
+              <dd className="sm:mt-0.5">
                 {gym.contact.address}{" "}
                 <a
                   href={gym.contact.naverPlace}
@@ -64,12 +67,12 @@ export default function Footer() {
               </dd>
             </div>
             <div>
-              <dt className="text-xs text-muted/80">전화</dt>
-              <dd className="mt-0.5">{gym.contact.phone}</dd>
+              <dt className="sr-only text-xs text-muted/80 sm:not-sr-only">전화</dt>
+              <dd className="sm:mt-0.5">{gym.contact.phone}</dd>
             </div>
             <div>
-              <dt className="text-xs text-muted/80">SNS</dt>
-              <dd className="mt-0.5">
+              <dt className="sr-only text-xs text-muted/80 sm:not-sr-only">SNS</dt>
+              <dd className="sm:mt-0.5">
                 <a href={gym.contact.instagram} target="_blank" rel="noopener noreferrer" className={externalLink}>
                   인스타그램
                 </a>
@@ -81,7 +84,7 @@ export default function Footer() {
 
       {/* 맨 아래 줄: 저작권 + 개인정보처리방침(팝업) */}
       <div className="border-t border-line">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-4 py-4 text-xs text-muted">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-4 py-2.5 text-xs text-muted sm:py-4">
           <p>
             © {gym.foundedYear} {gym.name}. All rights reserved.
           </p>
