@@ -140,7 +140,8 @@ export default function ClassCard({
 
       {/* 관리자 전용: 회원이 아닌 드랍인/체험 방문자를 예약자에 직접 넣기. 오늘 이후 수업에만 (이미 시작한 오늘 수업도 가능) */}
       {isAdmin && !readOnly && guestTypes.length > 0 && (
-        <div className="border-t border-line pt-3">
+        // 모바일은 이름 칸/버튼 여백을 줄여서 "게스트 추가" 버튼이 같은 줄에 들어가게 합니다
+        <div className="border-t border-line pt-3 [&_button]:px-3 sm:[&_button]:px-4 [&_form]:gap-1.5 sm:[&_form]:gap-2">
           <MemberActionForm
             action={adminAddGuestAction.bind(null, s.slotId, s.classDate)}
             submitLabel="게스트 추가"
@@ -148,7 +149,8 @@ export default function ClassCard({
             layout="inline"
           >
             <label htmlFor={`guest-${s.slotId}-${s.classDate}`} className="text-sm font-bold">
-              드랍인 · 체험
+              드랍인<span className="sm:hidden">·</span>
+              <span className="hidden sm:inline"> · </span>체험
             </label>
             <input
               id={`guest-${s.slotId}-${s.classDate}`}
@@ -158,7 +160,7 @@ export default function ClassCard({
               maxLength={GUEST_NAME_MAX}
               placeholder="이름"
               autoComplete="off"
-              className="w-28 rounded-md border border-line px-2 py-1.5 text-sm focus:border-accent focus:outline-none"
+              className="w-20 rounded-md border border-line px-2 py-1.5 text-sm focus:border-accent focus:outline-none sm:w-28"
             />
             <select
               name="guestType"
