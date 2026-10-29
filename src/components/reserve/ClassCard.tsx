@@ -4,11 +4,9 @@ import {
   adminAddGuestAction,
   adminCancelReservationAction,
   cancelReservationAction,
-  markAbsentAction,
   markAttendanceAction,
   reserveAction,
   setCapacityAction,
-  unmarkAbsentAction,
 } from "@/app/reserve/actions";
 import MemberActionForm from "@/components/admin/MemberActionForm";
 import Avatar from "@/components/Avatar";
@@ -22,11 +20,9 @@ import type { Attendee, ClassSession } from "@/lib/reservations/repository";
 type ClassCardProps = {
   session: ClassSession;
   started: boolean; // 수업이 이미 시작했는지 (시작했으면 예약/취소 불가)
-  ended: boolean; // 수업이 끝났는지
   startAt: number; // 수업 시작 시각(밀리초). 이 시각이 되면 출석 버튼이 저절로 나타남
-  endAt: number; // 수업 종료 시각(밀리초). 이 시각이 되면 결석 버튼이 저절로 나타남
   isAdmin: boolean;
-  readOnly?: boolean; // 지난 날짜: 예약/취소/정원 변경 버튼 없이 예약자 목록만 볼 수 있음 (출석/결석 표시만 보임. 하루가 지나면 확정) (목록은 다른 날짜처럼 접어 둠)
+  readOnly?: boolean; // 지난 날짜: 예약/취소/정원 변경 버튼 없이 예약자 목록만 볼 수 있음 (목록은 다른 날짜처럼 접어 둠. 출석 표시만 보이고 하루가 지나면 확정)
   attendees: Attendee[]; // 이 수업의 예약 + 대기 (신청 순서). 회원/관리자 모두에게 보임
   guestTypes?: CodeOption[]; // 드랍인/체험 구분 목록 (관리자의 게스트 추가 폼용)
 };
@@ -47,9 +43,7 @@ const typeBadge: Record<ClassSession["classType"], string> = {
 export default function ClassCard({
   session: s,
   started,
-  ended,
   startAt,
-  endAt,
   isAdmin,
   readOnly = false,
   attendees,
@@ -199,7 +193,7 @@ export default function ClassCard({
             예약자 {confirmed.length}명{waiting.length > 0 && ` · 대기 ${waiting.length}명`}
           </summary>
           <div className="mt-3 space-y-3 text-sm">
-            {confirmed.length > 0 && <AttendeeList title="예약" list={confirmed} readOnly={readOnly} started={started} ended={ended} startAt={startAt} endAt={endAt} />}
+            {confirmed.length > 0 && <AttendeeList title="예약" list={confirmed} readOnly={readOnly} started={started} startAt={startAt} />}
             {waiting.length > 0 && <AttendeeList title="대기 (신청 순서)" list={waiting} numbered readOnly={readOnly} />}
           </div>
         </details>
@@ -214,18 +208,14 @@ function AttendeeList({
   numbered = false,
   readOnly = false,
   started = false,
-  ended = false,
   startAt,
-  endAt,
 }: {
   title: string;
   list: Attendee[];
   numbered?: boolean;
   readOnly?: boolean;
   started?: boolean; // 수업이 시작했는지 (시작한 뒤에 출석 버튼이 나옴)
-  ended?: boolean; // 수업이 끝났는지 (끝난 뒤에 결석 버튼이 나옴)
   startAt?: number; // 시작 시각(밀리초): 이때 출석 버튼이 저절로 나타남 (새로고침 불필요)
-  endAt?: number; // 종료 시각(밀리초): 이때 결석 버튼이 저절로 나타남
 }) {
   return (
     <div>
@@ -240,16 +230,14 @@ function AttendeeList({
               <span className={a.isMe ? "font-bold" : ""}>{displayName(a)}</span>
               {a.isMe && <span className="rounded bg-accent px-1.5 py-0.5 text-[10px] font-bold text-white">나</span>}
             </span>
-            {/* 관리자 버튼: 예약 번호가 관리자에게만 오므로 관리자에게만 보입니다. (회원만 대상: 대기자와 드랍인/체험은 출석 일수를 기록하지 않음)
-                수업 중: 시작되면 [출석]이 나타납니다. 끝날 때까지 누르지 않으면 수업 종료 후 자동으로 출석 처리됩니다.
-                수업이 끝난 뒤: [결석]이 나타납니다. 안 온 회원에게 누르면 출석 일수가 1일 줄어듭니다.
-                결석: "결석" + [결석 취소]
-                모든 버튼은 수업 당일에만 있습니다. 하루가 지나면 출석이 확정되어 버튼이 사라집니다. */}
+            {/* 관리자 버튼: 예약 번호가 관리자에게만 오므로 관리자에게만 보입니다. (출석은 회원만 대상: 대기자와 드랍인/체험은 출석 일수를 기록하지 않음)
+                [출석]: 수업이 시작되면 나타납니다. 끝날 때까지 누르지 않으면 수업 종료 후 자동으로 출석 처리됩니다.
+                [취소]: 예약 취소. 안 온 회원은 [취소]하면 결석으로 처리됩니다. 이미 출석으로 기록된 회원을 취소하면 출석 일수가 1일 줄어듭니다.
+                버튼은 수업 당일에만 있습니다. 하루가 지나면 출석이 확정되어 사라집니다. */}
             {a.reservationId !== null && (
               <span className="flex flex-wrap items-center gap-2">
                 {!numbered && !a.guestLabel && a.attended && <span className="text-xs font-bold text-accent">✔ 출석</span>}
-                {!numbered && !a.guestLabel && a.absent && <span className="text-xs font-bold text-muted">결석</span>}
-                {!readOnly && !numbered && !a.guestLabel && !a.attended && !a.absent && (
+                {!readOnly && !numbered && !a.guestLabel && !a.attended && (
                   <TimeGate initial={started} showFrom={startAt}>
                     <MemberActionForm
                       action={markAttendanceAction.bind(null, a.reservationId)}
@@ -259,32 +247,13 @@ function AttendeeList({
                     />
                   </TimeGate>
                 )}
-                {!readOnly && !numbered && !a.guestLabel && !a.absent && (
-                  <TimeGate initial={ended} showFrom={endAt}>
-                    <MemberActionForm
-                      action={markAbsentAction.bind(null, a.reservationId)}
-                      submitLabel="결석"
-                      pendingLabel="처리 중…"
-                      confirmMessage={`${displayName(a)}님을 결석 처리할까요?${a.attended ? "\n이미 출석으로 기록되어 있어서 출석 일수가 1일 줄어듭니다." : ""}`}
-                      layout="inline"
-                    />
-                  </TimeGate>
-                )}
-                {!readOnly && !numbered && !a.guestLabel && a.absent && (
-                  <MemberActionForm
-                    action={unmarkAbsentAction.bind(null, a.reservationId)}
-                    submitLabel="결석 취소"
-                    pendingLabel="취소 중…"
-                    layout="inline"
-                  />
-                )}
-                {/* 지난 날짜에는 버튼이 없습니다. 출석/결석은 수업 당일에만 정정할 수 있고, 하루가 지나면 확정됩니다 */}
+                {/* 지난 날짜에는 버튼이 없습니다. 출석은 수업 당일에만 정정할 수 있고, 하루가 지나면 확정됩니다 */}
                 {!readOnly && (
                   <MemberActionForm
                     action={adminCancelReservationAction.bind(null, a.reservationId)}
                     submitLabel="취소"
                     pendingLabel="취소 중…"
-                    confirmMessage={`${displayName(a)}님의 ${numbered ? "대기" : "예약"}를 취소할까요?${a.attended ? "\n(이미 출석 처리되어 출석 일수는 그대로 유지됩니다)" : ""}`}
+                    confirmMessage={`${displayName(a)}님의 ${numbered ? "대기" : "예약"}를 취소할까요?${a.attended ? "\n이미 출석으로 기록되어 있어서 취소하면 출석 일수가 1일 줄어듭니다." : ""}`}
                     layout="inline"
                   />
                 )}
