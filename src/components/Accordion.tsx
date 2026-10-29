@@ -1,6 +1,7 @@
 // 아코디언: 제목 줄을 누르면 내용이 위아래로 부드럽게 펼쳐지고, 한 번에 하나만 열립니다. (다른 줄을 누르면 열려 있던 것은 접힘)
 // 내용의 실제 높이를 재서 높이(height)를 0 ↔ 그 높이로 부드럽게 바꾸는 방식이라 브라우저 종류와 상관없이 슬라이드됩니다.
 // (내용이 바뀌어 높이가 달라져도 ResizeObserver가 다시 재서 맞춥니다)
+// 속도: duration-[700ms]. 더 느리게/빠르게 하려면 이 숫자(밀리초)를 바꿉니다. (이 파일에서 2곳: 내용 상자, 화살표)
 // 접힌 내용은 inert로 막아서 키보드(Tab)로 접근하거나 화면 낭독기가 읽지 않게 합니다.
 "use client";
 
@@ -35,7 +36,7 @@ function Panel({ id, labelledBy, open, children }: { id: string; labelledBy: str
       aria-labelledby={labelledBy}
       inert={!open}
       style={{ height: open ? height : 0 }}
-      className={`overflow-hidden transition-[height,opacity] duration-300 ease-out ${open ? "opacity-100" : "opacity-0"}`}
+      className={`overflow-hidden transition-[height,opacity] duration-[700ms] ease-in-out ${open ? "opacity-100" : "opacity-0"}`}
     >
       <div ref={inner} className="border-t border-line">
         {children}
@@ -67,7 +68,7 @@ export default function Accordion({ items }: { items: AccordionItem[] }) {
                 <svg
                   viewBox="0 0 12 8"
                   aria-hidden="true"
-                  className={`h-2 w-3 shrink-0 text-muted transition-transform duration-300 ${
+                  className={`h-2 w-3 shrink-0 text-muted transition-transform duration-[700ms] ease-in-out ${
                     open ? "rotate-180" : ""
                   }`}
                   fill="none"
