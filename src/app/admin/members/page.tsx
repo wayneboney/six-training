@@ -185,6 +185,12 @@ async function MemberList({ searchParams }: { searchParams: PageProps<"/admin/me
         </p>
       )}
 
+      {/* 총 인원은 목록 맨 위에. 지금 보고 있는 조건(탭, 검색) 기준입니다. */}
+      <p className="text-sm font-bold">
+        총 {visible.length}명
+        {totalPages > 1 && <span className="ml-2 font-normal text-muted">{page} / {totalPages} 페이지</span>}
+      </p>
+
       {visible.length === 0 ? (
         <p className="rounded-lg bg-surface p-8 text-center text-muted">조건에 맞는 회원이 없습니다.</p>
       ) : (
@@ -195,7 +201,8 @@ async function MemberList({ searchParams }: { searchParams: PageProps<"/admin/me
         </ul>
       )}
 
-      {visible.length > 0 && <Pagination page={page} totalPages={totalPages} totalCount={visible.length} pageHref={pageHref} />}
+      {/* 페이지 번호는 회원이 20명 이하여도 보입니다 */}
+      <Pagination page={page} totalPages={totalPages} pageHref={pageHref} />
     </div>
   );
 }
