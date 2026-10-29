@@ -70,6 +70,40 @@ export async function adminCancelReservationAction(reservationId: number): Promi
   return { ok: true, message: "예약을 취소했습니다." };
 }
 
+// 관리자: 예약자 출석 처리 (수업이 시작된 뒤부터. 끝날 때까지 누르지 않으면 수업 종료 후 자동으로 출석 처리됨)
+export async function markAttendanceAction(reservationId: number): Promise<ReserveActionState> {
+  await requireAdmin();
+  const id = parseBigintId(reservationId);
+  if (id === null) {
+    return BAD_REQUEST;
+  }
+
+  const supabase = await createAuthSupabase();
+  const { error } = await supabase.rpc("admin_mark_attendance", { p_reservation_id: id });
+  if (error) {
+    return toFailure(error, "출석 처리");
+  }
+  revalidatePath("/reserve");
+  return { ok: true, message: "출석 처리했습니다." };
+}
+
+// 관리자: 출석 취소 (실수로 누른 경우. 수업이 끝나기 전까지만 가능)
+export async function unmarkAttendanceAction(reservationId: number): Promise<ReserveActionState> {
+  await requireAdmin();
+  const id = parseBigintId(reservationId);
+  if (id === null) {
+    return BAD_REQUEST;
+  }
+
+  const supabase = await createAuthSupabase();
+  const { error } = await supabase.rpc("admin_unmark_attendance", { p_reservation_id: id });
+  if (error) {
+    return toFailure(error, "출석 취소");
+  }
+  revalidatePath("/reserve");
+  return { ok: true, message: "출석을 취소했습니다." };
+}
+
 // 관리자: 그 날짜의 수업 정원을 20명 또는 30명으로 변경
 export async function setCapacityAction(
   slotId: number,
