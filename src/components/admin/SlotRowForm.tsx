@@ -11,7 +11,7 @@ const fieldClass = "rounded-md border border-line px-2 py-1.5 text-sm focus:bord
 
 export default function SlotRowForm({ slot }: { slot: AdminSlot }) {
   return (
-    <li className="space-y-2 p-3">
+    <li className="flex flex-wrap items-center gap-2 px-3 py-2">
       <MemberActionForm
         action={updateSlotAction.bind(null, slot.id)}
         submitLabel="저장"
@@ -72,25 +72,22 @@ export default function SlotRowForm({ slot }: { slot: AdminSlot }) {
         </label>
       </MemberActionForm>
 
-      <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
-        {slot.endTime === null && <span className="font-bold text-accent">종료 시각을 입력해 주세요 ·</span>}
-        {slot.booked > 0 ? (
-          <span>오늘 이후 예약/대기 {slot.booked}건 (시작 시각·종류는 바꿀 수 없고, 삭제하면 모두 취소됩니다)</span>
-        ) : (
-          <span>오늘 이후 예약 없음</span>
-        )}
-        <MemberActionForm
-          action={deleteSlotAction.bind(null, slot.id)}
-          submitLabel="삭제"
-          pendingLabel="삭제 중…"
-          confirmMessage={
-            slot.booked > 0
-              ? `${slot.endTime ? `${slot.startTime} - ${slot.endTime}` : slot.startTime} ${classLabelsKo[slot.classType as keyof typeof classLabelsKo] ?? slot.classType} 수업을 삭제할까요?\n오늘 이후 예약/대기 ${slot.booked}건이 모두 취소됩니다. 되돌릴 수 없습니다.`
-              : `${slot.endTime ? `${slot.startTime} - ${slot.endTime}` : slot.startTime} ${classLabelsKo[slot.classType as keyof typeof classLabelsKo] ?? slot.classType} 수업을 삭제할까요?`
-          }
-          layout="inline"
-        />
-      </div>
+      {/* 삭제: 저장 버튼 바로 옆. 예약이 있으면 확인 팝업에 취소될 건수가 나옵니다 */}
+      <MemberActionForm
+        action={deleteSlotAction.bind(null, slot.id)}
+        submitLabel="삭제"
+        pendingLabel="삭제 중…"
+        confirmMessage={
+          slot.booked > 0
+            ? `${slot.endTime ? `${slot.startTime} - ${slot.endTime}` : slot.startTime} ${classLabelsKo[slot.classType as keyof typeof classLabelsKo] ?? slot.classType} 수업을 삭제할까요?\n오늘 이후 예약/대기 ${slot.booked}건이 모두 취소됩니다. 되돌릴 수 없습니다.`
+            : `${slot.endTime ? `${slot.startTime} - ${slot.endTime}` : slot.startTime} ${classLabelsKo[slot.classType as keyof typeof classLabelsKo] ?? slot.classType} 수업을 삭제할까요?`
+        }
+        layout="inline"
+      />
+
+      {/* 알림이 필요할 때만 작게: 예약이 있으면 건수, 종료 시각이 비어 있으면 입력 안내 */}
+      {slot.booked > 0 && <span className="text-xs text-muted">예약 {slot.booked}건</span>}
+      {slot.endTime === null && <span className="text-xs font-bold text-accent">종료 시각 입력 필요</span>}
     </li>
   );
 }
