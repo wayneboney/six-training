@@ -54,36 +54,6 @@ function refresh() {
   revalidatePath("/about");
 }
 
-// 수업 추가 (요일은 화면에서 bind로 붙여 오지만 조작될 수 있어서 다시 검사)
-export async function addSlotAction(
-  weekday: number,
-  _prev: ScheduleActionState,
-  formData: FormData,
-): Promise<ScheduleActionState> {
-  await requireAdmin();
-  if (!Number.isInteger(weekday) || weekday < 1 || weekday > 6) {
-    return BAD_REQUEST;
-  }
-  const parsed = parseSlotForm(formData);
-  if (!parsed.ok) {
-    return parsed;
-  }
-
-  const supabase = await createAuthSupabase();
-  const { error } = await supabase.rpc("admin_add_class_slot", {
-    p_weekday: weekday,
-    p_start_time: parsed.time,
-    p_end_time: parsed.endTime,
-    p_class_type: parsed.type,
-    p_capacity: parsed.capacity,
-  });
-  if (error) {
-    return toFailure(error, "수업 추가");
-  }
-  refresh();
-  return { ok: true, message: `${parsed.time} - ${parsed.endTime} 수업을 추가했습니다.` };
-}
-
 // 수업 수정 (시작 시각, 종류, 기본 정원)
 export async function updateSlotAction(
   slotId: number,
@@ -133,5 +103,84 @@ export async function deleteSlotAction(slotId: number): Promise<ScheduleActionSt
   return {
     ok: true,
     message: cancelled > 0 ? `수업을 삭제했습니다. 예약/대기 ${cancelled}건을 취소했습니다.` : "수업을 삭제했습니다.",
+  };
+}
+
+// 여러 요일에 같은 수업을 한 번에 추가 (하나라도 실패하면 DB가 전부 취소)
+export async function addSlotsAction(_prev: ScheduleActionState, formData: FormData): Promise<ScheduleActionState> {
+  await requireAdmin();
+  const weekdays = [...new Set(formData.getAll("weekday").map((value) => parseInteger(value as FormDataEntryValue)))].filter(
+    (day): day is number => day !== null && day >= 1 && day <= 6,
+  );
+  if (weekdays.length === 0) {
+    return { ok: false, message: "요일을 하나 이상 선택해 주세요." };
+  }
+  const parsed = parseSlotForm(formData);
+  if (!parsed.ok) {
+    return parsed;
+  }
+
+  const supabase = await createAuthSupabase();
+  const { data, error } = await supabase.rpc("admin_add_class_slots", {
+    p_weekdays: weekdays,
+    p_start_time: parsed.time,
+    p_end_time: parsed.endTime,
+    p_class_type: parsed.type,
+    p_capacity: parsed.capacity,
+  });
+  if (error) {
+    return toFailure(error, "수업 여러 요일 추가");
+  }
+  refresh();
+  const added = typeof data === "number" ? data : weekdays.length;
+  return { ok: true, message: `${parsed.time} - ${parsed.endTime} 수업을 ${added}개 요일에 추가했습니다.` };
+}
+
+// 같은 시작 시각의 모든 수업에 종료 시각 설정 (시작 시각은 화면에서 bind로 붙여 오지만 조작될 수 있어서 다시 검사)
+export async function setEndTimeAction(
+  startTime: string,
+  _prev: ScheduleActionState,
+  formData: FormData,
+): Promise<ScheduleActionState> {
+  await requireAdmin();
+  const start = parseTime(startTime);
+  const end = parseTime(formData.get("endTime"));
+  if (!start) {
+    return BAD_REQUEST;
+  }
+  if (!end) {
+    return { ok: false, message: "종료 시각을 입력해 주세요. (예: 20:00)" };
+  }
+  if (end <= start) {
+    return { ok: false, message: "종료 시각은 시작 시각보다 늦어야 합니다." };
+  }
+
+  const supabase = await createAuthSupabase();
+  const { data, error } = await supabase.rpc("admin_set_class_end_time", { p_start_time: start, p_end_time: end });
+  if (error) {
+    return toFailure(error, "종료 시각 일괄 설정");
+  }
+  refresh();
+  return { ok: true, message: `${start} 시작 수업 ${typeof data === "number" ? data : ""}개의 종료 시각을 ${end}로 바꿨습니다.` };
+}
+
+// 종료 시각이 비어 있는 수업(오픈짐 제외)을 "시작 + N분"으로 채우기
+export async function fillEndTimesAction(_prev: ScheduleActionState, formData: FormData): Promise<ScheduleActionState> {
+  await requireAdmin();
+  const minutes = parseInteger(formData.get("minutes"));
+  if (minutes === null || minutes < 15 || minutes > 240) {
+    return { ok: false, message: "수업 시간은 15~240분으로 입력해 주세요." };
+  }
+
+  const supabase = await createAuthSupabase();
+  const { data, error } = await supabase.rpc("admin_fill_missing_end_times", { p_minutes: minutes });
+  if (error) {
+    return toFailure(error, "종료 시각 채우기");
+  }
+  refresh();
+  const filled = typeof data === "number" ? data : 0;
+  return {
+    ok: true,
+    message: filled > 0 ? `종료 시각이 비어 있던 수업 ${filled}개를 채웠습니다.` : "채울 수업이 없습니다. (종료 시각이 모두 입력되어 있습니다)",
   };
 }
