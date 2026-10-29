@@ -101,7 +101,9 @@ export default function MemberActionForm({
       {children}
 
       {modes ? (
-        modes.map((mode) => (
+        // 버튼이 여럿이면 사이에 간격을 둡니다. (stack 배치에서는 버튼이 붙어 보이던 문제)
+        <div className={layout === "stack" ? "flex flex-wrap gap-2" : "contents"}>
+        {modes.map((mode) => (
           <button
             key={mode.value}
             type="submit"
@@ -114,7 +116,8 @@ export default function MemberActionForm({
           >
             {pending ? pendingLabel : mode.label}
           </button>
-        ))
+        ))}
+        </div>
       ) : (
         <button
           type="submit"
