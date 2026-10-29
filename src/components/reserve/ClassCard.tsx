@@ -193,7 +193,7 @@ export default function ClassCard({
             예약자 {confirmed.length}명{waiting.length > 0 && ` · 대기 ${waiting.length}명`}
           </summary>
           <div className="mt-3 space-y-3 text-sm">
-            {confirmed.length > 0 && <AttendeeList title="예약" list={confirmed} readOnly={readOnly} started={started} startAt={startAt} />}
+            {confirmed.length > 0 && <AttendeeList title="예약" list={confirmed} readOnly={readOnly} started={started} startAt={startAt} countsAttendance={s.classType === "CROSSFIT" || s.classType === "HYROX"} />}
             {waiting.length > 0 && <AttendeeList title="대기 (신청 순서)" list={waiting} numbered readOnly={readOnly} />}
           </div>
         </details>
@@ -209,12 +209,14 @@ function AttendeeList({
   readOnly = false,
   started = false,
   startAt,
+  countsAttendance = false,
 }: {
   title: string;
   list: Attendee[];
   numbered?: boolean;
   readOnly?: boolean;
   started?: boolean; // 수업이 시작했는지 (시작한 뒤에 출석 버튼이 나옴)
+  countsAttendance?: boolean; // 출석 일수에 들어가는 수업인지 (크로스핏, 하이록스만. 오픈짐/코치 트레이닝은 출석 버튼 없음)
   startAt?: number; // 시작 시각(밀리초): 이때 출석 버튼이 저절로 나타남 (새로고침 불필요)
 }) {
   return (
@@ -236,8 +238,8 @@ function AttendeeList({
                 버튼은 수업 당일에만 있습니다. 하루가 지나면 출석이 확정되어 사라집니다. */}
             {a.reservationId !== null && (
               <span className="flex flex-wrap items-center gap-2">
-                {!numbered && !a.guestLabel && a.attended && <span className="text-xs font-bold text-accent">✔ 출석</span>}
-                {!readOnly && !numbered && !a.guestLabel && !a.attended && (
+                {countsAttendance && !numbered && !a.guestLabel && a.attended && <span className="text-xs font-bold text-accent">✔ 출석</span>}
+                {countsAttendance && !readOnly && !numbered && !a.guestLabel && !a.attended && (
                   <TimeGate initial={started} showFrom={startAt}>
                     <MemberActionForm
                       action={markAttendanceAction.bind(null, a.reservationId)}
