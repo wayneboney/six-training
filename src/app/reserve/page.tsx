@@ -9,6 +9,7 @@ import { classLabelsKo } from "@/data/timetable";
 import { requireContentAccess } from "@/lib/auth/member";
 import { addDaysToKey, parseDateKey, seoulTodayKey, weekdayLabels } from "@/lib/date";
 import { getHolidays } from "@/lib/holidays/repository";
+import { getActiveCodes, type CodeOption } from "@/lib/members/repository";
 import {
   getAttendees,
   getMyReservations,
@@ -81,17 +82,21 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
   let mine: MyReservation[] = [];
   let attendees: Attendee[] = [];
   let holidays: Record<string, string> = {};
+  let guestTypes: CodeOption[] = [];
   try {
-    const [schedule, myList, attendeeList, holidayMap] = await Promise.all([
+    const [schedule, myList, attendeeList, holidayMap, guestTypeList] = await Promise.all([
       getSchedule(selected, selected),
       isAdmin ? Promise.resolve([] as MyReservation[]) : getMyReservations(firstMonday),
       getAttendees(selected, selected),
       getHolidays([...new Set(weekDays.map((d) => parseDateKey(d).year))]),
+      // 드랍인/체험 구분 목록 (관리자의 "게스트 추가"에서만 필요)
+      isAdmin ? getActiveCodes("GUEST_TYPE") : Promise.resolve([] as CodeOption[]),
     ]);
     sessions = schedule;
     mine = myList;
     attendees = attendeeList;
     holidays = holidayMap;
+    guestTypes = guestTypeList;
   } catch (error) {
     console.error("[reserve] 예약 화면 조회 실패", error);
   }
@@ -232,6 +237,7 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
                 started={hasStarted(s.classDate, s.startTime)}
                 readOnly={isPastDay}
                 isAdmin={isAdmin}
+                guestTypes={guestTypes}
                 attendees={attendees.filter((a) => a.slotId === s.slotId && a.classDate === s.classDate)}
               />
             ))}

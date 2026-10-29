@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth/admin";
 import { requireMember } from "@/lib/auth/member";
 import { toFailure, type ActionResult } from "@/lib/members/rpc-error";
-import { parseBigintId, parseDate, parseInteger } from "@/lib/members/validation";
+import { GUEST_NAME_MAX, parseBigintId, parseDate, parseGuestName, parseInteger } from "@/lib/members/validation";
 import { createAuthSupabase } from "@/lib/supabase/auth";
 
 export type ReserveActionState = ActionResult | undefined;
@@ -99,4 +99,41 @@ export async function setCapacityAction(
   }
   revalidatePath("/reserve");
   return { ok: true, message: `정원을 ${capacity}명으로 바꿨습니다. 정원이 늘면 대기자가 자동으로 예약됩니다.` };
+}
+
+// 관리자: 회원이 아닌 드랍인/체험 방문자를 수업 예약자에 직접 넣기 (예약자 목록에 "홍길동(드랍인)"으로 보임)
+// 정원, 날짜, 이름 중복 같은 최종 규칙은 DB 함수가 확인합니다.
+export async function adminAddGuestAction(
+  slotId: number,
+  classDate: string,
+  _prev: ReserveActionState,
+  formData: FormData,
+): Promise<ReserveActionState> {
+  await requireAdmin();
+  const sid = parseBigintId(slotId);
+  const date = parseDate(classDate);
+  const name = parseGuestName(formData.get("guestName"));
+  const type = formData.get("guestType");
+  if (sid === null || !date) {
+    return BAD_REQUEST;
+  }
+  if (!name) {
+    return { ok: false, message: `이름을 ${GUEST_NAME_MAX}자 이하로 입력해 주세요.` };
+  }
+  if (typeof type !== "string" || !/^[A-Z_]{1,20}$/.test(type)) {
+    return { ok: false, message: "드랍인 또는 체험을 선택해 주세요." };
+  }
+
+  const supabase = await createAuthSupabase();
+  const { error } = await supabase.rpc("admin_add_guest_reservation", {
+    p_slot_id: sid,
+    p_class_date: date,
+    p_guest_name: name,
+    p_guest_type: type,
+  });
+  if (error) {
+    return toFailure(error, "게스트 예약 추가");
+  }
+  revalidatePath("/reserve");
+  return { ok: true, message: `${name}님을 예약자에 추가했습니다.` };
 }

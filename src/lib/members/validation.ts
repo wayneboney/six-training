@@ -43,6 +43,17 @@ export function parseInteger(value: FormDataEntryValue | null): number | null {
   return Number(text);
 }
 
+export const GUEST_NAME_MAX = 30;
+
+// 게스트(드랍인/체험) 이름: 앞뒤 공백 제거, 1~30자, 줄바꿈 같은 제어문자 불가. 올바르지 않으면 null
+export function parseGuestName(value: FormDataEntryValue | null): string | null {
+  const text = typeof value === "string" ? value.trim() : "";
+  if (text === "" || text.length > GUEST_NAME_MAX || /[\u0000-\u001f\u007f]/.test(text)) {
+    return null;
+  }
+  return text;
+}
+
 // 메모: 앞뒤 공백 제거, 비면 null. 너무 길면 undefined
 export function parseNote(value: FormDataEntryValue | null): string | null | undefined {
   const text = typeof value === "string" ? value.trim() : "";

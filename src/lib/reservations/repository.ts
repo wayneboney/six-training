@@ -34,6 +34,7 @@ export type Attendee = {
   avatarUrl: string | null;
   isMe: boolean;
   reservationId: number | null; // 관리자에게만 값이 있음 (대신 취소 버튼용)
+  guestLabel: string | null; // 회원이 아닌 예약자(드랍인/체험)의 구분. 회원이면 null
 };
 
 type ScheduleRow = {
@@ -124,6 +125,7 @@ export async function getAttendees(from: string, to: string): Promise<Attendee[]
     avatar_url: string | null;
     is_me: boolean;
     reservation_id: number | null;
+    guest_label: string | null;
   }[];
   return rows.map((row) => ({
     slotId: row.slot_id,
@@ -134,5 +136,6 @@ export async function getAttendees(from: string, to: string): Promise<Attendee[]
     avatarUrl: row.avatar_url,
     isMe: row.is_me,
     reservationId: row.reservation_id,
+    guestLabel: row.guest_label,
   }));
 }

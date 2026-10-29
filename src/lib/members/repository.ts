@@ -277,7 +277,7 @@ export async function getMemberDetail(userId: string): Promise<MemberDetail | nu
 }
 
 // 공통코드(콤보박스 목록). 사용 중(is_active)인 것만, 정렬 순서대로
-export async function getActiveCodes(group: "ROLE" | "STATUS"): Promise<CodeOption[]> {
+export async function getActiveCodes(group: "ROLE" | "STATUS" | "GUEST_TYPE"): Promise<CodeOption[]> {
   const supabase = await createAuthSupabase();
   const { data, error } = await supabase
     .from("codes")

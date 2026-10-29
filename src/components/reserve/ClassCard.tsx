@@ -1,6 +1,7 @@
 // 수업 한 칸(날짜별)의 카드: 시간, 종류, 정원 현황, 예약/취소 버튼. 관리자에게는 정원 선택과 예약자 목록도 보여줍니다.
 // 서버에서 그려지는 컴포넌트이고, 버튼 폼(MemberActionForm)만 브라우저에서 실행됩니다.
 import {
+  adminAddGuestAction,
   adminCancelReservationAction,
   cancelReservationAction,
   reserveAction,
@@ -9,6 +10,8 @@ import {
 import MemberActionForm from "@/components/admin/MemberActionForm";
 import Avatar from "@/components/Avatar";
 import { classLabelsKo } from "@/data/timetable";
+import { GUEST_NAME_MAX } from "@/lib/members/validation";
+import type { CodeOption } from "@/lib/members/repository";
 import type { Attendee, ClassSession } from "@/lib/reservations/repository";
 
 type ClassCardProps = {
@@ -17,7 +20,13 @@ type ClassCardProps = {
   isAdmin: boolean;
   readOnly?: boolean; // 지난 날짜: 예약/취소/정원 변경 버튼 없이 예약자 목록만 보여줌
   attendees: Attendee[]; // 이 수업의 예약 + 대기 (신청 순서). 회원/관리자 모두에게 보임
+  guestTypes?: CodeOption[]; // 드랍인/체험 구분 목록 (관리자의 게스트 추가 폼용)
 };
+
+// 예약자 이름 표시: 회원은 이름, 드랍인/체험은 "홍길동(드랍인)"
+function displayName(a: Attendee): string {
+  return a.guestLabel ? `${a.name}(${a.guestLabel})` : a.name;
+}
 
 // 수업 종류별 표시 색 (Tailwind는 클래스 이름을 통째로 써야 해서 완성된 이름으로 적습니다)
 const typeBadge: Record<ClassSession["classType"], string> = {
@@ -27,7 +36,14 @@ const typeBadge: Record<ClassSession["classType"], string> = {
   COACH_TRAINING: "bg-violet-700 text-white",
 };
 
-export default function ClassCard({ session: s, started, isAdmin, readOnly = false, attendees }: ClassCardProps) {
+export default function ClassCard({
+  session: s,
+  started,
+  isAdmin,
+  readOnly = false,
+  attendees,
+  guestTypes = [],
+}: ClassCardProps) {
   const full = s.confirmedCount >= s.capacity;
   const percent = Math.min(100, Math.round((s.confirmedCount / s.capacity) * 100));
   const confirmed = attendees.filter((a) => a.status === "confirmed");
@@ -122,6 +138,44 @@ export default function ClassCard({ session: s, started, isAdmin, readOnly = fal
         </div>
       )}
 
+      {/* 관리자 전용: 회원이 아닌 드랍인/체험 방문자를 예약자에 직접 넣기. 오늘 이후 수업에만 (이미 시작한 오늘 수업도 가능) */}
+      {isAdmin && !readOnly && guestTypes.length > 0 && (
+        <div className="border-t border-line pt-3">
+          <MemberActionForm
+            action={adminAddGuestAction.bind(null, s.slotId, s.classDate)}
+            submitLabel="게스트 추가"
+            pendingLabel="추가 중…"
+            layout="inline"
+          >
+            <label htmlFor={`guest-${s.slotId}-${s.classDate}`} className="text-sm font-bold">
+              드랍인 · 체험
+            </label>
+            <input
+              id={`guest-${s.slotId}-${s.classDate}`}
+              name="guestName"
+              type="text"
+              required
+              maxLength={GUEST_NAME_MAX}
+              placeholder="이름"
+              autoComplete="off"
+              className="w-28 rounded-md border border-line px-2 py-1.5 text-sm focus:border-accent focus:outline-none"
+            />
+            <select
+              name="guestType"
+              defaultValue={guestTypes[0].code}
+              aria-label="구분"
+              className="rounded-md border border-line px-2 py-1.5 text-sm focus:border-accent focus:outline-none"
+            >
+              {guestTypes.map((t) => (
+                <option key={t.code} value={t.code}>
+                  {t.name}
+                </option>
+              ))}
+            </select>
+          </MemberActionForm>
+        </div>
+      )}
+
       {/* 예약자 목록 (회원/관리자 모두): 프로필 사진 + 이름. 관리자에게는 대신 취소 버튼도 보임 */}
       {attendees.length === 0 ? (
         // 예약한 사람이 없으면 펼칠 내용이 없으므로 "예약자 0명"만 보여줍니다.
@@ -161,8 +215,8 @@ function AttendeeList({
             <span className="flex items-center gap-2">
               {numbered && <span className="w-5 text-center font-bold text-accent">{a.queueNo}</span>}
               {/* 프로필 사진이 없으면 기본 실루엣이 나옵니다 */}
-              <Avatar url={a.avatarUrl} name={a.name} size={28} />
-              <span className={a.isMe ? "font-bold" : ""}>{a.name}</span>
+              <Avatar url={a.avatarUrl} name={displayName(a)} size={28} />
+              <span className={a.isMe ? "font-bold" : ""}>{displayName(a)}</span>
               {a.isMe && <span className="rounded bg-accent px-1.5 py-0.5 text-[10px] font-bold text-white">나</span>}
             </span>
             {/* 대신 취소는 관리자에게만 예약 번호가 와서 관리자에게만 보입니다 */}
@@ -171,7 +225,7 @@ function AttendeeList({
                 action={adminCancelReservationAction.bind(null, a.reservationId)}
                 submitLabel="취소"
                 pendingLabel="취소 중…"
-                confirmMessage={`${a.name}님의 ${numbered ? "대기" : "예약"}를 취소할까요?`}
+                confirmMessage={`${displayName(a)}님의 ${numbered ? "대기" : "예약"}를 취소할까요?`}
                 layout="inline"
               />
             )}
