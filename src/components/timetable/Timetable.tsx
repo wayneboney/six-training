@@ -1,14 +1,16 @@
+import { connection } from "next/server";
 import TimetableMobile from "@/components/timetable/TimetableMobile";
 import { classStyles } from "@/components/timetable/classStyles";
 import {
   classLabels,
   days,
   openingHours,
-  timetable,
   timetableNotes,
   type ClassType,
   type DayKey,
+  type TimeSlot,
 } from "@/data/timetable";
+import { getPublicTimetable } from "@/lib/schedule/repository";
 
 type Cell = { type: ClassType; span: number };
 
@@ -31,7 +33,25 @@ function mergeWeekdays(classes: Record<DayKey, ClassType>): Cell[] {
 }
 
 // Timetable = 수업 시간표 전체 (PC 표 + 모바일 요일 탭 + 운영 시간 안내)
-export default function Timetable() {
+// 시간표는 DB(관리자의 "시간표 관리"에서 바꾼 값)에서 읽습니다. 그래서 방문할 때마다 새로 읽습니다.
+export default async function Timetable() {
+  await connection();
+
+  // DB 조회만 try/catch로 감쌉니다. 실패해도 페이지의 다른 부분은 그대로 보이게 안내 문구만 보여줍니다.
+  let timetable: TimeSlot[] | null = null;
+  try {
+    timetable = await getPublicTimetable();
+  } catch (error) {
+    console.error("[timetable] 수업 시간표 조회 실패", error);
+  }
+  if (timetable === null) {
+    return (
+      <p role="alert" className="rounded-lg bg-surface p-6 text-center text-muted">
+        수업 시간표를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
+      </p>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* PC: 요일 x 시간 표. 화면이 좁으면 숨기고 모바일용 목록을 보여줍니다. */}
@@ -76,7 +96,7 @@ export default function Timetable() {
       </table>
 
       {/* 모바일: 요일을 골라서 보는 목록 */}
-      <TimetableMobile />
+      <TimetableMobile timetable={timetable} />
 
       {/* 운영 시간 */}
       <dl className="grid gap-3 sm:grid-cols-3">

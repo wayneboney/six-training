@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 // 메뉴가 늘어나면 배열에 한 줄만 추가합니다.
 const adminMenus = [
   { href: "/admin/programs", label: "Program 관리" },
+  { href: "/admin/schedule", label: "시간표 관리" },
   { href: "/admin/members", label: "회원 관리" },
 ];
 

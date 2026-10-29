@@ -3,11 +3,11 @@
 
 import { useState } from "react";
 import { classStyles } from "@/components/timetable/classStyles";
-import { classLabels, days, timetable, type DayKey } from "@/data/timetable";
+import { classLabels, days, type DayKey, type TimeSlot } from "@/data/timetable";
 
 // TimetableMobile = 모바일에서 요일을 골라 그날 수업만 보여주는 목록
 // 7칸짜리 표는 휴대폰 화면에서 너무 좁아서, 요일별로 나눠서 보여줍니다.
-export default function TimetableMobile() {
+export default function TimetableMobile({ timetable }: { timetable: TimeSlot[] }) {
   // 선택한 요일. 처음에는 월요일
   const [selected, setSelected] = useState<DayKey>("MON");
 

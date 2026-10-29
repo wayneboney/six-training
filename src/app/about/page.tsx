@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import PriceList from "@/components/PriceList";
 import Section from "@/components/Section";
 import Timetable from "@/components/timetable/Timetable";
@@ -70,7 +71,10 @@ export default function AboutPage() {
       </Section>
 
       <Section title="수업 시간표">
-        <Timetable />
+        {/* 시간표는 DB에서 읽어서 요청할 때 채우므로, 읽는 동안 안내 문구를 먼저 보여줍니다 */}
+        <Suspense fallback={<p className="py-10 text-center text-muted">시간표를 불러오는 중입니다…</p>}>
+          <Timetable />
+        </Suspense>
       </Section>
 
       <Section title="가격">
