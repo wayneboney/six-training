@@ -47,6 +47,7 @@ export const gym = {
     { title: "하이록스 스테이션", description: "슬레드 푸시, 슬레드 풀, 스키에르그, 로잉" },
     { title: "유산소 머신", description: "로잉, 스키에르그, 바이크, 에어바이크, 트레드밀" },
     { title: "프리웨이트", description: "바벨, 덤벨, 케틀벨, 메디신볼" },
+    { title: "샤워실 & 락커", description: "샤워실, 락커" },
   ] satisfies InfoCard[],
 
   coaches: [
