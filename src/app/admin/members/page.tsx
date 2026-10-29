@@ -248,6 +248,13 @@ function MemberItem({
               <span className="ml-3">가입 {formatDateTimeToKey(m.createdAt)}</span>
             </p>
           </div>
+          {/* 모바일: 프로필 줄 오른쪽 빈자리에 상세 버튼 */}
+          <Link
+            href={`/admin/members/${m.userId}`}
+            className="shrink-0 rounded-md border border-line px-3 py-1 text-sm font-bold hover:bg-surface sm:hidden"
+          >
+            상세
+          </Link>
         </div>
 
         {/* 회원권 이용 현황 */}
@@ -255,9 +262,10 @@ function MemberItem({
           <MembershipSummary member={m} presence={presence} />
         </div>
 
+        {/* PC: 오른쪽 끝. (모바일은 위 프로필 줄 오른쪽에 같은 버튼이 있어서 여기서는 숨김) */}
         <Link
           href={`/admin/members/${m.userId}`}
-          className="w-fit shrink-0 rounded-md border border-line px-3 py-1 text-sm font-bold hover:bg-surface"
+          className="hidden w-fit shrink-0 rounded-md border border-line px-3 py-1 text-sm font-bold hover:bg-surface sm:block"
         >
           상세
         </Link>
