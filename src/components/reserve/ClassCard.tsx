@@ -256,9 +256,11 @@ function AttendeeList({
                     submitLabel="취소"
                     pendingLabel="취소 중…"
                     confirmMessage={
-                      a.attended
+                      a.attended && (a.dayAttended ?? 1) <= 1
                         ? `⚠️ ${displayName(a)}님은 이미 출석 처리된 회원입니다.\n취소하면 출석이 취소되어 출석 일수가 1일 줄어듭니다.\n\n정말 취소할까요?`
-                        : `${displayName(a)}님의 ${numbered ? "대기" : "예약"}를 취소할까요?`
+                        : a.attended
+                          ? `${displayName(a)}님은 이 수업에 출석 처리되어 있습니다.\n같은 날 다른 수업에도 출석이 있어서 출석 일수는 줄어들지 않습니다.\n\n이 예약을 취소할까요?`
+                          : `${displayName(a)}님의 ${numbered ? "대기" : "예약"}를 취소할까요?`
                     }
                     layout="inline"
                   />
