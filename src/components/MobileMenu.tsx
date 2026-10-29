@@ -3,7 +3,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import NavLink from "@/components/NavLink";
 import type { NavItem } from "@/data/navigation";
 
 // MobileMenu = 화면이 좁을 때(모바일) 보이는 ☰ 버튼과 펼침 메뉴
@@ -36,14 +36,8 @@ export default function MobileMenu({ items }: { items: NavItem[] }) {
           <ul className="mx-auto flex max-w-5xl flex-col px-4 py-2">
             {items.map((item) => (
               <li key={item.href}>
-                {/* 메뉴를 누르면 페이지 이동과 함께 메뉴를 닫습니다 */}
-                <Link
-                  href={item.href}
-                  onClick={() => setOpen(false)}
-                  className="block py-3 hover:text-accent"
-                >
-                  {item.label}
-                </Link>
+                {/* 메뉴를 누르면 페이지 이동과 함께 메뉴를 닫습니다. 지금 보는 페이지의 메뉴는 강조됩니다. */}
+                <NavLink href={item.href} label={item.label} variant="mobile" onClick={() => setOpen(false)} />
               </li>
             ))}
           </ul>

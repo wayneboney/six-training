@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { Suspense } from "react";
 import { connection } from "next/server";
 import AccountLinks from "@/components/AccountLinks";
 import MobileMenu from "@/components/MobileMenu";
+import NavLink from "@/components/NavLink";
 import { navItems, publicNavItems, type NavItem } from "@/data/navigation";
 import { getMemberIfSignedIn, hasContentAccess } from "@/lib/auth/member";
 
@@ -13,11 +13,9 @@ import { getMemberIfSignedIn, hasContentAccess } from "@/lib/auth/member";
 function DesktopNav({ items }: { items: NavItem[] }) {
   // hidden = 기본 숨김, sm:flex = 640px 이상에서만 보임
   return (
-    <nav className="hidden items-center gap-6 text-sm text-muted sm:flex">
+    <nav className="hidden items-center gap-6 text-sm sm:flex">
       {items.map((item) => (
-        <Link key={item.href} href={item.href} className="hover:text-foreground">
-          {item.label}
-        </Link>
+        <NavLink key={item.href} href={item.href} label={item.label} />
       ))}
     </nav>
   );
