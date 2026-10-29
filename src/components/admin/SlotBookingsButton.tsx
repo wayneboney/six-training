@@ -1,4 +1,4 @@
-// 시간표 관리의 "예약 N건" 옆 동그란 "?" 버튼. 누르면 이 수업의 오늘 이후 예약 인원(이름, 날짜)이 작은 팝업으로 나옵니다.
+// 시간표 관리의 "예약 N건" 옆 "≡"(줄 3개) 버튼. 누르면 이 수업의 오늘 이후 예약 인원(이름, 날짜)이 작은 팝업으로 나옵니다.
 // PC, 모바일 모두 보입니다. 모바일에서는 "예약 N건"과 함께 저장/삭제 버튼 아래 줄에 나오므로 줄이 더 늘어나지 않습니다.
 // 목록은 눌렀을 때 서버에서 불러옵니다. 팝업은 접힌 아코디언(overflow 숨김) 안에서도 잘리지 않도록 화면 기준(fixed)으로 위치를 잡습니다.
 "use client";
@@ -95,9 +95,12 @@ export default function SlotBookingsButton({ slotId, label }: { slotId: number; 
         aria-label={`${label} 예약 인원 보기`}
         aria-expanded={open}
         aria-haspopup="dialog"
-        className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-muted text-xs font-bold text-muted hover:border-accent hover:text-accent"
+        className="inline-flex h-6 w-7 items-center justify-center rounded-md border border-muted px-0! text-muted hover:border-accent hover:text-accent"
       >
-        ?
+        {/* 줄 3개(≡) 모양 아이콘 */}
+        <svg viewBox="0 0 16 12" aria-hidden="true" className="h-3 w-4" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round">
+          <path d="M2 2h12M2 6h12M2 10h12" />
+        </svg>
       </button>
       {open && position && (
         <div
