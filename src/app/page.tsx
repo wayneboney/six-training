@@ -15,7 +15,7 @@ export default function Home() {
   return (
     <>
       <div className="mx-auto flex max-w-5xl flex-col items-start gap-6 px-4 py-20 sm:py-28">
-        <p className="text-sm font-bold uppercase tracking-widest text-accent">Functional Training</p>
+        <p className="text-sm font-bold uppercase tracking-widest text-accent">HYROX · CrossFit</p>
 
         {/* sm:text-6xl = 화면이 640px 이상일 때만 글자를 더 크게 (모바일 우선 설계) */}
         <h1 className="text-4xl font-black leading-tight sm:text-6xl">{gym.slogan}</h1>
