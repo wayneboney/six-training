@@ -18,7 +18,7 @@ type ClassCardProps = {
   session: ClassSession;
   started: boolean; // 수업이 이미 시작했는지 (시작했으면 예약/취소 불가)
   isAdmin: boolean;
-  readOnly?: boolean; // 지난 날짜: 예약/취소/정원 변경 버튼 없이 예약자 목록만 보여줌
+  readOnly?: boolean; // 지난 날짜: 예약/취소/정원 변경 버튼 없이 예약자 목록만 볼 수 있음 (목록은 다른 날짜처럼 접어 둠)
   attendees: Attendee[]; // 이 수업의 예약 + 대기 (신청 순서). 회원/관리자 모두에게 보임
   guestTypes?: CodeOption[]; // 드랍인/체험 구분 목록 (관리자의 게스트 추가 폼용)
 };
@@ -181,7 +181,7 @@ export default function ClassCard({
         // 예약한 사람이 없으면 펼칠 내용이 없으므로 "예약자 0명"만 보여줍니다.
         <p className="border-t border-line pt-3 text-sm font-bold">예약자 0명</p>
       ) : (
-        <details open={readOnly} className="border-t border-line pt-3">
+        <details className="border-t border-line pt-3">
           <summary className="cursor-pointer text-sm font-bold">
             예약자 {confirmed.length}명{waiting.length > 0 && ` · 대기 ${waiting.length}명`}
           </summary>
