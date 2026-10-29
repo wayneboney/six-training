@@ -5,6 +5,7 @@ import { adjustDaysAction, cancelHoldAction, registerMembershipAction } from "@/
 import MemberActionForm from "@/components/admin/MemberActionForm";
 import { requireAdmin } from "@/lib/auth/admin";
 import { seoulTodayKey } from "@/lib/date";
+import Avatar from "@/components/Avatar";
 import { formatPhone } from "@/lib/profile/contact";
 import { formatDateTimeToKey } from "@/lib/members/format";
 import {
@@ -211,25 +212,29 @@ function MemberItem({
   return (
     <li className={`space-y-3 p-4 ${presence === "pending" ? "bg-accent-soft/40" : ""}`}>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-        <div className="min-w-0 flex-1">
-          <p className="font-bold">
-            {m.name}
-            {m.role === "admin" && (
-              <span className="ml-2 rounded bg-foreground px-1.5 py-0.5 text-xs font-bold text-background">관리자</span>
-            )}
-            <span
-              className={`ml-2 rounded px-1.5 py-0.5 text-xs font-bold ${
-                presence === "pending" ? "bg-accent text-white" : "border border-line text-muted"
-              }`}
-            >
-              {statusLabel}
-            </span>
-          </p>
-          <p className="truncate text-sm text-muted">
-            {m.email ?? "이메일 없음"}
-            {m.phone && <span className="ml-3">{formatPhone(m.phone)}</span>}
-            <span className="ml-3">가입 {formatDateTimeToKey(m.createdAt)}</span>
-          </p>
+        {/* 프로필 사진 (없으면 기본 실루엣) + 이름/연락처 */}
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <Avatar url={m.avatarUrl} name={m.name} size={44} />
+          <div className="min-w-0 flex-1">
+            <p className="font-bold">
+              {m.name}
+              {m.role === "admin" && (
+                <span className="ml-2 rounded bg-foreground px-1.5 py-0.5 text-xs font-bold text-background">관리자</span>
+              )}
+              <span
+                className={`ml-2 rounded px-1.5 py-0.5 text-xs font-bold ${
+                  presence === "pending" ? "bg-accent text-white" : "border border-line text-muted"
+                }`}
+              >
+                {statusLabel}
+              </span>
+            </p>
+            <p className="truncate text-sm text-muted">
+              {m.email ?? "이메일 없음"}
+              {m.phone && <span className="ml-3">{formatPhone(m.phone)}</span>}
+              <span className="ml-3">가입 {formatDateTimeToKey(m.createdAt)}</span>
+            </p>
+          </div>
         </div>
 
         {/* 회원권 이용 현황 */}

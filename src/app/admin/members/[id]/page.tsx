@@ -10,6 +10,7 @@ import {
   sendPasswordResetAction,
   updateMemberAction,
 } from "@/app/admin/members/actions";
+import Avatar from "@/components/Avatar";
 import MemberActionForm from "@/components/admin/MemberActionForm";
 import { requireAdmin } from "@/lib/auth/admin";
 import { PASSWORD_RESET_ENABLED } from "@/lib/auth/features";
@@ -99,24 +100,27 @@ async function MemberDetailView({ params }: { params: PageProps<"/admin/members/
   return (
     <div className="space-y-8">
       {/* 기본 정보 */}
-      <section>
-        <h1 className="text-2xl font-black">
-          {member.name}
-          <span className="ml-3 rounded border border-line px-2 py-0.5 align-middle text-sm font-bold text-muted">
-            {statusLabel}
-          </span>
-        </h1>
-        <p className="mt-1 text-sm text-muted">
-          {member.email ?? "이메일 없음"} · 가입 {formatDateTimeToKey(member.createdAt)}
-        </p>
-        {/* 연락처/생년월일/성별은 회원 본인만 수정할 수 있습니다. 관리자는 조회만. */}
-        <p className="mt-1 text-sm text-muted">
-          {member.phone ? formatPhone(member.phone) : "전화번호 없음"}
-          {" · "}
-          {member.birthDate ? `${member.birthDate} (만 ${ageOf(member.birthDate)}세)` : "생년월일 없음"}
-          {" · "}
-          {member.gender ? genderLabels[member.gender as Gender] ?? member.gender : "성별 없음"}
-        </p>
+      <section className="flex items-center gap-4">
+        <Avatar url={member.avatarUrl} name={member.name} size={72} />
+        <div className="min-w-0">
+          <h1 className="text-2xl font-black">
+            {member.name}
+            <span className="ml-3 rounded border border-line px-2 py-0.5 align-middle text-sm font-bold text-muted">
+              {statusLabel}
+            </span>
+          </h1>
+          <p className="mt-1 text-sm text-muted">
+            {member.email ?? "이메일 없음"} · 가입 {formatDateTimeToKey(member.createdAt)}
+          </p>
+          {/* 연락처/생년월일/성별은 회원 본인만 수정할 수 있습니다. 관리자는 조회만. */}
+          <p className="mt-1 text-sm text-muted">
+            {member.phone ? formatPhone(member.phone) : "전화번호 없음"}
+            {" · "}
+            {member.birthDate ? `${member.birthDate} (만 ${ageOf(member.birthDate)}세)` : "생년월일 없음"}
+            {" · "}
+            {member.gender ? genderLabels[member.gender as Gender] ?? member.gender : "성별 없음"}
+          </p>
+        </div>
       </section>
 
       {/* 승인 = 회원권 등록 */}

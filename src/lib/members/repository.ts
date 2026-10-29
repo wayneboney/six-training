@@ -7,6 +7,7 @@ export type MemberRow = {
   userId: string;
   name: string;
   email: string | null;
+  avatarUrl: string | null; // 프로필 사진 주소 (없으면 null)
   phone: string | null; // 숫자만
   role: string;
   status: string;
@@ -51,6 +52,7 @@ export type MemberDetail = {
   userId: string;
   name: string;
   email: string | null;
+  avatarUrl: string | null;
   phone: string | null;
   birthDate: string | null;
   gender: string | null;
@@ -68,7 +70,7 @@ export async function listMembers(today: string): Promise<{ members: MemberRow[]
 
   const { data: profiles, error } = await supabase
     .from("profiles")
-    .select("user_id, name, email, phone, role, status, created_at")
+    .select("user_id, name, email, avatar_url, phone, role, status, created_at")
     .order("created_at", { ascending: false })
     .limit(MEMBER_LIST_LIMIT)
     .overrideTypes<
@@ -76,6 +78,7 @@ export async function listMembers(today: string): Promise<{ members: MemberRow[]
         user_id: string;
         name: string;
         email: string | null;
+        avatar_url: string | null;
         phone: string | null;
         role: string;
         status: string;
@@ -163,6 +166,7 @@ export async function listMembers(today: string): Promise<{ members: MemberRow[]
       userId: p.user_id,
       name: p.name,
       email: p.email,
+      avatarUrl: p.avatar_url,
       phone: p.phone,
       role: p.role,
       status: p.status,
@@ -185,7 +189,7 @@ export async function getMemberDetail(userId: string): Promise<MemberDetail | nu
 
   const { data: profile, error } = await supabase
     .from("profiles")
-    .select("user_id, name, email, phone, birth_date, gender, role, status, created_at")
+    .select("user_id, name, email, avatar_url, phone, birth_date, gender, role, status, created_at")
     .eq("user_id", userId)
     .maybeSingle()
     .overrideTypes<
@@ -193,6 +197,7 @@ export async function getMemberDetail(userId: string): Promise<MemberDetail | nu
         user_id: string;
         name: string;
         email: string | null;
+        avatar_url: string | null;
         phone: string | null;
         birth_date: string | null;
         gender: string | null;
@@ -247,6 +252,7 @@ export async function getMemberDetail(userId: string): Promise<MemberDetail | nu
     userId: profile.user_id,
     name: profile.name,
     email: profile.email,
+    avatarUrl: profile.avatar_url,
     phone: profile.phone,
     birthDate: profile.birth_date,
     gender: profile.gender,
