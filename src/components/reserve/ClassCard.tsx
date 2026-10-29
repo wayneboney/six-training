@@ -255,7 +255,11 @@ function AttendeeList({
                     action={adminCancelReservationAction.bind(null, a.reservationId)}
                     submitLabel="취소"
                     pendingLabel="취소 중…"
-                    confirmMessage={`${displayName(a)}님의 ${numbered ? "대기" : "예약"}를 취소할까요?${a.attended ? "\n이미 출석으로 기록되어 있어서 취소하면 출석 일수가 1일 줄어듭니다." : ""}`}
+                    confirmMessage={
+                      a.attended
+                        ? `⚠️ ${displayName(a)}님은 이미 출석 처리된 회원입니다.\n취소하면 출석이 취소되어 출석 일수가 1일 줄어듭니다.\n\n정말 취소할까요?`
+                        : `${displayName(a)}님의 ${numbered ? "대기" : "예약"}를 취소할까요?`
+                    }
                     layout="inline"
                   />
                 )}
