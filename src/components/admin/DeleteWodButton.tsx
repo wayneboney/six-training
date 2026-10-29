@@ -1,11 +1,12 @@
-// Program 삭제 버튼 + 확인 단계
-// "삭제" → "정말 삭제할까요?" → "삭제하기"를 눌러야 실제로 지워집니다. (되돌릴 수 없는 작업이라 실수 방지)
+// Program 삭제 버튼 + 확인 팝업
+// "삭제"를 누르면 화면 가운데에 "삭제할까요?" 팝업이 뜨고, 팝업에서 "삭제"를 눌러야 실제로 지워집니다. (되돌릴 수 없는 작업이라 실수 방지)
 // 수정 화면(panel: 큰 상자)과 목록(inline: 한 줄 안의 작은 버튼)에서 같이 씁니다.
-// 화면 모양만 다르고, 확인 단계와 서버 삭제 함수는 같습니다.
+// 화면 모양만 다르고, 확인 팝업(ConfirmDialog)과 서버 삭제 함수는 같습니다.
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import type { WodDeleteState } from "@/app/admin/programs/actions";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 type DeleteWodButtonProps = {
   // 삭제 서버 함수 (deleteWodAction.bind(null, id))
@@ -15,30 +16,10 @@ type DeleteWodButtonProps = {
 };
 
 export default function DeleteWodButton({ action, wodLabel, variant = "panel" }: DeleteWodButtonProps) {
-  // 확인 단계를 보여주는 중인지 (화면 안에서만 쓰는 상태)
-  const [confirming, setConfirming] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  // 확인 팝업을 보여주는 중인지 (화면 안에서만 쓰는 상태)
+  const [asking, setAsking] = useState(false);
   const [state, formAction, pending] = useActionState(action, undefined);
-
-  // 확인 단계의 버튼 두 개 (두 모양이 같이 씀)
-  const confirmButtons = (
-    <div className="flex gap-2">
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-md bg-accent px-3 py-1.5 text-sm font-bold text-white hover:opacity-90 disabled:opacity-50"
-      >
-        {pending ? "삭제 중…" : "삭제하기"}
-      </button>
-      <button
-        type="button"
-        disabled={pending}
-        onClick={() => setConfirming(false)}
-        className="rounded-md border border-line bg-background px-3 py-1.5 text-sm font-bold hover:bg-surface"
-      >
-        취소
-      </button>
-    </div>
-  );
 
   const errorMessage = state?.error && (
     <p role="alert" className="rounded-md bg-accent-soft px-3 py-2 text-sm font-bold text-accent">
@@ -46,32 +27,40 @@ export default function DeleteWodButton({ action, wodLabel, variant = "panel" }:
     </p>
   );
 
+  // 눈에 보이지 않는 폼. 팝업에서 "삭제"를 누르면 이 폼을 제출해서 서버 함수를 실행합니다.
+  const hiddenForm = <form ref={formRef} action={formAction} />;
+
+  const dialog = (
+    <ConfirmDialog
+      open={asking}
+      title="Program 삭제"
+      message={`${wodLabel}\n이 Program을 삭제할까요? 삭제한 Program은 되돌릴 수 없습니다.`}
+      confirmLabel="삭제"
+      onCancel={() => setAsking(false)}
+      onConfirm={() => {
+        setAsking(false);
+        formRef.current?.requestSubmit();
+      }}
+    />
+  );
+
   // ---------- 목록용: 한 줄 안의 작은 버튼 ----------
   if (variant === "inline") {
-    if (!confirming) {
-      return (
-        <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
-          <button
-            type="button"
-            onClick={() => setConfirming(true)}
-            aria-label={`${wodLabel} 삭제`}
-            className="rounded-md border border-line px-3 py-1 text-sm font-bold text-accent hover:bg-accent-soft"
-          >
-            삭제
-          </button>
-          {errorMessage}
-        </div>
-      );
-    }
     return (
-      <form action={formAction} className="flex shrink-0 flex-col gap-2 rounded-md bg-accent-soft p-3 sm:items-end">
-        {/* 목록에서는 이름이 이미 같은 줄에 보이므로 짧게 묻습니다. 화면 낭독기용으로는 전체 이름을 함께 읽어 줍니다. */}
-        <p className="text-sm font-bold">
-          정말 삭제할까요?<span className="sr-only"> {wodLabel}</span>
-        </p>
-        {confirmButtons}
+      <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
+        <button
+          type="button"
+          disabled={pending}
+          onClick={() => setAsking(true)}
+          aria-label={`${wodLabel} 삭제`}
+          className="rounded-md border border-line px-3 py-1 text-sm font-bold text-accent hover:bg-accent-soft disabled:opacity-50"
+        >
+          {pending ? "삭제 중…" : "삭제"}
+        </button>
         {errorMessage}
-      </form>
+        {hiddenForm}
+        {dialog}
+      </div>
     );
   }
 
@@ -85,25 +74,16 @@ export default function DeleteWodButton({ action, wodLabel, variant = "panel" }:
 
       {errorMessage}
 
-      {!confirming ? (
-        // 1단계: 삭제 버튼 (아직 지우지 않음, 확인 단계만 보여줌)
-        <button
-          type="button"
-          onClick={() => setConfirming(true)}
-          className="rounded-md border border-accent px-4 py-2 text-sm font-bold text-accent hover:bg-accent-soft"
-        >
-          삭제
-        </button>
-      ) : (
-        // 2단계: 확인. 여기서 "삭제하기"를 눌러야 서버에서 실제로 지웁니다.
-        <form action={formAction} className="space-y-3 rounded-md bg-accent-soft p-4">
-          <div>
-            <p className="text-sm font-bold">정말 삭제할까요?</p>
-            <p className="mt-1 text-sm">{wodLabel}</p>
-          </div>
-          {confirmButtons}
-        </form>
-      )}
+      <button
+        type="button"
+        disabled={pending}
+        onClick={() => setAsking(true)}
+        className="rounded-md border border-accent px-4 py-2 text-sm font-bold text-accent hover:bg-accent-soft disabled:opacity-50"
+      >
+        {pending ? "삭제 중…" : "삭제"}
+      </button>
+      {hiddenForm}
+      {dialog}
     </section>
   );
 }
