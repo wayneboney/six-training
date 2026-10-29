@@ -36,11 +36,11 @@ export type Attendee = {
   isMe: boolean;
   reservationId: number | null; // 관리자에게만 값이 있음 (대신 취소 버튼용)
   guestLabel: string | null; // 회원이 아닌 예약자(드랍인/체험)의 구분. 회원이면 null
-  isMvp: boolean; // 지난달 MVP(출석 일수 1위)이면 true
+  mvpRank: number | null; // 지난달 MVP 순위(1~3). 순위 밖이면 null
 };
 
-// 지난달 MVP (출석 일수가 가장 많은 회원. 동점이면 여럿). 예약 화면 상단 안내용
-export type MonthlyMvp = { name: string; avatarUrl: string | null; attendDays: number };
+// 지난달 MVP 1~3위 (출석 일수 순. 동점이면 같은 순위). 예약 화면 상단 안내용
+export type MonthlyMvp = { name: string; avatarUrl: string | null; attendDays: number; rank: number };
 
 export async function getMonthlyMvp(monthStart: string): Promise<MonthlyMvp[]> {
   const supabase = await createAuthSupabase();
@@ -48,8 +48,8 @@ export async function getMonthlyMvp(monthStart: string): Promise<MonthlyMvp[]> {
   if (error) {
     throw error;
   }
-  const rows = (data ?? []) as { name: string; avatar_url: string | null; attend_days: number }[];
-  return rows.map((row) => ({ name: row.name, avatarUrl: row.avatar_url, attendDays: row.attend_days }));
+  const rows = (data ?? []) as { name: string; avatar_url: string | null; attend_days: number; mvp_rank: number }[];
+  return rows.map((row) => ({ name: row.name, avatarUrl: row.avatar_url, attendDays: row.attend_days, rank: row.mvp_rank }));
 }
 
 type ScheduleRow = {
@@ -143,7 +143,7 @@ export async function getAttendees(from: string, to: string): Promise<Attendee[]
     is_me: boolean;
     reservation_id: number | null;
     guest_label: string | null;
-    is_mvp: boolean | null;
+    mvp_rank: number | null;
   }[];
   return rows.map((row) => ({
     slotId: row.slot_id,
@@ -155,6 +155,6 @@ export async function getAttendees(from: string, to: string): Promise<Attendee[]
     isMe: row.is_me,
     reservationId: row.reservation_id,
     guestLabel: row.guest_label,
-    isMvp: row.is_mvp === true, // 아직 SQL(9-8)을 실행하기 전에는 값이 없어서 false로 처리
+    mvpRank: row.mvp_rank ?? null, // 아직 SQL(9-9)을 실행하기 전에는 값이 없어서 null로 처리
   }));
 }

@@ -6,6 +6,7 @@ import MemberActionForm from "@/components/admin/MemberActionForm";
 import { requireAdmin } from "@/lib/auth/admin";
 import { seoulTodayKey } from "@/lib/date";
 import Avatar from "@/components/Avatar";
+import { medalEmoji, medalOf } from "@/lib/mvp";
 import Pagination from "@/components/Pagination";
 import { sortMembersByName } from "@/lib/members/sort";
 import { formatPhone } from "@/lib/profile/contact";
@@ -74,7 +75,7 @@ async function MemberList({ searchParams }: { searchParams: PageProps<"/admin/me
   let truncated = false;
   let statuses: CodeOption[] = [];
   let plans: PlanOption[] = [];
-  let mvp = new Map<string, number>(); // 지난달 MVP 회원 → 출석 일수
+  let mvp = new Map<string, { days: number; rank: number }>(); // 지난달 MVP 1~3위 회원 → 출석 일수, 순위
   try {
     const result = await listMembers(today);
     members = result.members;
@@ -199,7 +200,7 @@ async function MemberList({ searchParams }: { searchParams: PageProps<"/admin/me
       ) : (
         <ul className="divide-y divide-line rounded-lg border border-line">
           {pageRows.map((m) => (
-            <MemberItem key={m.userId} member={m} presence={presenceOf(m)} statusLabel={statusName.get(m.status) ?? m.status} plans={plans} today={today} mvpDays={mvp.get(m.userId) ?? null} />
+            <MemberItem key={m.userId} member={m} presence={presenceOf(m)} statusLabel={statusName.get(m.status) ?? m.status} plans={plans} today={today} mvp={mvp.get(m.userId) ?? null} />
           ))}
         </ul>
       )}
@@ -217,14 +218,14 @@ function MemberItem({
   statusLabel,
   plans,
   today,
-  mvpDays,
+  mvp,
 }: {
   member: MemberRow;
   presence: Presence;
   statusLabel: string;
   plans: PlanOption[];
   today: string;
-  mvpDays: number | null; // 지난달 MVP이면 지난달 출석 일수
+  mvp: { days: number; rank: number } | null; // 지난달 MVP 1~3위이면 출석 일수와 순위
 }) {
   const isMember = m.role === "member";
   return (
@@ -232,15 +233,17 @@ function MemberItem({
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
         {/* 프로필 사진 (없으면 기본 실루엣) + 이름/연락처 */}
         <div className="flex min-w-0 flex-1 items-center gap-3">
-          <Avatar url={m.avatarUrl} name={m.name} size={44} mark={m.role === "admin" ? "admin" : mvpDays !== null ? "mvp" : undefined} />
+          <Avatar url={m.avatarUrl} name={m.name} size={44} mark={m.role === "admin" ? "admin" : medalOf(mvp?.rank)} />
           <div className="min-w-0 flex-1">
             <p className="font-bold">
               {m.name}
               {m.role === "admin" && (
                 <span className="ml-2 rounded bg-foreground px-1.5 py-0.5 text-xs font-bold text-background">관리자</span>
               )}
-              {mvpDays !== null && (
-                <span className="ml-2 text-xs font-normal text-muted">🏆 지난달 {mvpDays}일 출석</span>
+              {mvp !== null && medalOf(mvp.rank) && (
+                <span className="ml-2 text-xs font-normal text-muted">
+                  {medalEmoji[medalOf(mvp.rank)!]} 지난달 {mvp.rank}위 · {mvp.days}일 출석
+                </span>
               )}
               <span
                 className={`ml-2 rounded px-1.5 py-0.5 text-xs font-bold ${

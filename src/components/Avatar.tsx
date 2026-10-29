@@ -2,13 +2,14 @@
 // 사진을 불러오는 중이거나 실패한 경우를 처리하려고 브라우저에서 실행되는 컴포넌트로 만들었습니다.
 "use client";
 
+import { medalEmoji, medalLabel, type Medal } from "@/lib/mvp";
 import { useEffect, useRef, useState } from "react";
 
 type AvatarProps = {
   url: string | null; // 프로필 사진 주소 (https만 DB에서 허용)
   name: string; // 사진 설명(alt)용 이름
   size?: number; // 지름(px)
-  mark?: "admin" | "mvp"; // 왼쪽 위에 다는 표시: admin = 관리자(코치), mvp = 지난달 MVP
+  mark?: "admin" | Medal; // 왼쪽 위에 다는 표시: admin = 관리자(코치), gold/silver/bronze = 지난달 MVP 1/2/3위
 };
 
 export default function Avatar({ url, name, size = 32, mark }: AvatarProps) {
@@ -78,12 +79,12 @@ export default function Avatar({ url, name, size = 32, mark }: AvatarProps) {
       {circle}
       <span
         role="img"
-        aria-label={mark === "admin" ? "관리자" : "지난달 MVP"}
-        title={mark === "admin" ? "관리자" : "지난달 MVP"}
+        aria-label={mark === "admin" ? "관리자" : medalLabel[mark]}
+        title={mark === "admin" ? "관리자" : medalLabel[mark]}
         style={{ fontSize: markSize, lineHeight: 1 }}
         className={`pointer-events-none absolute -left-1 -top-1.5 select-none drop-shadow`}
       >
-        {mark === "admin" ? "🏋️" : "🏆"}
+        {mark === "admin" ? "🏋️" : medalEmoji[mark]}
       </span>
     </span>
   );

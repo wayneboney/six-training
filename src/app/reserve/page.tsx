@@ -10,6 +10,7 @@ import TodayButton from "@/components/reserve/TodayButton";
 import { classLabelsKo } from "@/data/timetable";
 import { requireContentAccess } from "@/lib/auth/member";
 import { addDaysToKey, lastMonthStartKey, parseDateKey, seoulTodayKey, weekdayLabels } from "@/lib/date";
+import { medalEmoji, medalOf } from "@/lib/mvp";
 import { getHolidays } from "@/lib/holidays/repository";
 import { getActiveCodes, type CodeOption } from "@/lib/members/repository";
 import {
@@ -140,19 +141,23 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
         </p>
       )}
 
-      {/* 지난달 MVP: 지난달 출석 일수가 가장 많은 회원 (동점이면 모두). 매달 1일부터 그 달 내내 보입니다 */}
+      {/* 지난달 MVP: 지난달 출석 일수 1~3위 (금/은/동). 동점이면 같은 순위로 모두 보입니다. 매달 1일부터 그 달 내내 보입니다 */}
       {mvps.length > 0 && (
         <section aria-label="지난달 MVP" className="rounded-lg border border-line bg-surface px-4 py-3">
-          <p className="text-xs font-bold text-muted">
-            🏆 {parseDateKey(lastMonthStartKey(today)).month + 1}월 MVP · 출석 {mvps[0].attendDays}일
-          </p>
-          <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-2">
-            {mvps.map((m, i) => (
-              <li key={`${m.name}-${i}`} className="flex items-center gap-2">
-                <Avatar url={m.avatarUrl} name={m.name} size={32} mark="mvp" />
-                <span className="font-bold">{m.name}</span>
-              </li>
-            ))}
+          <p className="text-xs font-bold text-muted">{parseDateKey(lastMonthStartKey(today)).month + 1}월 MVP · 출석 일수 순</p>
+          <ul className="mt-2 space-y-2">
+            {mvps.map((m, i) => {
+              const medal = medalOf(m.rank);
+              return (
+                <li key={`${m.name}-${i}`} className="flex items-center gap-2">
+                  <Avatar url={m.avatarUrl} name={m.name} size={32} mark={medal} />
+                  <span className="font-bold">{m.name}</span>
+                  <span className="text-xs text-muted">
+                    {medal ? medalEmoji[medal] : ""} {m.rank}위 · {m.attendDays}일
+                  </span>
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}
