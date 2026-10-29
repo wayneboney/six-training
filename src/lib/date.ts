@@ -86,3 +86,10 @@ export function diffDays(a: string, b: string): number {
   const pb = parseDateKey(b);
   return Math.round((Date.UTC(pb.year, pb.month, pb.day) - Date.UTC(pa.year, pa.month, pa.day)) / 86400000);
 }
+
+// 지난달 1일 ("YYYY-MM-01"). 월간 MVP는 지난달 출석으로 정하므로 이 날짜로 지난달을 가리킵니다.
+export function lastMonthStartKey(today: string): string {
+  const { year, month } = parseDateKey(today);
+  const prev = shiftMonth(year, month, -1);
+  return `${toMonthKey(prev.year, prev.month)}-01`;
+}

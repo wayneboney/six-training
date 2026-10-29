@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import Avatar from "@/components/Avatar";
 import ClassCard from "@/components/reserve/ClassCard";
 import ExpandAllButtons from "@/components/reserve/ExpandAllButtons";
 import LinkPendingOverlay from "@/components/reserve/LinkPendingOverlay";
@@ -8,15 +9,17 @@ import ScrollToTarget from "@/components/reserve/ScrollToTarget";
 import TodayButton from "@/components/reserve/TodayButton";
 import { classLabelsKo } from "@/data/timetable";
 import { requireContentAccess } from "@/lib/auth/member";
-import { addDaysToKey, parseDateKey, seoulTodayKey, weekdayLabels } from "@/lib/date";
+import { addDaysToKey, lastMonthStartKey, parseDateKey, seoulTodayKey, weekdayLabels } from "@/lib/date";
 import { getHolidays } from "@/lib/holidays/repository";
 import { getActiveCodes, type CodeOption } from "@/lib/members/repository";
 import {
   getAttendees,
+  getMonthlyMvp,
   getMyReservations,
   getSchedule,
   type Attendee,
   type ClassSession,
+  type MonthlyMvp,
   type MyReservation,
 } from "@/lib/reservations/repository";
 
@@ -84,6 +87,7 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
   let attendees: Attendee[] = [];
   let holidays: Record<string, string> = {};
   let guestTypes: CodeOption[] = [];
+  let mvps: MonthlyMvp[] = []; // 지난달 MVP (조회에 실패해도 예약 화면은 그대로 보여줌)
   try {
     const [schedule, myList, attendeeList, holidayMap, guestTypeList] = await Promise.all([
       getSchedule(selected, selected),
@@ -100,6 +104,12 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
     guestTypes = guestTypeList;
   } catch (error) {
     console.error("[reserve] 예약 화면 조회 실패", error);
+  }
+
+  try {
+    mvps = await getMonthlyMvp(lastMonthStartKey(today));
+  } catch (error) {
+    console.error("[reserve] 지난달 MVP 조회 실패", error);
   }
 
   if (sessions === null) {
@@ -128,6 +138,23 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
             ? "가입 승인 후 예약할 수 있습니다. 코치가 회원권을 등록하면 이용할 수 있어요."
             : "이용 중인 회원권이 없습니다. 코치에게 재등록을 문의해 주세요."}
         </p>
+      )}
+
+      {/* 지난달 MVP: 지난달 출석 일수가 가장 많은 회원 (동점이면 모두). 매달 1일부터 그 달 내내 보입니다 */}
+      {mvps.length > 0 && (
+        <section aria-label="지난달 MVP" className="rounded-lg border border-line bg-surface px-4 py-3">
+          <p className="text-xs font-bold text-muted">
+            🏆 {parseDateKey(lastMonthStartKey(today)).month + 1}월 MVP · 출석 {mvps[0].attendDays}일
+          </p>
+          <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-2">
+            {mvps.map((m, i) => (
+              <li key={`${m.name}-${i}`} className="flex items-center gap-2">
+                <Avatar url={m.avatarUrl} name={m.name} size={32} />
+                <span className="font-bold">{m.name}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       {/* 날짜 선택: 월~토를 한 줄로, 이번 주 / 다음 주. 오늘은 테두리와 "오늘" 표시로 강조합니다. */}

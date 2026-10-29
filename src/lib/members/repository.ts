@@ -317,3 +317,21 @@ export async function getActivePlans(): Promise<PlanOption[]> {
     holdMaxCount: p.hold_max_count,
   }));
 }
+
+// 지난달 MVP 회원 번호 → 출석 일수. 회원 목록의 MVP 딱지용.
+// 아직 DB에 SQL(9-8)이 없거나 조회에 실패해도 회원 목록은 그대로 보여야 하므로, 실패하면 빈 목록을 돌려줍니다.
+export async function getLastMonthMvp(): Promise<Map<string, number>> {
+  try {
+    const supabase = await createAuthSupabase();
+    const { data, error } = await supabase.rpc("admin_last_month_mvp");
+    if (error) {
+      console.error("[admin] 지난달 MVP 조회 실패", error);
+      return new Map();
+    }
+    const rows = (data ?? []) as { user_id: string; attend_days: number }[];
+    return new Map(rows.map((row) => [row.user_id, row.attend_days]));
+  } catch (error) {
+    console.error("[admin] 지난달 MVP 조회 실패", error);
+    return new Map();
+  }
+}

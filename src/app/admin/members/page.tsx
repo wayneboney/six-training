@@ -6,6 +6,7 @@ import MemberActionForm from "@/components/admin/MemberActionForm";
 import { requireAdmin } from "@/lib/auth/admin";
 import { seoulTodayKey } from "@/lib/date";
 import Avatar from "@/components/Avatar";
+import MvpBadge from "@/components/MvpBadge";
 import Pagination from "@/components/Pagination";
 import { sortMembersByName } from "@/lib/members/sort";
 import { formatPhone } from "@/lib/profile/contact";
@@ -13,6 +14,7 @@ import { formatDateTimeToKey } from "@/lib/members/format";
 import {
   getActiveCodes,
   getActivePlans,
+  getLastMonthMvp,
   listMembers,
   MEMBER_LIST_LIMIT,
   type CodeOption,
@@ -73,12 +75,14 @@ async function MemberList({ searchParams }: { searchParams: PageProps<"/admin/me
   let truncated = false;
   let statuses: CodeOption[] = [];
   let plans: PlanOption[] = [];
+  let mvp = new Map<string, number>(); // 지난달 MVP 회원 → 출석 일수
   try {
     const result = await listMembers(today);
     members = result.members;
     truncated = result.truncated;
     statuses = await getActiveCodes("STATUS");
     plans = await getActivePlans();
+    mvp = await getLastMonthMvp(); // 실패해도 빈 목록 (딱지만 안 보임)
   } catch (error) {
     console.error("[admin] 회원 목록 조회 실패", error);
   }
@@ -196,7 +200,7 @@ async function MemberList({ searchParams }: { searchParams: PageProps<"/admin/me
       ) : (
         <ul className="divide-y divide-line rounded-lg border border-line">
           {pageRows.map((m) => (
-            <MemberItem key={m.userId} member={m} presence={presenceOf(m)} statusLabel={statusName.get(m.status) ?? m.status} plans={plans} today={today} />
+            <MemberItem key={m.userId} member={m} presence={presenceOf(m)} statusLabel={statusName.get(m.status) ?? m.status} plans={plans} today={today} mvpDays={mvp.get(m.userId) ?? null} />
           ))}
         </ul>
       )}
@@ -214,12 +218,14 @@ function MemberItem({
   statusLabel,
   plans,
   today,
+  mvpDays,
 }: {
   member: MemberRow;
   presence: Presence;
   statusLabel: string;
   plans: PlanOption[];
   today: string;
+  mvpDays: number | null; // 지난달 MVP이면 지난달 출석 일수
 }) {
   const isMember = m.role === "member";
   return (
@@ -233,6 +239,12 @@ function MemberItem({
               {m.name}
               {m.role === "admin" && (
                 <span className="ml-2 rounded bg-foreground px-1.5 py-0.5 text-xs font-bold text-background">관리자</span>
+              )}
+              {mvpDays !== null && (
+                <span className="ml-2 inline-flex items-center gap-1 align-middle">
+                  <MvpBadge />
+                  <span className="text-xs font-normal text-muted">지난달 {mvpDays}일 출석</span>
+                </span>
               )}
               <span
                 className={`ml-2 rounded px-1.5 py-0.5 text-xs font-bold ${
