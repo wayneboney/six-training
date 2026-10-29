@@ -8,15 +8,15 @@ import { seoulTodayKey } from "@/lib/date";
 import { isValidDateKey } from "@/lib/wods/validation";
 
 export const metadata: Metadata = {
-  title: "프로그램 등록",
+  title: "Program 등록",
 };
 
-// /admin/programs/new = 프로그램 등록 화면
+// /admin/programs/new = Program 등록 화면
 // /admin/programs/new?date=2026-10-28 처럼 날짜를 주면 그 날짜가 미리 채워집니다.
 export default function NewWodPage(props: PageProps<"/admin/programs/new">) {
   return (
     <div>
-      <h1 className="text-2xl font-black">프로그램 등록</h1>
+      <h1 className="text-2xl font-black">Program 등록</h1>
       <div className="mt-8">
         <Suspense fallback={<p className="text-muted">확인 중…</p>}>
           <NewWod searchParams={props.searchParams} />

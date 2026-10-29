@@ -1,4 +1,4 @@
-// 프로그램 삭제 버튼 + 확인 단계
+// Program 삭제 버튼 + 확인 단계
 // "삭제" → "정말 삭제할까요?" → "삭제하기"를 눌러야 실제로 지워집니다. (되돌릴 수 없는 작업이라 실수 방지)
 // 수정 화면(panel: 큰 상자)과 목록(inline: 한 줄 안의 작은 버튼)에서 같이 씁니다.
 // 화면 모양만 다르고, 확인 단계와 서버 삭제 함수는 같습니다.
@@ -79,8 +79,8 @@ export default function DeleteWodButton({ action, wodLabel, variant = "panel" }:
   return (
     <section className="mt-12 space-y-4 rounded-lg border border-accent/40 p-6">
       <div>
-        <h2 className="font-bold text-accent">프로그램 삭제</h2>
-        <p className="mt-1 text-sm text-muted">삭제한 프로그램은 되돌릴 수 없습니다.</p>
+        <h2 className="font-bold text-accent">Program 삭제</h2>
+        <p className="mt-1 text-sm text-muted">삭제한 Program은 되돌릴 수 없습니다.</p>
       </div>
 
       {errorMessage}

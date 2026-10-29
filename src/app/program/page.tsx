@@ -9,30 +9,30 @@ import { getHolidays } from "@/lib/holidays/repository";
 import { getWods } from "@/lib/wods/repository";
 
 export const metadata: Metadata = {
-  title: "프로그램",
+  title: "Program",
 };
 
-// 몇 달치 프로그램을 가져올지 (오늘이 속한 달 기준)
+// 몇 달치 Program을 가져올지 (오늘이 속한 달 기준)
 const MONTHS_BEFORE = 6;
 const MONTHS_AFTER = 3;
 
 // /program 주소의 화면.
-// 제목 부분은 빌드할 때 미리 만들어 두고, 프로그램 달력 부분(WodSection)만 방문할 때마다 DB에서 새로 읽습니다.
-// 그래서 코치가 DB에 프로그램을 올리면 다음 방문부터 바로 반영됩니다.
+// 제목 부분은 빌드할 때 미리 만들어 두고, Program 달력 부분(WodSection)만 방문할 때마다 DB에서 새로 읽습니다.
+// 그래서 코치가 DB에 Program을 올리면 다음 방문부터 바로 반영됩니다.
 export default function WodPage() {
   return (
     <>
       <div className="border-b border-line bg-surface">
         <div className="mx-auto max-w-5xl px-4 py-16">
           <p className="text-sm font-bold tracking-widest text-accent">WORKOUT OF THE DAY</p>
-          <h1 className="mt-2 text-3xl font-black sm:text-5xl">프로그램</h1>
-          <p className="mt-4 text-muted">날짜를 누르면 그날의 프로그램을 볼 수 있습니다.</p>
+          <h1 className="mt-2 text-3xl font-black sm:text-5xl">Program</h1>
+          <p className="mt-4 text-muted">날짜를 누르면 그날의 Program을 볼 수 있습니다.</p>
         </div>
       </div>
 
       <div className="mx-auto max-w-5xl px-4 py-12">
         {/* Suspense = 안쪽(WodSection)이 DB를 읽는 동안 fallback을 먼저 보여주고, 다 읽으면 바꿔 끼웁니다 */}
-        <Suspense fallback={<p className="py-20 text-center text-muted">프로그램을 불러오는 중입니다…</p>}>
+        <Suspense fallback={<p className="py-20 text-center text-muted">Program을 불러오는 중입니다…</p>}>
           <WodSection />
         </Suspense>
       </div>
@@ -40,7 +40,7 @@ export default function WodPage() {
   );
 }
 
-// DB에서 프로그램을 읽어 달력에 넘기는 부분 (Controller가 Service를 호출해 화면에 넘기는 역할)
+// DB에서 Program을 읽어 달력에 넘기는 부분 (Controller가 Service를 호출해 화면에 넘기는 역할)
 async function WodSection() {
   // connection() = "여기부터는 빌드할 때가 아니라 방문자가 접속했을 때 실행"하라는 표시
   await connection();
@@ -57,7 +57,7 @@ async function WodSection() {
 
   // try/catch는 "DB 조회"만 감쌉니다.
   // 화면(JSX)을 try 안에서 만들면, 화면을 그리다 난 에러는 이 catch로 잡히지 않는데도 잡히는 것처럼 보여서 헷갈립니다.
-  // 프로그램 조회와 관리자 확인을 동시에 시작합니다. (하나씩 기다리지 않아서 더 빠름)
+  // Program 조회와 관리자 확인을 동시에 시작합니다. (하나씩 기다리지 않아서 더 빠름)
   // 관리자 확인은 로그인 쿠키가 없으면 바로 끝나고, 실패해도 null이라 페이지가 깨지지 않습니다.
   const adminPromise = getAdminIfSignedIn();
   // 공휴일도 같이 가져옵니다. 조회 기간이 걸치는 모든 해(보통 1~2개)가 대상이고, 실패해도 달력은 그대로 나옵니다.
@@ -69,14 +69,14 @@ async function WodSection() {
     wods = await getWods(from, to);
   } catch (error) {
     // 자세한 원인은 서버 로그에만 남기고, 방문자에게는 안내 문구만 보여줍니다. (DB 정보 노출 방지)
-    console.error("[wod page] 프로그램을 불러오지 못했습니다.", error);
+    console.error("[wod page] Program을 불러오지 못했습니다.", error);
   }
   const isAdmin = (await adminPromise) !== null;
 
   if (wods === null) {
     return (
       <div role="alert" className="rounded-lg border border-line bg-surface p-8 text-center">
-        <p className="font-bold">프로그램을 불러오지 못했습니다.</p>
+        <p className="font-bold">Program을 불러오지 못했습니다.</p>
         <p className="mt-2 text-sm text-muted">잠시 후 다시 시도해 주세요.</p>
       </div>
     );

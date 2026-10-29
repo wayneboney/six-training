@@ -6,14 +6,14 @@ import { wodTypeLabels, type Wod } from "@/data/wods";
 import { formatDateKey } from "@/lib/date";
 
 type WodAdminListProps = {
-  wods: Wod[]; // 한 달치 프로그램 (날짜순으로 정렬된 상태)
+  wods: Wod[]; // 한 달치 Program (날짜순으로 정렬된 상태)
 };
 
-// 관리자용 프로그램 목록. 날짜별로 묶어서 보여줍니다.
+// 관리자용 Program 목록. 날짜별로 묶어서 보여줍니다.
 // 각 줄에 수정/삭제 버튼이 있고, 삭제는 "정말 삭제할까요?" 확인을 한 번 더 거칩니다.
 export default function WodAdminList({ wods }: WodAdminListProps) {
   if (wods.length === 0) {
-    return <p className="rounded-lg bg-surface p-8 text-center text-muted">이 달에 등록된 프로그램이 없습니다.</p>;
+    return <p className="rounded-lg bg-surface p-8 text-center text-muted">이 달에 등록된 Program이 없습니다.</p>;
   }
 
   // 날짜별로 묶기: [["2026-10-26", [Wod]], ["2026-10-27", [Wod, Wod]], ...]

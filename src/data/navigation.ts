@@ -7,7 +7,7 @@ export type NavItem = { href: string; label: string; memberOnly?: boolean };
 export const navItems: NavItem[] = [
   { href: "/", label: "홈" },
   { href: "/about", label: "박스 소개" },
-  { href: "/program", label: "프로그램", memberOnly: true },
+  { href: "/program", label: "Program", memberOnly: true },
   { href: "/reserve", label: "수업 예약", memberOnly: true },
 ];
 

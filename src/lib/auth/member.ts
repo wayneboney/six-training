@@ -83,7 +83,7 @@ export async function requireMember(): Promise<Member> {
   return member;
 }
 
-// 프로그램과 수업 예약을 볼 수 있는지: 관리자, 또는 상태가 '활동'이고 유효한 회원권이 있는 회원. (승인 대기, 회원권 종료 회원은 볼 수 없음)
+// Program과 수업 예약을 볼 수 있는지: 관리자, 또는 상태가 '활동'이고 유효한 회원권이 있는 회원. (승인 대기, 회원권 종료 회원은 볼 수 없음)
 // 판단은 DB 함수 can_view_member_content()가 합니다. DB 규칙(RLS)도 같은 함수를 써서, 화면을 거치지 않아도 막힙니다.
 // cache() = 같은 요청 안에서 같은 값으로 여러 번 불러도 DB에는 한 번만 묻습니다. (헤더, 페이지가 각각 확인해도 부담 없음)
 // 확인에 실패하면 안전하게 "볼 수 없음"으로 처리합니다.
@@ -97,7 +97,7 @@ export const hasContentAccess = cache(async (userId: string): Promise<boolean> =
   return data === true;
 });
 
-// 프로그램/수업 예약 같은 회원 전용 화면 맨 앞에서 호출합니다.
+// Program/수업 예약 같은 회원 전용 화면 맨 앞에서 호출합니다.
 //   로그인 안 함 → 로그인 화면 / 로그인했지만 회원권이 유효하지 않음 → 내 정보(안내가 있는 화면)
 export async function requireContentAccess(): Promise<Member> {
   const member = await requireMember();

@@ -32,7 +32,7 @@ export function HeaderMenusFallback() {
 
 export default async function HeaderMenus() {
   await connection();
-  // 프로그램, 수업 예약 메뉴는 회원권이 유효한 회원(과 관리자)에게만 보입니다.
+  // Program, 수업 예약 메뉴는 회원권이 유효한 회원(과 관리자)에게만 보입니다.
   const member = await getMemberIfSignedIn();
   const canView = member !== null && (await hasContentAccess(member.userId));
   const items = canView ? navItems : publicNavItems;

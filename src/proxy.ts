@@ -2,7 +2,7 @@
 // Java의 Servlet Filter와 비슷한 역할입니다.
 //
 // 여기서는 관리자 화면(/admin)과 회원 화면(/me, /login, /signup) 요청마다 로그인 쿠키(토큰)가 만료되기 전에 갱신만 합니다.
-// 로그인 여부만 보고 프로그램, 수업 예약 주소를 로그인 화면으로 보냅니다. (로그인 확인만 하고, 관리자 같은 권한 검사는 하지 않음)
+// 로그인 여부만 보고 Program, 수업 예약 주소를 로그인 화면으로 보냅니다. (로그인 확인만 하고, 관리자 같은 권한 검사는 하지 않음)
 // ⚠️ 권한 검사는 여기서 하지 않습니다. 실제 검사는 각 페이지와 Server Action의 requireAdmin()에서 합니다.
 //    (Next.js 문서 권장: proxy는 빠른 사전 처리용이고, 인증/권한의 최종 판단 장소가 아님)
 import { NextResponse, type NextRequest } from "next/server";
@@ -49,7 +49,7 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // 회원권이 유효한 회원(과 관리자)만 볼 수 있는 화면(프로그램, 수업 예약)을 서버가 화면을 만들기 전에 막는 1차 관문입니다.
+  // 회원권이 유효한 회원(과 관리자)만 볼 수 있는 화면(Program, 수업 예약)을 서버가 화면을 만들기 전에 막는 1차 관문입니다.
   //   로그인 안 함 → 로그인 화면 / 로그인했지만 회원권이 유효하지 않음 → 내 정보 화면
   // 각 페이지(requireContentAccess)와 DB 규칙도 같은 조건으로 한 번씩 더 확인합니다.
   if (MEMBER_ONLY_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`))) {

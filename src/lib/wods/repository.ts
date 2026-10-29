@@ -1,4 +1,4 @@
-// 프로그램 데이터를 DB에서 읽어 오는 곳. (Spring의 Repository/DAO 역할)
+// Program 데이터를 DB에서 읽어 오는 곳. (Spring의 Repository/DAO 역할)
 // 화면 코드는 이 함수만 부르고, DB 종류나 SQL은 몰라도 됩니다.
 import "server-only";
 import { createAuthSupabase } from "@/lib/supabase/auth";
@@ -13,7 +13,7 @@ export class WodLoadError extends Error {
   }
 }
 
-// from ~ to 기간의 프로그램을 날짜순으로 가져옵니다. (날짜는 "YYYY-MM-DD")
+// from ~ to 기간의 Program을 날짜순으로 가져옵니다. (날짜는 "YYYY-MM-DD")
 export async function getWods(from: string, to: string): Promise<Wod[]> {
   // 로그인한 사용자의 권한으로 조회합니다. DB 규칙(RLS)이 로그인하지 않은 요청은 막아서, 로그인하지 않으면 빈 결과가 나옵니다.
   const supabase = await createAuthSupabase();
@@ -30,14 +30,14 @@ export async function getWods(from: string, to: string): Promise<Wod[]> {
 
   if (error) {
     // 원인(error)은 서버 로그용으로 함께 넘기고, 화면에는 일반적인 안내만 보여줍니다.
-    throw new WodLoadError(`프로그램 조회 실패: ${error.message}`, { cause: error });
+    throw new WodLoadError(`Program 조회 실패: ${error.message}`, { cause: error });
   }
 
   const { wods, skipped } = toWods(data ?? []);
   if (skipped.length > 0) {
     // 화면이 모르는 종류(wod_type)가 DB에 있으면 빼고 보여주되, 서버 로그에 남깁니다.
     console.warn(
-      `[wods] 알 수 없는 종류라서 제외한 프로그램 ${skipped.length}개:`,
+      `[wods] 알 수 없는 종류라서 제외한 Program ${skipped.length}개:`,
       skipped.map((row) => ({ id: row.id, wod_type: row.wod_type })),
     );
   }

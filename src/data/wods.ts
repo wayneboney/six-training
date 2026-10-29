@@ -1,8 +1,8 @@
-// 프로그램(Workout Of the Day)의 모양(타입)과 종류 정의.
-// 실제 프로그램 데이터는 Supabase DB의 wods 테이블에 있고, src/lib/wods/repository.ts가 읽어 옵니다.
+// Program(Workout Of the Day)의 모양(타입)과 종류 정의.
+// 실제 Program 데이터는 Supabase DB의 wods 테이블에 있고, src/lib/wods/repository.ts가 읽어 옵니다.
 // DB 테이블 정의: supabase/migrations/20261025000000_create_wods.sql
 
-// 프로그램 종류 목록. 종류를 추가하려면 여기와 아래 wodTypeLabels,
+// Program 종류 목록. 종류를 추가하려면 여기와 아래 wodTypeLabels,
 // 그리고 화면 색상(src/components/wod/wodTypeStyles.ts)에 한 줄씩 추가합니다.
 // DB 테이블의 check 제약(wod_type in (...))에도 같은 값을 넣어야 합니다.
 export const wodTypes = ["CROSSFIT", "HYROX", "COACH_TRAINING"] as const;
@@ -11,10 +11,10 @@ export const wodTypes = ["CROSSFIT", "HYROX", "COACH_TRAINING"] as const;
 export type WodType = (typeof wodTypes)[number];
 
 export type Wod = {
-  id: number; // DB의 PK. 관리자 화면에서 수정/삭제할 프로그램을 가리킬 때 씁니다.
+  id: number; // DB의 PK. 관리자 화면에서 수정/삭제할 Program을 가리킬 때 씁니다.
   date: string; // "YYYY-MM-DD" 형식 (예: "2026-10-26")
   type: WodType;
-  title: string; // 프로그램 이름 (예: "Fran")
+  title: string; // Program 이름 (예: "Fran")
   format: string; // 진행 방식 (예: "For Time", "AMRAP 20min")
   movements: string[]; // 동작 목록, 한 줄에 하나
   note?: string; // 코치 메모 (생략 가능)

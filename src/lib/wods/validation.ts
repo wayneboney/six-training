@@ -1,4 +1,4 @@
-// 프로그램 입력값 검증 (Spring의 @Valid + Validator 역할)
+// Program 입력값 검증 (Spring의 @Valid + Validator 역할)
 // 규칙은 DB 테이블의 check 제약(supabase/migrations/20261025000000_create_wods.sql)과 같게 맞춥니다.
 // 서버에서 반드시 실행합니다. 브라우저 검사(required 등)는 우회할 수 있어서 믿으면 안 됩니다.
 import { wodTypes, type WodType } from "@/data/wods";
@@ -40,7 +40,7 @@ export type WodValidationResult =
   | { ok: true; value: WodInput; values: WodFormValues }
   | { ok: false; errors: WodFieldErrors; values: WodFormValues };
 
-// 주소나 폼에서 받은 프로그램 id 검사: 1 이상의 정수만 허용 (예: "abc", "-1", "1.5", "0"은 거부)
+// 주소나 폼에서 받은 Program id 검사: 1 이상의 정수만 허용 (예: "abc", "-1", "1.5", "0"은 거부)
 export function parseWodId(value: unknown): number | null {
   if (typeof value === "number") {
     return Number.isSafeInteger(value) && value > 0 ? value : null;
@@ -108,9 +108,9 @@ export function validateWodForm(formData: FormData): WodValidationResult {
   }
 
   if (!values.title) {
-    errors.title = "프로그램 이름을 입력해 주세요.";
+    errors.title = "Program 이름을 입력해 주세요.";
   } else if (values.title.length > WOD_LIMITS.title) {
-    errors.title = `프로그램 이름은 ${WOD_LIMITS.title}자 이하로 입력해 주세요.`;
+    errors.title = `Program 이름은 ${WOD_LIMITS.title}자 이하로 입력해 주세요.`;
   }
 
   if (!values.format) {

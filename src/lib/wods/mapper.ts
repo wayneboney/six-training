@@ -1,4 +1,4 @@
-// DB에서 꺼낸 프로그램 한 줄을 화면에서 쓰는 Wod 모양으로 바꿉니다. (MyBatis resultMap 역할)
+// DB에서 꺼낸 Program 한 줄을 화면에서 쓰는 Wod 모양으로 바꿉니다. (MyBatis resultMap 역할)
 // DB 컬럼 이름(snake_case)과 화면 필드 이름(camelCase)이 달라서 이 변환이 필요합니다.
 import { wodTypes, type Wod, type WodType } from "@/data/wods";
 

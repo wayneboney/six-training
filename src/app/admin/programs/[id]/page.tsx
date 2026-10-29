@@ -12,15 +12,15 @@ import { getWodById } from "@/lib/wods/admin-repository";
 import { parseWodId, wodToFormValues } from "@/lib/wods/validation";
 
 export const metadata: Metadata = {
-  title: "프로그램 수정",
+  title: "Program 수정",
 };
 
-// /admin/programs/123 = id가 123인 프로그램 수정 화면
+// /admin/programs/123 = id가 123인 Program 수정 화면
 // [id] 폴더 이름의 대괄호 = 주소의 그 자리 값을 params.id로 받는다는 뜻 (Spring의 @PathVariable)
 export default function EditWodPage(props: PageProps<"/admin/programs/[id]">) {
   return (
     <div>
-      <h1 className="text-2xl font-black">프로그램 수정</h1>
+      <h1 className="text-2xl font-black">Program 수정</h1>
       <div className="mt-8">
         <Suspense fallback={<p className="text-muted">불러오는 중…</p>}>
           <EditWod params={props.params} />
@@ -41,7 +41,7 @@ async function EditWod({ params }: { params: PageProps<"/admin/programs/[id]">["
     notFound();
   }
 
-  // 없는 프로그램(이미 삭제됨 등)도 404
+  // 없는 Program(이미 삭제됨 등)도 404
   const wod = await getWodById(wodId);
   if (!wod) {
     notFound();

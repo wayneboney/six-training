@@ -1,4 +1,4 @@
-// 프로그램 등록/수정 폼 (두 화면이 같이 씁니다)
+// Program 등록/수정 폼 (두 화면이 같이 씁니다)
 // 제출 중 표시, 칸별 에러 표시가 필요해서 브라우저에서 실행되는 컴포넌트로 만듭니다.
 "use client";
 
@@ -79,7 +79,7 @@ export default function WodForm({ action, initialValues, submitLabel, cancelHref
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2">
-        <Field label="프로그램 이름" htmlFor="title" error={errors.title}>
+        <Field label="Program 이름" htmlFor="title" error={errors.title}>
           <input
             id="title"
             name="title"

@@ -43,7 +43,7 @@ export async function getCurrentAdmin(): Promise<Admin | null> {
   return { userId: user.id, email: user.email ?? "", name: adminRow.name as string };
 }
 
-// 일반 방문자 화면(헤더, 프로그램 달력)에서 "관리자에게만 버튼 보여주기"용으로 쓰는 가벼운 확인.
+// 일반 방문자 화면(헤더, Program 달력)에서 "관리자에게만 버튼 보여주기"용으로 쓰는 가벼운 확인.
 // - 로그인 쿠키가 아예 없으면 Supabase에 묻지 않고 바로 null (일반 방문자는 추가 비용 없음)
 // - 확인 중 문제가 생겨도 일반 화면이 깨지지 않도록 null로 처리하고 로그만 남김
 export async function getAdminIfSignedIn(): Promise<Admin | null> {
