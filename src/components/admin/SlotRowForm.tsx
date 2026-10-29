@@ -4,6 +4,7 @@
 
 import { deleteSlotAction, updateSlotAction } from "@/app/admin/schedule/actions";
 import MemberActionForm from "@/components/admin/MemberActionForm";
+import SlotBookingsButton from "@/components/admin/SlotBookingsButton";
 import { classLabelsKo } from "@/data/timetable";
 import type { AdminSlot } from "@/lib/schedule/repository";
 
@@ -89,7 +90,16 @@ export default function SlotRowForm({ slot }: { slot: AdminSlot }) {
       />
 
       {/* 알림이 필요할 때만 작게: 예약이 있으면 건수, 종료 시각이 비어 있으면 입력 안내 */}
-      {slot.booked > 0 && <span className="text-xs text-muted">예약 {slot.booked}건</span>}
+      {slot.booked > 0 && (
+        <>
+          <span className="text-xs text-muted">예약 {slot.booked}건</span>
+          {/* 누르면 예약 인원 목록 팝업 */}
+          <SlotBookingsButton
+            slotId={slot.id}
+            label={`${slot.endTime ? `${slot.startTime} - ${slot.endTime}` : slot.startTime} ${classLabelsKo[slot.classType as keyof typeof classLabelsKo] ?? slot.classType}`}
+          />
+        </>
+      )}
       {slot.endTime === null && <span className="text-xs font-bold text-accent">종료 시각 입력 필요</span>}
     </li>
   );

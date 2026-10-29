@@ -4,6 +4,8 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth/admin";
+import { seoulTodayKey } from "@/lib/date";
+import { getActiveCodes } from "@/lib/members/repository";
 import { toFailure, type ActionResult } from "@/lib/members/rpc-error";
 import { parseBigintId, parseInteger } from "@/lib/members/validation";
 import { createAuthSupabase } from "@/lib/supabase/auth";
@@ -134,4 +136,65 @@ export async function addSlotsAction(_prev: ScheduleActionState, formData: FormD
   refresh();
   const added = typeof data === "number" ? data : weekdays.length;
   return { ok: true, message: `${parsed.time} - ${parsed.endTime} 수업을 ${added}개 요일에 추가했습니다.` };
+}
+
+// ---------- 수업 한 칸의 오늘 이후 예약 인원 (시간표 관리의 "?" 팝업) ----------
+export type SlotBooking = {
+  classDate: string; // YYYY-MM-DD
+  status: "confirmed" | "waiting";
+  name: string;
+  guestLabel: string | null; // 드랍인/체험이면 그 이름, 회원이면 null
+};
+
+export type SlotBookingsResult = { ok: true; bookings: SlotBooking[] } | { ok: false; message: string };
+
+// 팝업을 열 때만 불러옵니다. 관리자만 볼 수 있고(DB 규칙도 같음), 이름과 구분만 돌려줍니다.
+export async function listSlotBookingsAction(slotId: number): Promise<SlotBookingsResult> {
+  await requireAdmin();
+  const id = parseBigintId(slotId);
+  if (id === null) {
+    return { ok: false, message: "잘못된 요청입니다. 화면을 새로고침한 뒤 다시 시도해 주세요." };
+  }
+
+  const supabase = await createAuthSupabase();
+  const { data, error } = await supabase
+    .from("reservations")
+    .select("class_date, status, guest_name, guest_type, profiles(name)")
+    .eq("slot_id", id)
+    .gte("class_date", seoulTodayKey())
+    .neq("status", "cancelled")
+    .order("class_date", { ascending: true })
+    .order("id", { ascending: true })
+    .overrideTypes<
+      {
+        class_date: string;
+        status: "confirmed" | "waiting";
+        guest_name: string | null;
+        guest_type: string | null;
+        profiles: { name: string } | null;
+      }[],
+      { merge: false }
+    >();
+  if (error) {
+    console.error("[admin] 수업 예약 인원 조회 실패", error);
+    return { ok: false, message: "예약 인원을 불러오지 못했습니다." };
+  }
+
+  // 드랍인/체험 구분 이름은 공통코드에서 읽습니다. (조회에 실패해도 이름은 그대로 보여줌)
+  let guestNames = new Map<string, string>();
+  try {
+    guestNames = new Map((await getActiveCodes("GUEST_TYPE")).map((c) => [c.code, c.name]));
+  } catch (codeError) {
+    console.error("[admin] 게스트 구분 조회 실패", codeError);
+  }
+
+  return {
+    ok: true,
+    bookings: data.map((row) => ({
+      classDate: row.class_date,
+      status: row.status,
+      name: row.profiles?.name ?? row.guest_name ?? "(이름 없음)",
+      guestLabel: row.guest_type ? (guestNames.get(row.guest_type) ?? row.guest_type) : null,
+    })),
+  };
 }
