@@ -22,7 +22,6 @@ export default function AboutPage() {
           <p className="text-sm font-bold tracking-widest text-accent">SINCE {gym.foundedYear}</p>
           <h1 className="mt-2 text-3xl font-black sm:text-5xl">박스 소개</h1>
           <p className="mt-4 max-w-2xl text-muted">{gym.intro}</p>
-          <p className="mt-2 max-w-2xl text-muted">{gym.nameStory}</p>
         </div>
       </div>
 
