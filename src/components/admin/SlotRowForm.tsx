@@ -11,6 +11,17 @@ import type { AdminSlot } from "@/lib/schedule/repository";
 const fieldClass = "rounded-md border border-line px-2 py-1.5 text-sm focus:border-accent focus:outline-none";
 
 export default function SlotRowForm({ slot }: { slot: AdminSlot }) {
+  // 예약 N건 + 인원 보기(?) 버튼. 모바일은 윗줄(시각 줄)의 남는 오른쪽 자리에, PC는 삭제 버튼 오른쪽에 보입니다. (같은 내용을 두 곳에 두고 화면 크기로 하나만 보여줌)
+  const bookingNote = slot.booked > 0 && (
+    <>
+      <span className="whitespace-nowrap text-xs text-muted">예약 {slot.booked}건</span>
+      <SlotBookingsButton
+        slotId={slot.id}
+        label={`${slot.endTime ? `${slot.startTime} - ${slot.endTime}` : slot.startTime} ${classLabelsKo[slot.classType as keyof typeof classLabelsKo] ?? slot.classType}`}
+      />
+    </>
+  );
+
   return (
     // [&_button]:px-3 = 모바일에서 이 줄의 버튼(저장, 삭제) 좌우 여백을 줄여서 두 버튼이 한 줄에 나란히 들어가게 합니다
     <li className="flex flex-wrap items-center gap-1.5 px-3 py-2 sm:gap-2 [&_button]:px-3 sm:[&_button]:px-4">
@@ -21,7 +32,7 @@ export default function SlotRowForm({ slot }: { slot: AdminSlot }) {
         layout="contents"
       >
         {/* 시작 - 종료: 모바일에서는 이 묶음이 한 줄을 차지하고(basis-full), 그 아래 줄에 종류·정원·저장·삭제가 나란히 옵니다 */}
-        <div className="flex basis-full items-center gap-2 sm:basis-auto">
+        <div className="flex basis-full flex-wrap items-center gap-2 sm:basis-auto sm:flex-nowrap">
           <label className="sr-only" htmlFor={`time-${slot.id}`}>
             시작 시각
           </label>
@@ -48,6 +59,8 @@ export default function SlotRowForm({ slot }: { slot: AdminSlot }) {
             defaultValue={slot.endTime ?? undefined}
             className={fieldClass}
           />
+          {/* 모바일: 시각 줄의 오른쪽 빈자리. 자리가 모자란 좁은 화면에서는 시각 아래 줄로 내려갑니다 */}
+          {bookingNote && <div className="ml-auto flex items-center gap-1.5 sm:hidden">{bookingNote}</div>}
         </div>
         <select
           key={`c-${slot.classType}`}
@@ -90,16 +103,7 @@ export default function SlotRowForm({ slot }: { slot: AdminSlot }) {
       />
 
       {/* 알림이 필요할 때만 작게: 예약이 있으면 건수, 종료 시각이 비어 있으면 입력 안내 */}
-      {slot.booked > 0 && (
-        <>
-          <span className="text-xs text-muted">예약 {slot.booked}건</span>
-          {/* 누르면 예약 인원 목록 팝업 */}
-          <SlotBookingsButton
-            slotId={slot.id}
-            label={`${slot.endTime ? `${slot.startTime} - ${slot.endTime}` : slot.startTime} ${classLabelsKo[slot.classType as keyof typeof classLabelsKo] ?? slot.classType}`}
-          />
-        </>
-      )}
+      {bookingNote && <div className="hidden items-center gap-1.5 sm:flex">{bookingNote}</div>}
       {slot.endTime === null && <span className="text-xs font-bold text-accent">종료 시각 입력 필요</span>}
     </li>
   );
