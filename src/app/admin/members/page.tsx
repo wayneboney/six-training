@@ -242,10 +242,11 @@ function MemberItem({
                 {statusLabel}
               </span>
             </p>
-            <p className="truncate text-sm text-muted">
+            {/* 모바일: 이메일/휴대폰만 (줄바꿈으로 …이 생기지 않게), 가입 일시는 PC에서만 */}
+            <p className="break-all text-sm text-muted sm:truncate sm:break-normal">
               {m.email ?? "이메일 없음"}
-              {m.phone && <span className="ml-3">{formatPhone(m.phone)}</span>}
-              <span className="ml-3">가입 {formatDateTimeToKey(m.createdAt)}</span>
+              {m.phone && <span className="block sm:ml-3 sm:inline">{formatPhone(m.phone)}</span>}
+              <span className="ml-3 hidden sm:inline">가입 {formatDateTimeToKey(m.createdAt)}</span>
             </p>
           </div>
           {/* 모바일: 프로필 줄 오른쪽 빈자리에 상세 버튼 */}
