@@ -43,7 +43,7 @@ export default function WodAdminList({ wods }: WodAdminListProps) {
                     <span className="ml-2 text-sm font-normal text-accent">{wod.format}</span>
                   </p>
                   {/* truncate = 한 줄을 넘으면 … 으로 줄임. 목록에서는 요약만 보여줍니다 */}
-                  <p className="truncate text-sm text-muted">{wod.movements.join(" · ")}</p>
+                  <p className="truncate text-sm text-muted">{wod.movements.filter((line) => line !== "").join(" · ")}</p>
                 </div>
 
                 {wod.note && <span className="shrink-0 text-xs text-muted">💬 메모 있음</span>}

@@ -119,12 +119,17 @@ export function validateWodForm(formData: FormData): WodValidationResult {
     errors.format = `진행 방식은 ${WOD_LIMITS.format}자 이하로 입력해 주세요.`;
   }
 
-  // 동작: 줄바꿈으로 나누고, 앞뒤 공백 제거, 빈 줄은 버림
+  // 동작: 줄바꿈으로 나누고, 앞뒤 공백 제거
+  // 빈 줄은 "구간 사이 띄움"으로 남깁니다. (예: 1번 운동과 2번 운동 사이) 단, 맨 앞/뒤의 빈 줄과 연속된 빈 줄은 하나로 줄입니다.
   // \r?\n = 윈도우(\r\n)와 맥(\n) 줄바꿈 모두 처리
   const movements = values.movements
     .split(/\r?\n/)
     .map((line) => line.trim())
-    .filter((line) => line.length > 0);
+    .filter((line, index, lines) => line.length > 0 || (index > 0 && lines[index - 1].length > 0));
+  // 맨 뒤의 빈 줄은 버립니다.
+  while (movements.length > 0 && movements[movements.length - 1] === "") {
+    movements.pop();
+  }
 
   if (movements.length === 0) {
     errors.movements = "동작을 한 줄에 하나씩 1개 이상 입력해 주세요.";

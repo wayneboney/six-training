@@ -48,11 +48,16 @@ export default function WodDetail({ date, wods, holiday, isAdmin = false }: WodD
                 key에 순서 번호(index)를 함께 넣습니다. 같은 동작이 한 Program에 두 번 나올 수 있어서
                 (예: 처음과 마지막에 Run 400m) 이름만으로는 key가 겹치기 때문입니다. */}
             <ol className="mt-3 space-y-1">
-              {wod.movements.map((movement, index) => (
-                <li key={`${index}-${movement}`} className="border-l-2 border-line pl-3">
-                  {movement}
-                </li>
-              ))}
+              {wod.movements.map((movement, index) =>
+                // 빈 줄은 구간 사이의 띄움으로 보여줍니다.
+                movement === "" ? (
+                  <li key={`${index}-gap`} aria-hidden="true" className="h-3" />
+                ) : (
+                  <li key={`${index}-${movement}`} className="border-l-2 border-line pl-3">
+                    {movement}
+                  </li>
+                ),
+              )}
             </ol>
 
             {wod.note && <p className="mt-3 rounded bg-surface p-3 text-sm text-muted">💬 {wod.note}</p>}
