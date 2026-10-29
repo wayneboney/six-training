@@ -8,9 +8,10 @@ type AvatarProps = {
   url: string | null; // 프로필 사진 주소 (https만 DB에서 허용)
   name: string; // 사진 설명(alt)용 이름
   size?: number; // 지름(px)
+  mark?: "crown" | "mvp"; // 왼쪽 위에 다는 표시: crown = 관리자 왕관, mvp = 지난달 MVP
 };
 
-export default function Avatar({ url, name, size = 32 }: AvatarProps) {
+export default function Avatar({ url, name, size = 32, mark }: AvatarProps) {
   // 불러오기를 마친(성공/실패) 주소를 기억합니다. 주소가 바뀌면 다시 시도합니다.
   const [loadedUrl, setLoadedUrl] = useState<string | null>(null);
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
@@ -36,7 +37,7 @@ export default function Avatar({ url, name, size = 32 }: AvatarProps) {
     return () => clearTimeout(timer);
   }, [url]);
 
-  return (
+  const circle = (
     // 바깥 동그라미 안에 실루엣을 항상 깔아 두고, 사진은 다 불러온 뒤에만 그 위에 보여줍니다.
     // (불러오는 동안이나 실패했을 때 깨진 사진 아이콘이 보이지 않게 하기 위해)
     <span
@@ -64,6 +65,26 @@ export default function Avatar({ url, name, size = 32 }: AvatarProps) {
           className={`absolute inset-0 h-full w-full object-cover ${imageReady ? "opacity-100" : "opacity-0"}`}
         />
       )}
+    </span>
+  );
+
+  if (!mark) {
+    return circle;
+  }
+  // 표시가 있으면 동그라미(overflow 숨김) 바깥에서 왼쪽 위 모서리에 겹쳐 그립니다.
+  const markSize = Math.max(12, Math.round(size * 0.45));
+  return (
+    <span className="relative inline-block shrink-0">
+      {circle}
+      <span
+        role="img"
+        aria-label={mark === "crown" ? "관리자" : "지난달 MVP"}
+        title={mark === "crown" ? "관리자" : "지난달 MVP"}
+        style={{ fontSize: markSize, lineHeight: 1 }}
+        className={`pointer-events-none absolute -left-1 -top-1.5 select-none drop-shadow ${mark === "crown" ? "-rotate-[18deg]" : ""}`}
+      >
+        {mark === "crown" ? "👑" : "🏆"}
+      </span>
     </span>
   );
 }

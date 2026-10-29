@@ -42,7 +42,7 @@ export default async function AccountLinks() {
         aria-label={`${member.name}님, 내 정보로 이동`}
         className="flex items-center gap-2 hover:opacity-80 sm:border-l sm:border-line sm:pl-4"
       >
-        <Avatar url={member.avatarUrl} name={member.name} size={32} />
+        <Avatar url={member.avatarUrl} name={member.name} size={32} mark={member.role === "admin" ? "crown" : undefined} />
         <span className="max-w-[5rem] truncate text-sm font-bold sm:max-w-[12rem]">
           {member.name}님<span className="hidden font-normal text-muted sm:inline"> 환영합니다</span>
         </span>

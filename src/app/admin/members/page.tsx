@@ -6,7 +6,6 @@ import MemberActionForm from "@/components/admin/MemberActionForm";
 import { requireAdmin } from "@/lib/auth/admin";
 import { seoulTodayKey } from "@/lib/date";
 import Avatar from "@/components/Avatar";
-import MvpBadge from "@/components/MvpBadge";
 import Pagination from "@/components/Pagination";
 import { sortMembersByName } from "@/lib/members/sort";
 import { formatPhone } from "@/lib/profile/contact";
@@ -233,7 +232,7 @@ function MemberItem({
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
         {/* 프로필 사진 (없으면 기본 실루엣) + 이름/연락처 */}
         <div className="flex min-w-0 flex-1 items-center gap-3">
-          <Avatar url={m.avatarUrl} name={m.name} size={44} />
+          <Avatar url={m.avatarUrl} name={m.name} size={44} mark={m.role === "admin" ? "crown" : mvpDays !== null ? "mvp" : undefined} />
           <div className="min-w-0 flex-1">
             <p className="font-bold">
               {m.name}
@@ -241,10 +240,7 @@ function MemberItem({
                 <span className="ml-2 rounded bg-foreground px-1.5 py-0.5 text-xs font-bold text-background">관리자</span>
               )}
               {mvpDays !== null && (
-                <span className="ml-2 inline-flex items-center gap-1 align-middle">
-                  <MvpBadge />
-                  <span className="text-xs font-normal text-muted">지난달 {mvpDays}일 출석</span>
-                </span>
+                <span className="ml-2 text-xs font-normal text-muted">🏆 지난달 {mvpDays}일 출석</span>
               )}
               <span
                 className={`ml-2 rounded px-1.5 py-0.5 text-xs font-bold ${

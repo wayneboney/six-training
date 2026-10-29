@@ -149,7 +149,7 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
           <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-2">
             {mvps.map((m, i) => (
               <li key={`${m.name}-${i}`} className="flex items-center gap-2">
-                <Avatar url={m.avatarUrl} name={m.name} size={32} />
+                <Avatar url={m.avatarUrl} name={m.name} size={32} mark="mvp" />
                 <span className="font-bold">{m.name}</span>
               </li>
             ))}

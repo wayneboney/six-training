@@ -9,7 +9,6 @@ import {
 } from "@/app/reserve/actions";
 import MemberActionForm from "@/components/admin/MemberActionForm";
 import Avatar from "@/components/Avatar";
-import MvpBadge from "@/components/MvpBadge";
 import { classLabelsKo } from "@/data/timetable";
 import { GUEST_NAME_MAX } from "@/lib/members/validation";
 import type { CodeOption } from "@/lib/members/repository";
@@ -218,9 +217,8 @@ function AttendeeList({
             <span className="flex items-center gap-2">
               {numbered && <span className="w-5 text-center font-bold text-accent">{a.queueNo}</span>}
               {/* 프로필 사진이 없으면 기본 실루엣이 나옵니다 */}
-              <Avatar url={a.avatarUrl} name={displayName(a)} size={28} />
+              <Avatar url={a.avatarUrl} name={displayName(a)} size={28} mark={a.isMvp ? "mvp" : undefined} />
               <span className={a.isMe ? "font-bold" : ""}>{displayName(a)}</span>
-              {a.isMvp && <MvpBadge />}
               {a.isMe && <span className="rounded bg-accent px-1.5 py-0.5 text-[10px] font-bold text-white">나</span>}
             </span>
             {/* 대신 취소는 관리자에게만 예약 번호가 와서 관리자에게만 보입니다 */}
