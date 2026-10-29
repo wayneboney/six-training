@@ -8,7 +8,7 @@ type AvatarProps = {
   url: string | null; // 프로필 사진 주소 (https만 DB에서 허용)
   name: string; // 사진 설명(alt)용 이름
   size?: number; // 지름(px)
-  mark?: "crown" | "mvp"; // 왼쪽 위에 다는 표시: crown = 관리자 왕관, mvp = 지난달 MVP
+  mark?: "admin" | "mvp"; // 왼쪽 위에 다는 표시: admin = 관리자(코치), mvp = 지난달 MVP
 };
 
 export default function Avatar({ url, name, size = 32, mark }: AvatarProps) {
@@ -78,12 +78,12 @@ export default function Avatar({ url, name, size = 32, mark }: AvatarProps) {
       {circle}
       <span
         role="img"
-        aria-label={mark === "crown" ? "관리자" : "지난달 MVP"}
-        title={mark === "crown" ? "관리자" : "지난달 MVP"}
+        aria-label={mark === "admin" ? "관리자" : "지난달 MVP"}
+        title={mark === "admin" ? "관리자" : "지난달 MVP"}
         style={{ fontSize: markSize, lineHeight: 1 }}
-        className={`pointer-events-none absolute -left-1 -top-1.5 select-none drop-shadow ${mark === "crown" ? "-rotate-[18deg]" : ""}`}
+        className={`pointer-events-none absolute -left-1 -top-1.5 select-none drop-shadow`}
       >
-        {mark === "crown" ? "👑" : "🏆"}
+        {mark === "admin" ? "🏋️" : "🏆"}
       </span>
     </span>
   );

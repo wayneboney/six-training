@@ -101,7 +101,7 @@ async function MemberDetailView({ params }: { params: PageProps<"/admin/members/
     <div className="space-y-8">
       {/* 기본 정보 */}
       <section className="flex items-center gap-4">
-        <Avatar url={member.avatarUrl} name={member.name} size={72} mark={member.role === "admin" ? "crown" : undefined} />
+        <Avatar url={member.avatarUrl} name={member.name} size={72} mark={member.role === "admin" ? "admin" : undefined} />
         <div className="min-w-0">
           <h1 className="text-2xl font-black">
             {member.name}

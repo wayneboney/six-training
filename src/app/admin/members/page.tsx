@@ -232,7 +232,7 @@ function MemberItem({
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
         {/* 프로필 사진 (없으면 기본 실루엣) + 이름/연락처 */}
         <div className="flex min-w-0 flex-1 items-center gap-3">
-          <Avatar url={m.avatarUrl} name={m.name} size={44} mark={m.role === "admin" ? "crown" : mvpDays !== null ? "mvp" : undefined} />
+          <Avatar url={m.avatarUrl} name={m.name} size={44} mark={m.role === "admin" ? "admin" : mvpDays !== null ? "mvp" : undefined} />
           <div className="min-w-0 flex-1">
             <p className="font-bold">
               {m.name}
