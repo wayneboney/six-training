@@ -25,7 +25,7 @@ export default function AboutPage() {
         </div>
       </div>
 
-      <Section title="우리의 철학">
+      <Section title="SIX Training의 특징">
         {/* grid sm:grid-cols-3 = 모바일은 1열, PC는 3열 */}
         <div className="grid gap-4 sm:grid-cols-3">
           {gym.philosophy.map((item) => (
@@ -37,16 +37,18 @@ export default function AboutPage() {
         </div>
       </Section>
 
-      <Section title="시설">
-        <ul className="grid gap-4 sm:grid-cols-2">
-          {gym.facilities.map((item) => (
-            <li key={item.title} className="rounded-lg bg-surface p-5">
-              <p className="font-bold">{item.title}</p>
-              <p className="mt-1 text-sm text-muted">{item.description}</p>
-            </li>
-          ))}
-        </ul>
-      </Section>
+      {gym.facilities.length > 0 && (
+        <Section title="시설">
+          <ul className="grid gap-4 sm:grid-cols-2">
+            {gym.facilities.map((item) => (
+              <li key={item.title} className="rounded-lg bg-surface p-5">
+                <p className="font-bold">{item.title}</p>
+                <p className="mt-1 text-sm text-muted">{item.description}</p>
+              </li>
+            ))}
+          </ul>
+        </Section>
+      )}
 
       <Section title="코치진">
         <div className="grid gap-4 sm:grid-cols-3">

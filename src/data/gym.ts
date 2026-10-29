@@ -1,6 +1,5 @@
 // 체육관 정보는 이 파일 한 곳에서만 관리합니다.
 // 화면 컴포넌트는 여기 값을 읽어서 보여주기만 하므로, 가격이나 시간표가 바뀌면 이 파일만 고치면 됩니다.
-// TODO: 철학(philosophy), 시설(facilities) 문구는 아직 예시 값입니다.
 
 // type = 데이터의 모양 정의. Java의 DTO 클래스와 같은 역할입니다.
 // 정의와 다른 모양의 값을 넣으면 저장하는 순간 VS Code에 빨간 밑줄이 생깁니다.
@@ -30,25 +29,21 @@ export const gym = {
   // satisfies = "이 배열이 InfoCard[] 모양을 지키는지 검사해 줘"라는 뜻입니다.
   philosophy: [
     {
-      title: "안전이 먼저",
-      description: "무게보다 정확한 자세가 우선입니다. 모든 수업에 코치가 함께합니다.",
+      title: "하이록스 정식 지부",
+      description: "독일 본사 하이록스 정식 지부로, 마포구에서 하이록스를 제대로 배우고 훈련할 수 있는 유일한 박스입니다.",
     },
     {
-      title: "누구나 시작",
-      description: "운동 경험이 없어도 강도를 조절해서 같은 운동을 함께 수행합니다.",
+      title: "자격을 갖춘 코치진",
+      description: "크로스핏 레벨 1, 2 코치진이 동작부터 강도 조절까지 수업을 이끕니다.",
     },
     {
-      title: "함께하는 커뮤니티",
-      description: "혼자서는 못 할 것 같던 운동도 함께라면 끝까지 해낼 수 있습니다.",
+      title: "크로스핏 · 하이록스 · 오픈짐",
+      description: "수업 시간표에 맞춰 크로스핏과 하이록스 수업을 듣고, 오픈짐 시간에는 자유롭게 훈련할 수 있습니다.",
     },
   ] satisfies InfoCard[],
 
-  facilities: [
-    { title: "리그 & 풀업바", description: "8인 동시 사용 가능한 리그" },
-    { title: "바벨 & 플레이트", description: "올림픽 바벨, 범퍼 플레이트 완비" },
-    { title: "유산소 머신", description: "로잉, 에어바이크, 스키에르그, 트레드밀" },
-    { title: "샤워실 & 락커", description: "남녀 분리 샤워실, 개인 락커" },
-  ] satisfies InfoCard[],
+  // TODO: 실제 시설 정보를 받으면 채웁니다. 비어 있으면 소개 페이지에서 "시설" 영역이 나오지 않습니다.
+  facilities: [] as InfoCard[],
 
   coaches: [
     { name: "윤효용", role: "헤드 코치", instagram: "steel.yoon" },
