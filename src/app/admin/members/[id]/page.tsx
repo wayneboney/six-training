@@ -11,9 +11,10 @@ import {
   updateMemberAction,
 } from "@/app/admin/members/actions";
 import Avatar from "@/components/Avatar";
+import AttendanceDates from "@/components/AttendanceDates";
 import AttendanceStats from "@/components/AttendanceStats";
 import MemberActionForm from "@/components/admin/MemberActionForm";
-import { getAttendanceSummary, type AttendanceCount } from "@/lib/attendance/repository";
+import { getAttendanceSummary, getMemberAttendanceDates, type AttendanceCount } from "@/lib/attendance/repository";
 import { requireAdmin } from "@/lib/auth/admin";
 import { PASSWORD_RESET_ENABLED } from "@/lib/auth/features";
 import { diffDays, seoulTodayKey } from "@/lib/date";
@@ -65,6 +66,7 @@ async function MemberDetailView({ params }: { params: PageProps<"/admin/members/
   let roles: CodeOption[] = [];
   let statuses: CodeOption[] = [];
   let plans: PlanOption[] = [];
+  let attendanceDates: string[] = []; // 출석한 날짜 (최근순)
   let attendanceCount: AttendanceCount | null = null; // 출석 일수 (일반회원만, 조회 실패하면 표시 안 함)
   let failed = false;
   try {
@@ -74,6 +76,7 @@ async function MemberDetailView({ params }: { params: PageProps<"/admin/members/
     plans = await getActivePlans();
     if (member?.role === "member") {
       attendanceCount = (await getAttendanceSummary()).get(userId) ?? { thisMonth: 0, lastMonth: 0, total: 0 };
+      attendanceDates = await getMemberAttendanceDates(userId);
     }
   } catch (error) {
     console.error("[admin] 회원 상세 조회 실패", error);
@@ -136,6 +139,10 @@ async function MemberDetailView({ params }: { params: PageProps<"/admin/members/
             <AttendanceStats count={attendanceCount} />
           </div>
           <p className="mt-2 text-xs text-muted">하루에 수업을 여러 번 들어도 1일로 세고, 수업(시간표)을 지워도 줄어들지 않습니다.</p>
+          <div className="mt-4 border-t border-line pt-4">
+            <p className="mb-2 text-sm font-bold">출석한 날짜</p>
+            <AttendanceDates dates={attendanceDates} total={attendanceCount.total} />
+          </div>
         </section>
       )}
 

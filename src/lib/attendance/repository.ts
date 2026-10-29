@@ -38,3 +38,19 @@ export async function getAttendanceSummary(): Promise<Map<string, AttendanceCoun
     return new Map();
   }
 }
+
+// 관리자: 회원 한 명이 출석한 날짜 목록 (최근순, "YYYY-MM-DD"). 조회 실패 시 빈 목록
+export async function getMemberAttendanceDates(userId: string, limit = 120): Promise<string[]> {
+  try {
+    const supabase = await createAuthSupabase();
+    const { data, error } = await supabase.rpc("admin_member_attendance_dates", { p_user_id: userId, p_limit: limit });
+    if (error) {
+      console.error("[admin] 회원 출석 날짜 조회 실패", error);
+      return [];
+    }
+    return ((data ?? []) as { attend_date: string }[]).map((row) => row.attend_date);
+  } catch (error) {
+    console.error("[admin] 회원 출석 날짜 조회 실패", error);
+    return [];
+  }
+}
