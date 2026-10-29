@@ -6,6 +6,8 @@ import MemberActionForm from "@/components/admin/MemberActionForm";
 import { requireAdmin } from "@/lib/auth/admin";
 import { seoulTodayKey } from "@/lib/date";
 import Avatar from "@/components/Avatar";
+import Pagination from "@/components/Pagination";
+import { sortMembersByName } from "@/lib/members/sort";
 import { formatPhone } from "@/lib/profile/contact";
 import { formatDateTimeToKey } from "@/lib/members/format";
 import {
@@ -23,9 +25,10 @@ export const metadata = { title: "회원 관리" };
 // 남은 일수가 이 값 이하면 "만료 임박"으로 표시합니다.
 const EXPIRING_DAYS = 7;
 const EXPIRING_TAB = "expiring"; // 상태 코드와 겹치지 않는 특별한 탭 값
+const PAGE_SIZE = 20; // 한 페이지에 보여줄 회원 수
 
 // /admin/members = 관리자 첫 화면. 회원 목록
-// 주소로 받는 값: ?status=pending (상태 코드 또는 expiring), ?q=홍길동 (검색어)
+// 주소로 받는 값: ?status=pending (상태 코드 또는 expiring), ?q=홍길동 (검색어), ?page=2 (페이지)
 export default function MembersPage(props: PageProps<"/admin/members">) {
   return (
     <div>
@@ -51,20 +54,7 @@ function presenceOf(m: MemberRow): Presence {
   return m.lastEndDate ? "ended" : "none";
 }
 
-// 정렬: ① 승인대기(오래 기다린 순) ② 이용 중(남은 일수 적은 순) ③ 시작 예정 ④ 만료(최근 만료 순) ⑤ 그 밖
-function sortMembers(list: MemberRow[]): MemberRow[] {
-  const rank: Record<Presence, number> = { pending: 0, expiring: 1, active: 1, upcoming: 2, ended: 3, none: 4 };
-  return [...list].sort((a, b) => {
-    const pa = presenceOf(a);
-    const pb = presenceOf(b);
-    if (rank[pa] !== rank[pb]) return rank[pa] - rank[pb];
-    if (pa === "pending") return a.createdAt.localeCompare(b.createdAt);
-    if (rank[pa] === 1) return (a.daysLeft ?? 0) - (b.daysLeft ?? 0);
-    if (pa === "upcoming") return (a.startsInDays ?? 0) - (b.startsInDays ?? 0);
-    if (pa === "ended") return (b.lastEndDate ?? "").localeCompare(a.lastEndDate ?? "");
-    return b.createdAt.localeCompare(a.createdAt);
-  });
-}
+// 정렬: 관리자 계정이 맨 위, 그 아래로 일반 회원을 이름순 (한글 가나다순 → 영어 ABC순). src/lib/members/sort.ts
 
 const smallInput = "rounded-md border border-line px-2 py-1.5 text-sm focus:border-accent focus:outline-none";
 
@@ -112,7 +102,7 @@ async function MemberList({ searchParams }: { searchParams: PageProps<"/admin/me
   // 검색/필터는 서버에서 메모리로 처리합니다. (회원 수가 수백 명 수준이라 충분. 1000명을 넘기면 DB 검색으로 바꿔야 함)
   const needle = q.toLowerCase();
   const needleDigits = q.replace(/[^0-9]/g, ""); // 전화번호 검색: 하이픈 없이 숫자만 비교
-  const visible = sortMembers(
+  const visible = sortMembersByName(
     members.filter(
       (m) =>
         matchesTab(m) &&
@@ -126,6 +116,20 @@ async function MemberList({ searchParams }: { searchParams: PageProps<"/admin/me
     ...statuses.map((s) => ({ code: s.code, name: s.name, count: members.filter((m) => m.status === s.code).length })),
     { code: EXPIRING_TAB, name: `만료 임박(${EXPIRING_DAYS}일 이내)`, count: members.filter(isExpiring).length },
   ];
+  // 페이지: 주소의 ?page= 값. 잘못된 값이거나 범위를 벗어나면 가장 가까운 페이지로 맞춥니다.
+  const totalPages = Math.max(1, Math.ceil(visible.length / PAGE_SIZE));
+  const pageParam = Number(typeof query.page === "string" ? query.page : "1");
+  const page = Number.isInteger(pageParam) ? Math.min(Math.max(pageParam, 1), totalPages) : 1;
+  const pageRows = visible.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const pageHref = (n: number) => {
+    const params = new URLSearchParams();
+    if (tab) params.set("status", tab);
+    if (q) params.set("q", q);
+    if (n > 1) params.set("page", String(n));
+    const text = params.toString();
+    return text ? `/admin/members?${text}` : "/admin/members";
+  };
+
   const tabHref = (code: string) => {
     const params = new URLSearchParams();
     if (code) params.set("status", code);
@@ -185,11 +189,13 @@ async function MemberList({ searchParams }: { searchParams: PageProps<"/admin/me
         <p className="rounded-lg bg-surface p-8 text-center text-muted">조건에 맞는 회원이 없습니다.</p>
       ) : (
         <ul className="divide-y divide-line rounded-lg border border-line">
-          {visible.map((m) => (
+          {pageRows.map((m) => (
             <MemberItem key={m.userId} member={m} presence={presenceOf(m)} statusLabel={statusName.get(m.status) ?? m.status} plans={plans} today={today} />
           ))}
         </ul>
       )}
+
+      {visible.length > 0 && <Pagination page={page} totalPages={totalPages} totalCount={visible.length} pageHref={pageHref} />}
     </div>
   );
 }
