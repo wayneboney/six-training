@@ -54,3 +54,19 @@ export async function getMemberAttendanceDates(userId: string, limit = 120): Pro
     return [];
   }
 }
+
+// 로그인한 회원 본인이 출석한 날짜 목록 (최근순, "YYYY-MM-DD"). 조회 실패 시 빈 목록
+export async function getMyAttendanceDates(limit = 120): Promise<string[]> {
+  try {
+    const supabase = await createAuthSupabase();
+    const { data, error } = await supabase.rpc("get_my_attendance_dates", { p_limit: limit });
+    if (error) {
+      console.error("[me] 출석 날짜 조회 실패", error);
+      return [];
+    }
+    return ((data ?? []) as { attend_date: string }[]).map((row) => row.attend_date);
+  } catch (error) {
+    console.error("[me] 출석 날짜 조회 실패", error);
+    return [];
+  }
+}
