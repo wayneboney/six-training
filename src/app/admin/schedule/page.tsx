@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { addSlotsAction } from "@/app/admin/schedule/actions";
 import MemberActionForm from "@/components/admin/MemberActionForm";
+import Accordion from "@/components/Accordion";
 import SlotRowForm from "@/components/admin/SlotRowForm";
 import WeekdayPicker from "@/components/admin/WeekdayPicker";
 import { classLabelsKo } from "@/data/timetable";
@@ -93,30 +94,35 @@ async function ScheduleAdmin() {
           <p className="mt-2 text-sm text-muted">잠시 후 다시 시도해 주세요.</p>
         </div>
       ) : (
-        weekdays.map((weekday) => {
-          const daySlots = slots.filter((s) => s.weekday === weekday);
-          return (
-            // 요일마다 접어 둡니다. 시간표는 한 번 정해 두면 자주 고치지 않아서, 길게 펼쳐지지 않게 합니다. 제목 줄에 시간이 요약으로 보입니다.
-            <details key={weekday} className="rounded-lg border border-line">
-              <summary className="cursor-pointer bg-surface px-4 py-3">
-                <span className="font-black">{weekdayLabels[weekday]}요일</span>{" "}
-                <span className="text-sm font-normal text-muted">
-                  수업 {daySlots.length}개
-                  {daySlots.length > 0 && ` · ${daySlots.map((s) => s.startTime).join(", ")}`}
-                </span>
-              </summary>
-              {daySlots.length === 0 ? (
-                <p className="px-4 py-3 text-sm text-muted">등록된 수업이 없습니다.</p>
-              ) : (
-                <ul className="divide-y divide-line border-t border-line">
-                  {daySlots.map((slot) => (
-                    <SlotRowForm key={slot.id} slot={slot} />
-                  ))}
-                </ul>
-              )}
-            </details>
-          );
-        })
+        // 요일마다 접어 둡니다. 시간표는 한 번 정해 두면 자주 고치지 않아서 길게 펼쳐지지 않게 하고, 하나만 열리는 아코디언으로 보여줍니다.
+        // 제목 줄에 그날의 수업 시간이 요약으로 보입니다.
+        <Accordion
+          items={weekdays.map((weekday) => {
+            const daySlots = slots.filter((s) => s.weekday === weekday);
+            return {
+              id: String(weekday),
+              title: (
+                <>
+                  <span className="font-black">{weekdayLabels[weekday]}요일</span>{" "}
+                  <span className="text-sm font-normal text-muted">
+                    수업 {daySlots.length}개
+                    {daySlots.length > 0 && ` · ${daySlots.map((s) => s.startTime).join(", ")}`}
+                  </span>
+                </>
+              ),
+              content:
+                daySlots.length === 0 ? (
+                  <p className="px-4 py-3 text-sm text-muted">등록된 수업이 없습니다.</p>
+                ) : (
+                  <ul className="divide-y divide-line">
+                    {daySlots.map((slot) => (
+                      <SlotRowForm key={slot.id} slot={slot} />
+                    ))}
+                  </ul>
+                ),
+            };
+          })}
+        />
       )}
     </div>
   );
