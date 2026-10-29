@@ -85,7 +85,7 @@ export async function updateSlotAction(
   return { ok: true, message: "수업을 수정했습니다." };
 }
 
-// 수업 삭제 (사용 안 함으로 바꾸고, 시작하지 않은 오늘 이후의 예약/대기를 모두 취소)
+// 수업 삭제: 수업 칸과 그 수업의 모든 예약 기록(지난 수업 포함)을 완전히 지웁니다. 되돌릴 수 없습니다.
 export async function deleteSlotAction(slotId: number): Promise<ScheduleActionState> {
   await requireAdmin();
   const id = parseBigintId(slotId);
@@ -94,15 +94,15 @@ export async function deleteSlotAction(slotId: number): Promise<ScheduleActionSt
   }
 
   const supabase = await createAuthSupabase();
-  const { data, error } = await supabase.rpc("admin_deactivate_class_slot", { p_slot_id: id });
+  const { data, error } = await supabase.rpc("admin_delete_class_slot", { p_slot_id: id });
   if (error) {
     return toFailure(error, "수업 삭제");
   }
   refresh();
-  const cancelled = typeof data === "number" ? data : 0;
+  const removed = typeof data === "number" ? data : 0;
   return {
     ok: true,
-    message: cancelled > 0 ? `수업을 삭제했습니다. 예약/대기 ${cancelled}건을 취소했습니다.` : "수업을 삭제했습니다.",
+    message: removed > 0 ? `수업을 삭제했습니다. 예약 기록 ${removed}건도 함께 삭제했습니다.` : "수업을 삭제했습니다.",
   };
 }
 
