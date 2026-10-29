@@ -38,7 +38,7 @@ export default function Home() {
             href="/about"
             className="rounded-md bg-accent px-6 py-3 font-bold text-white hover:opacity-90"
           >
-            체육관 둘러보기
+            박스 둘러보기
           </Link>
         </div>
       </div>

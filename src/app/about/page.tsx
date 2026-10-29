@@ -5,9 +5,9 @@ import Section from "@/components/Section";
 import Timetable from "@/components/timetable/Timetable";
 import { gym, instagramUrl } from "@/data/gym";
 
-// 탭 제목이 layout.tsx의 template 규칙에 따라 "체육관 소개 | SIX Training"이 됩니다.
+// 탭 제목이 layout.tsx의 template 규칙에 따라 "박스 소개 | SIX Training"이 됩니다.
 export const metadata: Metadata = {
-  title: "체육관 소개",
+  title: "박스 소개",
 };
 
 // /about 주소의 화면. app/about 폴더 이름이 곧 URL이 됩니다. (Spring의 @GetMapping("/about") 역할)
@@ -20,7 +20,7 @@ export default function AboutPage() {
       <div className="border-b border-line bg-surface">
         <div className="mx-auto max-w-5xl px-4 py-16">
           <p className="text-sm font-bold tracking-widest text-accent">SINCE {gym.foundedYear}</p>
-          <h1 className="mt-2 text-3xl font-black sm:text-5xl">체육관 소개</h1>
+          <h1 className="mt-2 text-3xl font-black sm:text-5xl">박스 소개</h1>
           <p className="mt-4 max-w-2xl text-muted">{gym.intro}</p>
           <p className="mt-2 max-w-2xl text-muted">{gym.nameStory}</p>
         </div>

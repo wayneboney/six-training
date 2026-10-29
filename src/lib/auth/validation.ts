@@ -86,7 +86,7 @@ export function validateSignup(formData: FormData): SignupValidation {
   }
   const age = ageOf(birthDate);
   if (age !== null && age < MIN_JOIN_AGE) {
-    return fail(`만 ${MIN_JOIN_AGE}세 미만은 직접 가입할 수 없습니다. 체육관으로 문의해 주세요.`);
+    return fail(`만 ${MIN_JOIN_AGE}세 미만은 직접 가입할 수 없습니다. 박스로 문의해 주세요.`);
   }
   const gender = parseGender(genderRaw);
   if (!gender) {

@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     // 메인 페이지 탭 제목
     default: gym.name,
     // 하위 페이지 탭 제목 규칙. %s 자리에 각 페이지 제목이 들어갑니다.
-    // 예: 소개 페이지 → "체육관 소개 | SIX Training"
+    // 예: 소개 페이지 → "박스 소개 | SIX Training"
     template: `%s | ${gym.name}`,
   },
   description: `${gym.name} - ${gym.slogan}. ${gym.highlights.join(", ")}`,

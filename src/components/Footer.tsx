@@ -11,7 +11,7 @@ function FooterHeading({ children }: { children: string }) {
 
 const externalLink = "hover:text-foreground hover:underline";
 
-// Footer = 모든 페이지 맨 아래에 나오는 체육관 기본 정보
+// Footer = 모든 페이지 맨 아래에 나오는 박스 기본 정보
 // 위쪽: 소개 / 바로가기 / 문의·위치 3칸 (모바일에서는 세로로 쌓임), 아래쪽: 저작권 + 개인정보처리방침
 // 전화번호는 링크로 만들지 않고 글자로만 보여줍니다.
 export default function Footer() {
