@@ -26,7 +26,7 @@ type ClassCardProps = {
   startAt: number; // 수업 시작 시각(밀리초). 이 시각이 되면 출석 버튼이 저절로 나타남
   endAt: number; // 수업 종료 시각(밀리초). 이 시각이 되면 결석 버튼이 저절로 나타남
   isAdmin: boolean;
-  readOnly?: boolean; // 지난 날짜: 예약/취소/정원 변경 버튼 없이 예약자 목록만 볼 수 있음 (목록은 다른 날짜처럼 접어 둠)
+  readOnly?: boolean; // 지난 날짜: 예약/취소/정원 변경 버튼 없이 예약자 목록만 볼 수 있음 (관리자는 출석/결석 정정 버튼은 계속 보임) (목록은 다른 날짜처럼 접어 둠)
   attendees: Attendee[]; // 이 수업의 예약 + 대기 (신청 순서). 회원/관리자 모두에게 보임
   guestTypes?: CodeOption[]; // 드랍인/체험 구분 목록 (관리자의 게스트 추가 폼용)
 };
@@ -244,7 +244,7 @@ function AttendeeList({
                 수업 중: 시작되면 [출석]이 나타납니다. 끝날 때까지 누르지 않으면 수업 종료 후 자동으로 출석 처리됩니다.
                 수업이 끝난 뒤: [결석]이 나타납니다. 안 온 회원에게 누르면 출석 일수가 1일 줄어듭니다. (끝난 지 며칠 지나도 가능)
                 결석: "결석" + [결석 취소] */}
-            {a.reservationId !== null && !readOnly && (
+            {a.reservationId !== null && (
               <span className="flex flex-wrap items-center gap-2">
                 {!numbered && !a.guestLabel && a.attended && <span className="text-xs font-bold text-accent">✔ 출석</span>}
                 {!numbered && !a.guestLabel && a.absent && <span className="text-xs font-bold text-muted">결석</span>}
@@ -277,13 +277,16 @@ function AttendeeList({
                     layout="inline"
                   />
                 )}
-                <MemberActionForm
-                  action={adminCancelReservationAction.bind(null, a.reservationId)}
-                  submitLabel="취소"
-                  pendingLabel="취소 중…"
-                  confirmMessage={`${displayName(a)}님의 ${numbered ? "대기" : "예약"}를 취소할까요?${a.attended ? "\n(이미 출석 처리되어 출석 일수는 그대로 유지됩니다)" : ""}`}
-                  layout="inline"
-                />
+                {/* 지난 날짜는 예약 취소 버튼 없이 출석/결석 정정만 가능합니다 */}
+                {!readOnly && (
+                  <MemberActionForm
+                    action={adminCancelReservationAction.bind(null, a.reservationId)}
+                    submitLabel="취소"
+                    pendingLabel="취소 중…"
+                    confirmMessage={`${displayName(a)}님의 ${numbered ? "대기" : "예약"}를 취소할까요?${a.attended ? "\n(이미 출석 처리되어 출석 일수는 그대로 유지됩니다)" : ""}`}
+                    layout="inline"
+                  />
+                )}
               </span>
             )}
           </li>
