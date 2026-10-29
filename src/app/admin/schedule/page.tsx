@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { addSlotsAction, fillEndTimesAction, setEndTimeAction } from "@/app/admin/schedule/actions";
+import { addSlotsAction } from "@/app/admin/schedule/actions";
 import MemberActionForm from "@/components/admin/MemberActionForm";
 import SlotRowForm from "@/components/admin/SlotRowForm";
 import WeekdayPicker from "@/components/admin/WeekdayPicker";
@@ -18,22 +18,6 @@ const fieldClass = "rounded-md border border-line px-2 py-1.5 text-sm focus:bord
 
 // 월(1) ~ 토(6). 일요일은 휴무라서 관리하지 않습니다.
 const weekdays = [1, 2, 3, 4, 5, 6];
-
-// 같은 시작 시각의 수업을 묶어서 (요일 목록, 현재 종료 시각들)을 보여줍니다. "종료 시각 한꺼번에 설정"에 씁니다.
-function startGroups(slots: AdminSlot[]): { start: string; weekdays: number[]; ends: string[] }[] {
-  const groups = new Map<string, { start: string; weekdays: number[]; ends: Set<string> }>();
-  for (const slot of slots) {
-    const group = groups.get(slot.startTime) ?? { start: slot.startTime, weekdays: [], ends: new Set<string>() };
-    group.weekdays.push(slot.weekday);
-    if (slot.endTime) {
-      group.ends.add(slot.endTime);
-    }
-    groups.set(slot.startTime, group);
-  }
-  return [...groups.values()]
-    .sort((a, b) => a.start.localeCompare(b.start))
-    .map((g) => ({ start: g.start, weekdays: g.weekdays, ends: [...g.ends].sort() }));
-}
 
 // /admin/schedule = 시간표 관리. 수업 시간을 정해 두면 Program(운동 내용)을 등록하고, 회원이 그 시간으로 예약합니다.
 export default function SchedulePage() {
@@ -70,81 +54,37 @@ async function ScheduleAdmin() {
         </ul>
       </div>
 
+      {/* 수업 추가: 여러 요일에 한 번에 */}
       {slots !== null && (
-        <>
-          {/* 수업 추가: 여러 요일에 한 번에 */}
-          <section className="space-y-3 rounded-lg border border-line p-4">
-            <h2 className="font-black">수업 추가</h2>
-            <p className="text-xs text-muted">요일을 여러 개 고르면 같은 시간의 수업이 한 번에 추가됩니다. (예: 월~금 19:00 - 20:00)</p>
-            <MemberActionForm action={addSlotsAction} submitLabel="수업 추가" pendingLabel="추가 중…" layout="stack">
-              <WeekdayPicker />
-              <div className="flex flex-wrap items-center gap-2">
-                <label className="sr-only" htmlFor="new-start">
-                  시작 시각
-                </label>
-                <input id="new-start" name="startTime" type="time" required className={fieldClass} />
-                <span aria-hidden="true">-</span>
-                <label className="sr-only" htmlFor="new-end">
-                  종료 시각
-                </label>
-                <input id="new-end" name="endTime" type="time" required className={fieldClass} />
-                <select name="classType" aria-label="수업 종류" defaultValue="CROSSFIT" className={fieldClass}>
-                  {(Object.keys(classLabelsKo) as (keyof typeof classLabelsKo)[]).map((type) => (
-                    <option key={type} value={type}>
-                      {classLabelsKo[type]}
-                    </option>
-                  ))}
-                </select>
-                <label className="flex items-center gap-1 text-sm">
-                  정원
-                  <input name="capacity" type="number" required min={1} max={200} defaultValue={20} className={`${fieldClass} w-16`} />
-                </label>
-              </div>
-            </MemberActionForm>
-          </section>
-
-          {/* 종료 시각 한꺼번에: 시작 시각이 같은 수업을 모든 요일에 한 번에 */}
-          <section className="space-y-3 rounded-lg border border-line p-4">
-            <h2 className="font-black">종료 시각 한꺼번에 설정</h2>
-            <p className="text-xs text-muted">같은 시작 시각의 수업은 모든 요일에 한 번에 적용됩니다. 예약이 있어도 바꿀 수 있습니다.</p>
-            <MemberActionForm
-              action={fillEndTimesAction}
-              submitLabel="비어 있는 종료 시각 채우기"
-              pendingLabel="채우는 중…"
-              confirmMessage="종료 시각이 비어 있는 수업(오픈짐 제외)의 종료 시각을 '시작 시각 + 입력한 분'으로 채웁니다. 이미 입력한 종료 시각은 바뀌지 않습니다. 진행할까요?"
-              layout="inline"
-            >
-              <label className="flex items-center gap-1 text-sm">
-                수업 시간
-                <input name="minutes" type="number" required min={15} max={240} defaultValue={60} className={`${fieldClass} w-20`} />분
+        <section className="space-y-3 rounded-lg border border-line p-4">
+          <h2 className="font-black">수업 추가</h2>
+          <p className="text-xs text-muted">요일을 여러 개 고르면 같은 시간의 수업이 한 번에 추가됩니다. (예: 월~금 19:00 - 20:00)</p>
+          <MemberActionForm action={addSlotsAction} submitLabel="수업 추가" pendingLabel="추가 중…" layout="stack">
+            <WeekdayPicker />
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="sr-only" htmlFor="new-start">
+                시작 시각
               </label>
-            </MemberActionForm>
-            <ul className="divide-y divide-line rounded-md border border-line">
-              {startGroups(slots).map((group) => (
-                <li key={group.start} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm">
-                  <span>
-                    <span className="font-bold">{group.start}</span>{" "}
-                    <span className="text-muted">
-                      {group.weekdays.map((d) => weekdayLabels[d]).join("·")} · 종료{" "}
-                      {group.ends.length === 0 ? "미정" : group.ends.join(", ")}
-                    </span>
-                  </span>
-                  <MemberActionForm
-                    action={setEndTimeAction.bind(null, group.start)}
-                    submitLabel="적용"
-                    pendingLabel="적용 중…"
-                    layout="inline"
-                  >
-                    <label className="sr-only" htmlFor={`end-${group.start}`}>
-                      {group.start} 시작 수업의 종료 시각
-                    </label>
-                    <input id={`end-${group.start}`} name="endTime" type="time" required className={fieldClass} />
-                  </MemberActionForm>
-                </li>
-              ))}
-            </ul>
-          </section>
-        </>
+              <input id="new-start" name="startTime" type="time" required className={fieldClass} />
+              <span aria-hidden="true">-</span>
+              <label className="sr-only" htmlFor="new-end">
+                종료 시각
+              </label>
+              <input id="new-end" name="endTime" type="time" required className={fieldClass} />
+              <select name="classType" aria-label="수업 종류" defaultValue="CROSSFIT" className={fieldClass}>
+                {(Object.keys(classLabelsKo) as (keyof typeof classLabelsKo)[]).map((type) => (
+                  <option key={type} value={type}>
+                    {classLabelsKo[type]}
+                  </option>
+                ))}
+              </select>
+              <label className="flex items-center gap-1 text-sm">
+                정원
+                <input name="capacity" type="number" required min={1} max={200} defaultValue={20} className={`${fieldClass} w-16`} />
+              </label>
+            </div>
+          </MemberActionForm>
+        </section>
       )}
 
       {slots === null ? (
@@ -156,21 +96,25 @@ async function ScheduleAdmin() {
         weekdays.map((weekday) => {
           const daySlots = slots.filter((s) => s.weekday === weekday);
           return (
-            <section key={weekday} className="rounded-lg border border-line">
-              <h2 className="border-b border-line bg-surface px-4 py-2 font-black">
-                {weekdayLabels[weekday]}요일{" "}
-                <span className="text-sm font-normal text-muted">수업 {daySlots.length}개</span>
-              </h2>
+            // 요일마다 접어 둡니다. 시간표는 한 번 정해 두면 자주 고치지 않아서, 길게 펼쳐지지 않게 합니다. 제목 줄에 시간이 요약으로 보입니다.
+            <details key={weekday} className="rounded-lg border border-line">
+              <summary className="cursor-pointer bg-surface px-4 py-3">
+                <span className="font-black">{weekdayLabels[weekday]}요일</span>{" "}
+                <span className="text-sm font-normal text-muted">
+                  수업 {daySlots.length}개
+                  {daySlots.length > 0 && ` · ${daySlots.map((s) => s.startTime).join(", ")}`}
+                </span>
+              </summary>
               {daySlots.length === 0 ? (
                 <p className="px-4 py-3 text-sm text-muted">등록된 수업이 없습니다.</p>
               ) : (
-                <ul className="divide-y divide-line">
+                <ul className="divide-y divide-line border-t border-line">
                   {daySlots.map((slot) => (
                     <SlotRowForm key={slot.id} slot={slot} />
                   ))}
                 </ul>
               )}
-            </section>
+            </details>
           );
         })
       )}
