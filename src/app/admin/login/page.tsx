@@ -31,7 +31,7 @@ async function LoginGate() {
   await connection();
   const admin = await getCurrentAdmin();
   if (admin) {
-    redirect("/admin/members");
+    redirect("/admin/wods");
   }
   return <LoginForm />;
 }

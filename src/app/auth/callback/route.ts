@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
         .select("role, status")
         .eq("user_id", data.user.id)
         .maybeSingle();
-      const path = profile?.role === "admin" ? "/admin/members" : profile?.status === "pending" ? "/me" : "/";
+      const path = profile?.role === "admin" ? "/admin/wods" : profile?.status === "pending" ? "/me" : "/";
       return NextResponse.redirect(`${origin}${path}`);
     }
     console.error("[auth] 인증 코드 교환 실패", error?.code);

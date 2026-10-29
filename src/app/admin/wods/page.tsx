@@ -7,7 +7,7 @@ import { requireAdmin } from "@/lib/auth/admin";
 import { monthDateRange, parseMonthKey, parseDateKey, seoulTodayKey, shiftMonth, toMonthKey } from "@/lib/date";
 import { getWods } from "@/lib/wods/repository";
 
-// /admin/wods = WOD 관리 (월별 WOD 목록). 관리자 첫 화면은 회원 목록(/admin/members)입니다.
+// /admin/wods = WOD 관리 (월별 WOD 목록). 관리자 첫 화면입니다.
 // 보고 싶은 달은 주소로 받습니다. 예: /admin/wods?month=2026-10
 // 주소에 달이 들어 있어서 새로고침하거나 북마크해도 같은 달이 열립니다.
 export default function AdminHomePage(props: PageProps<"/admin/wods">) {

@@ -6,8 +6,8 @@ import { usePathname } from "next/navigation";
 // 관리자 화면 위쪽 메뉴. (로그아웃은 맨 위 헤더의 전원 버튼을 씁니다) (현재 주소를 알아야 해서 브라우저에서 실행되는 컴포넌트)
 // 메뉴가 늘어나면 배열에 한 줄만 추가합니다.
 const adminMenus = [
-  { href: "/admin/members", label: "회원 관리" },
   { href: "/admin/wods", label: "WOD 관리" },
+  { href: "/admin/members", label: "회원 관리" },
 ];
 
 export default function AdminNav() {
