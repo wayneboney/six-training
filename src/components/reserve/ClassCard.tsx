@@ -11,6 +11,7 @@ import {
 } from "@/app/reserve/actions";
 import MemberActionForm from "@/components/admin/MemberActionForm";
 import Avatar from "@/components/Avatar";
+import TimeGate from "@/components/reserve/TimeGate";
 import { medalOf } from "@/lib/mvp";
 import { classLabelsKo } from "@/data/timetable";
 import { GUEST_NAME_MAX } from "@/lib/members/validation";
@@ -21,6 +22,8 @@ type ClassCardProps = {
   session: ClassSession;
   started: boolean; // 수업이 이미 시작했는지 (시작했으면 예약/취소 불가)
   ended: boolean; // 수업이 끝났는지 (끝나면 출석 취소 불가, 미처리 예약자는 자동 출석)
+  startAt: number; // 수업 시작 시각(밀리초). 이 시각이 되면 출석 버튼이 저절로 나타남
+  endAt: number; // 수업 종료 시각(밀리초). 이 시각이 되면 출석 취소 버튼이 저절로 사라짐
   isAdmin: boolean;
   readOnly?: boolean; // 지난 날짜: 예약/취소/정원 변경 버튼 없이 예약자 목록만 볼 수 있음 (목록은 다른 날짜처럼 접어 둠)
   attendees: Attendee[]; // 이 수업의 예약 + 대기 (신청 순서). 회원/관리자 모두에게 보임
@@ -44,6 +47,8 @@ export default function ClassCard({
   session: s,
   started,
   ended,
+  startAt,
+  endAt,
   isAdmin,
   readOnly = false,
   attendees,
@@ -193,7 +198,7 @@ export default function ClassCard({
             예약자 {confirmed.length}명{waiting.length > 0 && ` · 대기 ${waiting.length}명`}
           </summary>
           <div className="mt-3 space-y-3 text-sm">
-            {confirmed.length > 0 && <AttendeeList title="예약" list={confirmed} readOnly={readOnly} started={started} ended={ended} />}
+            {confirmed.length > 0 && <AttendeeList title="예약" list={confirmed} readOnly={readOnly} started={started} ended={ended} startAt={startAt} endAt={endAt} />}
             {waiting.length > 0 && <AttendeeList title="대기 (신청 순서)" list={waiting} numbered readOnly={readOnly} />}
           </div>
         </details>
@@ -209,6 +214,8 @@ function AttendeeList({
   readOnly = false,
   started = false,
   ended = false,
+  startAt,
+  endAt,
 }: {
   title: string;
   list: Attendee[];
@@ -216,6 +223,8 @@ function AttendeeList({
   readOnly?: boolean;
   started?: boolean; // 수업이 시작했는지 (시작한 뒤에 출석 버튼이 나옴)
   ended?: boolean; // 수업이 끝났는지 (끝나면 출석 취소 버튼이 사라짐)
+  startAt?: number; // 시작 시각(밀리초): 이때 출석 버튼이 저절로 나타남 (새로고침 불필요)
+  endAt?: number; // 종료 시각(밀리초): 이때 출석 취소 버튼이 저절로 사라짐
 }) {
   return (
     <div>
@@ -236,22 +245,26 @@ function AttendeeList({
             {a.reservationId !== null && !readOnly && (
               <span className="flex flex-wrap items-center gap-2">
                 {!numbered && !a.guestLabel && a.attended && <span className="text-xs font-bold text-accent">✔ 출석</span>}
-                {!numbered && !a.guestLabel && started && !a.attended && (
-                  <MemberActionForm
-                    action={markAttendanceAction.bind(null, a.reservationId)}
-                    submitLabel="출석"
-                    pendingLabel="처리 중…"
-                    layout="inline"
-                  />
+                {!numbered && !a.guestLabel && !a.attended && (
+                  <TimeGate initial={started} showFrom={startAt}>
+                    <MemberActionForm
+                      action={markAttendanceAction.bind(null, a.reservationId)}
+                      submitLabel="출석"
+                      pendingLabel="처리 중…"
+                      layout="inline"
+                    />
+                  </TimeGate>
                 )}
-                {!numbered && !a.guestLabel && a.attended && !ended && (
-                  <MemberActionForm
-                    action={unmarkAttendanceAction.bind(null, a.reservationId)}
-                    submitLabel="출석 취소"
-                    pendingLabel="취소 중…"
-                    confirmMessage={`${displayName(a)}님의 출석을 취소할까요?`}
-                    layout="inline"
-                  />
+                {!numbered && !a.guestLabel && a.attended && (
+                  <TimeGate initial={!ended} hideAt={endAt}>
+                    <MemberActionForm
+                      action={unmarkAttendanceAction.bind(null, a.reservationId)}
+                      submitLabel="출석 취소"
+                      pendingLabel="취소 중…"
+                      confirmMessage={`${displayName(a)}님의 출석을 취소할까요?`}
+                      layout="inline"
+                    />
+                  </TimeGate>
                 )}
                 <MemberActionForm
                   action={adminCancelReservationAction.bind(null, a.reservationId)}

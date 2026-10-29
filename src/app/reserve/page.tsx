@@ -51,16 +51,21 @@ function weekdayOf(dateKey: string): number {
 }
 
 // 수업 시작 시각(한국 시간)이 지났는지
+function startAtOf(date: string, time: string): number {
+  return new Date(`${date}T${time}:00+09:00`).getTime();
+}
+
 function hasStarted(date: string, time: string): boolean {
-  return new Date(`${date}T${time}:00+09:00`).getTime() <= Date.now();
+  return startAtOf(date, time) <= Date.now();
 }
 
 // 수업 종료 시각(한국 시간)이 지났는지. 종료 시각이 없는 수업은 시작 1시간 뒤로 봅니다. (DB의 자동 출석 기준과 같음)
+function endAtOf(date: string, startTime: string, endTime: string | null): number {
+  return endTime ? startAtOf(date, endTime) : startAtOf(date, startTime) + 60 * 60 * 1000;
+}
+
 function hasEnded(date: string, startTime: string, endTime: string | null): boolean {
-  const endAt = endTime
-    ? new Date(`${date}T${endTime}:00+09:00`).getTime()
-    : new Date(`${date}T${startTime}:00+09:00`).getTime() + 60 * 60 * 1000;
-  return endAt <= Date.now();
+  return endAtOf(date, startTime, endTime) <= Date.now();
 }
 
 async function ReserveContent({ searchParams }: { searchParams: PageProps<"/reserve">["searchParams"] }) {
@@ -281,6 +286,8 @@ async function ReserveContent({ searchParams }: { searchParams: PageProps<"/rese
                 session={s}
                 started={hasStarted(s.classDate, s.startTime)}
                 ended={hasEnded(s.classDate, s.startTime, s.endTime)}
+                startAt={startAtOf(s.classDate, s.startTime)}
+                endAt={endAtOf(s.classDate, s.startTime, s.endTime)}
                 readOnly={isPastDay}
                 isAdmin={isAdmin}
                 guestTypes={guestTypes}
