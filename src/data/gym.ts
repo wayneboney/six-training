@@ -42,8 +42,12 @@ export const gym = {
     },
   ] satisfies InfoCard[],
 
-  // TODO: 실제 시설 정보를 받으면 채웁니다. 비어 있으면 소개 페이지에서 "시설" 영역이 나오지 않습니다.
-  facilities: [] as InfoCard[],
+  // 비어 있으면 소개 페이지에서 "시설" 영역이 나오지 않습니다. 장비가 바뀌면 이 목록만 고치면 됩니다.
+  facilities: [
+    { title: "하이록스 스테이션", description: "슬레드 푸시, 슬레드 풀, 스키에르그, 로잉" },
+    { title: "유산소 머신", description: "로잉, 스키에르그, 바이크, 에어바이크, 트레드밀" },
+    { title: "프리웨이트", description: "바벨, 덤벨, 케틀벨, 메디신볼" },
+  ] satisfies InfoCard[],
 
   coaches: [
     { name: "윤효용", role: "헤드 코치", instagram: "steel.yoon" },

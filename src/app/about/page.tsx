@@ -39,7 +39,7 @@ export default function AboutPage() {
 
       {gym.facilities.length > 0 && (
         <Section title="시설">
-          <ul className="grid gap-4 sm:grid-cols-2">
+          <ul className="grid gap-4 sm:grid-cols-3">
             {gym.facilities.map((item) => (
               <li key={item.title} className="rounded-lg bg-surface p-5">
                 <p className="font-bold">{item.title}</p>
