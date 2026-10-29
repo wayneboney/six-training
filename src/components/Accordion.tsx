@@ -1,15 +1,48 @@
 // 아코디언: 제목 줄을 누르면 내용이 위아래로 부드럽게 펼쳐지고, 한 번에 하나만 열립니다. (다른 줄을 누르면 열려 있던 것은 접힘)
-// 높이를 직접 계산하지 않고 grid의 행 높이를 0fr ↔ 1fr로 바꾸는 방식이라, 내용 길이가 달라도 자연스럽게 움직입니다.
+// 내용의 실제 높이를 재서 높이(height)를 0 ↔ 그 높이로 부드럽게 바꾸는 방식이라 브라우저 종류와 상관없이 슬라이드됩니다.
+// (내용이 바뀌어 높이가 달라져도 ResizeObserver가 다시 재서 맞춥니다)
 // 접힌 내용은 inert로 막아서 키보드(Tab)로 접근하거나 화면 낭독기가 읽지 않게 합니다.
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 export type AccordionItem = {
   id: string;
   title: ReactNode; // 제목 줄 (눌러서 여닫음)
   content: ReactNode; // 펼쳐지는 내용
 };
+
+// 펼쳐지는 부분. 안쪽 내용의 높이를 재서 바깥 상자의 높이를 그 값으로 바꿉니다.
+function Panel({ id, labelledBy, open, children }: { id: string; labelledBy: string; open: boolean; children: ReactNode }) {
+  const inner = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState(0);
+
+  useEffect(() => {
+    const el = inner.current;
+    if (!el) {
+      return;
+    }
+    setHeight(el.scrollHeight);
+    const observer = new ResizeObserver(() => setHeight(el.scrollHeight));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      id={id}
+      role="region"
+      aria-labelledby={labelledBy}
+      inert={!open}
+      style={{ height: open ? height : 0 }}
+      className={`overflow-hidden transition-[height,opacity] duration-300 ease-out ${open ? "opacity-100" : "opacity-0"}`}
+    >
+      <div ref={inner} className="border-t border-line">
+        {children}
+      </div>
+    </div>
+  );
+}
 
 export default function Accordion({ items }: { items: AccordionItem[] }) {
   const [openId, setOpenId] = useState<string | null>(null);
@@ -34,7 +67,7 @@ export default function Accordion({ items }: { items: AccordionItem[] }) {
                 <svg
                   viewBox="0 0 12 8"
                   aria-hidden="true"
-                  className={`h-2 w-3 shrink-0 text-muted transition-transform duration-300 motion-reduce:transition-none ${
+                  className={`h-2 w-3 shrink-0 text-muted transition-transform duration-300 ${
                     open ? "rotate-180" : ""
                   }`}
                   fill="none"
@@ -47,19 +80,9 @@ export default function Accordion({ items }: { items: AccordionItem[] }) {
                 </svg>
               </button>
             </h2>
-            <div
-              id={`accordion-panel-${item.id}`}
-              role="region"
-              aria-labelledby={`accordion-title-${item.id}`}
-              inert={!open}
-              className={`grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none ${
-                open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-              }`}
-            >
-              <div className="overflow-hidden">
-                <div className="border-t border-line">{item.content}</div>
-              </div>
-            </div>
+            <Panel id={`accordion-panel-${item.id}`} labelledBy={`accordion-title-${item.id}`} open={open}>
+              {item.content}
+            </Panel>
           </section>
         );
       })}
