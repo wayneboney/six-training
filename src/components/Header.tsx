@@ -28,7 +28,7 @@ export default function Header() {
         </Link>
 
         <div className="flex items-center gap-4 sm:gap-8">
-          {/* 메뉴 + 계정 링크 + 모바일 메뉴. 로그인한 사람에게만 WOD, 수업 예약 메뉴가 보입니다. */}
+          {/* 메뉴 + 계정 링크 + 모바일 메뉴. 로그인한 사람에게만 프로그램, 수업 예약 메뉴가 보입니다. */}
           <Suspense fallback={<HeaderMenusFallback />}>
             <HeaderMenus />
           </Suspense>

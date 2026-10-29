@@ -1,4 +1,4 @@
-// 로그인 직후 이동할 화면을 정합니다. 관리자는 관리자 첫 화면(WOD 관리, /admin/wods. /admin으로 보내면 주소가 바뀌지 않아 메뉴 선택 표시가 안 됨), 일반회원은 홈입니다.
+// 로그인 직후 이동할 화면을 정합니다. 관리자는 관리자 첫 화면(프로그램 관리, /admin/programs. /admin으로 보내면 주소가 바뀌지 않아 메뉴 선택 표시가 안 됨), 일반회원은 홈입니다.
 // 관리자 로그인 화면(/admin/login)과 일반 로그인 화면(/login) 어디서 로그인하든 같은 규칙을 씁니다.
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -13,5 +13,5 @@ export async function landingPathAfterLogin(supabase: SupabaseClient, userId: st
   if (!data) {
     return null;
   }
-  return data.role === "admin" ? "/admin/wods" : "/";
+  return data.role === "admin" ? "/admin/programs" : "/";
 }

@@ -1,4 +1,4 @@
-// 관리자용 WOD 데이터 접근 (등록/수정/단건 조회)
+// 관리자용 프로그램 데이터 접근 (등록/수정/단건 조회)
 // 모든 함수가 시작할 때 관리자인지 다시 확인합니다.
 // Server Action은 주소만 알면 누구나 직접 호출할 수 있다고 가정해야 해서, 화면에서 확인했더라도 여기서 또 확인합니다.
 // 그리고 DB의 RLS 규칙(관리자만 쓰기)이 마지막으로 한 번 더 막아 줍니다.
@@ -13,7 +13,7 @@ import { wodTypeLabels, type Wod } from "@/data/wods";
 export type WodSaveError =
   | { kind: "unauthorized" } // 관리자가 아님
   | { kind: "duplicate"; message: string } // 같은 날짜에 같은 종류가 이미 있음
-  | { kind: "not_found" } // 수정하려는 WOD가 없음 (그사이 삭제됨 등)
+  | { kind: "not_found" } // 수정하려는 프로그램이 없음 (그사이 삭제됨 등)
   | { kind: "unknown" }; // 그 밖의 오류 (원인은 서버 로그에)
 
 export type WodSaveResult = { ok: true; wod: Wod } | { ok: false; error: WodSaveError };
@@ -41,7 +41,7 @@ function toSaveError(error: { code?: string; message: string }, input: WodInput)
   if (error.code === PG_UNIQUE_VIOLATION) {
     return {
       kind: "duplicate",
-      message: `${input.date}에 이미 ${wodTypeLabels[input.type]} WOD가 있습니다. 기존 WOD를 수정해 주세요.`,
+      message: `${input.date}에 이미 ${wodTypeLabels[input.type]} 프로그램이 있습니다. 기존 프로그램을 수정해 주세요.`,
     };
   }
   if (error.code === PG_INSUFFICIENT_PRIVILEGE) {
@@ -103,7 +103,7 @@ export async function updateWod(id: number, input: WodInput): Promise<WodSaveRes
 }
 
 export type WodDeleteResult =
-  | { ok: true; date: string } // 지운 WOD의 날짜 (그 달 목록으로 돌아가기 위해)
+  | { ok: true; date: string } // 지운 프로그램의 날짜 (그 달 목록으로 돌아가기 위해)
   | { ok: false; error: { kind: "unauthorized" } | { kind: "not_found" } | { kind: "unknown" } };
 
 export async function deleteWod(id: number): Promise<WodDeleteResult> {
@@ -136,7 +136,7 @@ export async function deleteWod(id: number): Promise<WodDeleteResult> {
   return { ok: true, date: data.wod_date };
 }
 
-// 수정 화면에 채울 WOD 한 건. 관리자가 아니거나 없으면 null
+// 수정 화면에 채울 프로그램 한 건. 관리자가 아니거나 없으면 null
 export async function getWodById(id: number): Promise<Wod | null> {
   if (!(await getCurrentAdmin())) {
     return null;
@@ -151,7 +151,7 @@ export async function getWodById(id: number): Promise<Wod | null> {
 
   if (error) {
     console.error("[wods] 단건 조회 실패", error);
-    throw new Error("WOD 조회 실패", { cause: error });
+    throw new Error("프로그램 조회 실패", { cause: error });
   }
   return data ? toWod(data) : null;
 }

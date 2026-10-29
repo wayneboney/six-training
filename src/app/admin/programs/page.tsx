@@ -7,10 +7,10 @@ import { requireAdmin } from "@/lib/auth/admin";
 import { monthDateRange, parseMonthKey, parseDateKey, seoulTodayKey, shiftMonth, toMonthKey } from "@/lib/date";
 import { getWods } from "@/lib/wods/repository";
 
-// /admin/wods = WOD 관리 (월별 WOD 목록). 관리자 첫 화면입니다.
-// 보고 싶은 달은 주소로 받습니다. 예: /admin/wods?month=2026-10
+// /admin/programs = 프로그램 관리 (월별 프로그램 목록). 관리자 첫 화면입니다.
+// 보고 싶은 달은 주소로 받습니다. 예: /admin/programs?month=2026-10
 // 주소에 달이 들어 있어서 새로고침하거나 북마크해도 같은 달이 열립니다.
-export default function AdminHomePage(props: PageProps<"/admin/wods">) {
+export default function AdminHomePage(props: PageProps<"/admin/programs">) {
   return (
     <Suspense fallback={<p className="text-muted">확인 중…</p>}>
       <AdminHome searchParams={props.searchParams} />
@@ -18,7 +18,7 @@ export default function AdminHomePage(props: PageProps<"/admin/wods">) {
   );
 }
 
-async function AdminHome({ searchParams }: { searchParams: PageProps<"/admin/wods">["searchParams"] }) {
+async function AdminHome({ searchParams }: { searchParams: PageProps<"/admin/programs">["searchParams"] }) {
   // 관리자 화면은 로그인한 사람마다 내용이 달라서 미리 만들어 둘 수 없습니다.
   // connection() = "방문자가 요청했을 때만 실행"하라는 표시 (링크 미리 불러오기 단계에서는 실행하지 않음)
   await connection();
@@ -38,7 +38,7 @@ async function AdminHome({ searchParams }: { searchParams: PageProps<"/admin/wod
   const next = shiftMonth(target.year, target.month, 1);
   const { from, to } = monthDateRange(target.year, target.month);
 
-  // "새 WOD 등록"을 누르면 채워 둘 날짜: 이번 달을 보고 있으면 오늘, 다른 달이면 그 달 1일
+  // "새 프로그램 등록"을 누르면 채워 둘 날짜: 이번 달을 보고 있으면 오늘, 다른 달이면 그 달 1일
   const isCurrentMonth = target.year === today.year && target.month === today.month;
   const newWodDate = isCurrentMonth ? todayKey : from;
 
@@ -47,12 +47,12 @@ async function AdminHome({ searchParams }: { searchParams: PageProps<"/admin/wod
   try {
     wods = await getWods(from, to);
   } catch (error) {
-    console.error("[admin] WOD 목록 조회 실패", error);
+    console.error("[admin] 프로그램 목록 조회 실패", error);
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-black">WOD 관리</h1>
+      <h1 className="text-2xl font-black">프로그램 관리</h1>
 
       {/* 완료 안내: 등록/수정 후 ?saved=1, 삭제 후 ?deleted=1을 붙여서 이 화면으로 돌아옵니다 */}
       {saved === "1" && (
@@ -66,22 +66,22 @@ async function AdminHome({ searchParams }: { searchParams: PageProps<"/admin/wod
         </p>
       )}
 
-      {/* WOD 목록 */}
+      {/* 프로그램 목록 */}
       <section className="mt-8">
         <div className="mb-4 flex items-center justify-between gap-2">
           {/* 월 이동은 링크로: 주소의 ?month= 값만 바꿔서 같은 페이지를 다시 엽니다 */}
           <Link
-            href={`/admin/wods?month=${toMonthKey(prev.year, prev.month)}`}
+            href={`/admin/programs?month=${toMonthKey(prev.year, prev.month)}`}
             aria-label="이전 달"
             className="rounded-md border border-line px-3 py-1 hover:bg-surface"
           >
             ‹
           </Link>
           <h2 className="text-xl font-black">
-            {target.year}년 {target.month + 1}월 WOD
+            {target.year}년 {target.month + 1}월 프로그램
           </h2>
           <Link
-            href={`/admin/wods?month=${toMonthKey(next.year, next.month)}`}
+            href={`/admin/programs?month=${toMonthKey(next.year, next.month)}`}
             aria-label="다음 달"
             className="rounded-md border border-line px-3 py-1 hover:bg-surface"
           >
@@ -91,7 +91,7 @@ async function AdminHome({ searchParams }: { searchParams: PageProps<"/admin/wod
 
         {wods === null ? (
           <div role="alert" className="rounded-lg border border-line bg-surface p-8 text-center">
-            <p className="font-bold">WOD 목록을 불러오지 못했습니다.</p>
+            <p className="font-bold">프로그램 목록을 불러오지 못했습니다.</p>
             <p className="mt-2 text-sm text-muted">잠시 후 다시 시도해 주세요.</p>
           </div>
         ) : (
@@ -99,10 +99,10 @@ async function AdminHome({ searchParams }: { searchParams: PageProps<"/admin/wod
             <div className="mb-4 flex items-center justify-between">
               <p className="text-sm text-muted">총 {wods.length}개</p>
               <Link
-                href={`/admin/wods/new?date=${newWodDate}`}
+                href={`/admin/programs/new?date=${newWodDate}`}
                 className="rounded-md bg-accent px-4 py-2 text-sm font-bold text-white hover:opacity-90"
               >
-                + 새 WOD 등록
+                + 새 프로그램 등록
               </Link>
             </div>
             <WodAdminList wods={wods} />

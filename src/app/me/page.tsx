@@ -118,7 +118,7 @@ async function MyInfo() {
 
       {!canViewContent && (
         <p role="status" className="rounded-md border border-line bg-surface px-3 py-2 text-sm text-muted">
-          WOD와 수업 예약은 회원권이 유효한 회원만 이용할 수 있습니다. 코치에게 회원권 등록을 문의해 주세요.
+          프로그램과 수업 예약은 회원권이 유효한 회원만 이용할 수 있습니다. 코치에게 회원권 등록을 문의해 주세요.
         </p>
       )}
 

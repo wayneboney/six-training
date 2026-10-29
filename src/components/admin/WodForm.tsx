@@ -1,10 +1,10 @@
-// WOD 등록/수정 폼 (두 화면이 같이 씁니다)
+// 프로그램 등록/수정 폼 (두 화면이 같이 씁니다)
 // 제출 중 표시, 칸별 에러 표시가 필요해서 브라우저에서 실행되는 컴포넌트로 만듭니다.
 "use client";
 
 import Link from "next/link";
 import { useActionState } from "react";
-import type { WodFormState } from "@/app/admin/wods/actions";
+import type { WodFormState } from "@/app/admin/programs/actions";
 import { wodTypeStyles } from "@/components/wod/wodTypeStyles";
 import { wodTypeLabels, wodTypes } from "@/data/wods";
 import { WOD_LIMITS, type WodFormValues } from "@/lib/wods/validation";
@@ -79,7 +79,7 @@ export default function WodForm({ action, initialValues, submitLabel, cancelHref
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2">
-        <Field label="WOD 이름" htmlFor="title" error={errors.title}>
+        <Field label="프로그램 이름" htmlFor="title" error={errors.title}>
           <input
             id="title"
             name="title"

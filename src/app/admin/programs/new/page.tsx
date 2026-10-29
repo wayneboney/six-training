@@ -1,22 +1,22 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { createWodAction } from "@/app/admin/wods/actions";
+import { createWodAction } from "@/app/admin/programs/actions";
 import WodForm from "@/components/admin/WodForm";
 import { requireAdmin } from "@/lib/auth/admin";
 import { seoulTodayKey } from "@/lib/date";
 import { isValidDateKey } from "@/lib/wods/validation";
 
 export const metadata: Metadata = {
-  title: "WOD 등록",
+  title: "프로그램 등록",
 };
 
-// /admin/wods/new = WOD 등록 화면
-// /admin/wods/new?date=2026-10-28 처럼 날짜를 주면 그 날짜가 미리 채워집니다.
-export default function NewWodPage(props: PageProps<"/admin/wods/new">) {
+// /admin/programs/new = 프로그램 등록 화면
+// /admin/programs/new?date=2026-10-28 처럼 날짜를 주면 그 날짜가 미리 채워집니다.
+export default function NewWodPage(props: PageProps<"/admin/programs/new">) {
   return (
     <div>
-      <h1 className="text-2xl font-black">WOD 등록</h1>
+      <h1 className="text-2xl font-black">프로그램 등록</h1>
       <div className="mt-8">
         <Suspense fallback={<p className="text-muted">확인 중…</p>}>
           <NewWod searchParams={props.searchParams} />
@@ -26,7 +26,7 @@ export default function NewWodPage(props: PageProps<"/admin/wods/new">) {
   );
 }
 
-async function NewWod({ searchParams }: { searchParams: PageProps<"/admin/wods/new">["searchParams"] }) {
+async function NewWod({ searchParams }: { searchParams: PageProps<"/admin/programs/new">["searchParams"] }) {
   await connection();
   await requireAdmin();
 
@@ -39,7 +39,7 @@ async function NewWod({ searchParams }: { searchParams: PageProps<"/admin/wods/n
       action={createWodAction}
       initialValues={{ date: initialDate, type: "CROSSFIT", title: "", format: "", movements: "", note: "" }}
       submitLabel="등록"
-      cancelHref={`/admin/wods?month=${initialDate.slice(0, 7)}`}
+      cancelHref={`/admin/programs?month=${initialDate.slice(0, 7)}`}
     />
   );
 }

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { deleteWodAction, updateWodAction } from "@/app/admin/wods/actions";
+import { deleteWodAction, updateWodAction } from "@/app/admin/programs/actions";
 import DeleteWodButton from "@/components/admin/DeleteWodButton";
 import WodForm from "@/components/admin/WodForm";
 import { wodTypeLabels } from "@/data/wods";
@@ -12,15 +12,15 @@ import { getWodById } from "@/lib/wods/admin-repository";
 import { parseWodId, wodToFormValues } from "@/lib/wods/validation";
 
 export const metadata: Metadata = {
-  title: "WOD 수정",
+  title: "프로그램 수정",
 };
 
-// /admin/wods/123 = id가 123인 WOD 수정 화면
+// /admin/programs/123 = id가 123인 프로그램 수정 화면
 // [id] 폴더 이름의 대괄호 = 주소의 그 자리 값을 params.id로 받는다는 뜻 (Spring의 @PathVariable)
-export default function EditWodPage(props: PageProps<"/admin/wods/[id]">) {
+export default function EditWodPage(props: PageProps<"/admin/programs/[id]">) {
   return (
     <div>
-      <h1 className="text-2xl font-black">WOD 수정</h1>
+      <h1 className="text-2xl font-black">프로그램 수정</h1>
       <div className="mt-8">
         <Suspense fallback={<p className="text-muted">불러오는 중…</p>}>
           <EditWod params={props.params} />
@@ -30,7 +30,7 @@ export default function EditWodPage(props: PageProps<"/admin/wods/[id]">) {
   );
 }
 
-async function EditWod({ params }: { params: PageProps<"/admin/wods/[id]">["params"] }) {
+async function EditWod({ params }: { params: PageProps<"/admin/programs/[id]">["params"] }) {
   await connection();
   await requireAdmin();
 
@@ -41,7 +41,7 @@ async function EditWod({ params }: { params: PageProps<"/admin/wods/[id]">["para
     notFound();
   }
 
-  // 없는 WOD(이미 삭제됨 등)도 404
+  // 없는 프로그램(이미 삭제됨 등)도 404
   const wod = await getWodById(wodId);
   if (!wod) {
     notFound();
@@ -54,7 +54,7 @@ async function EditWod({ params }: { params: PageProps<"/admin/wods/[id]">["para
         action={updateWodAction.bind(null, wod.id)}
         initialValues={wodToFormValues(wod)}
         submitLabel="수정 저장"
-        cancelHref={`/admin/wods?month=${wod.date.slice(0, 7)}`}
+        cancelHref={`/admin/programs?month=${wod.date.slice(0, 7)}`}
       />
 
       {/* 삭제는 실수로 누르지 않도록 목록이 아니라 수정 화면 맨 아래에만 둡니다 */}

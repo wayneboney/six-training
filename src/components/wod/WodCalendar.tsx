@@ -8,7 +8,7 @@ import { wodTypeLabels, wodTypes, type Wod } from "@/data/wods";
 import { dateToKey, monthCells, parseDateKey, toDateKey, weekdayLabels } from "@/lib/date";
 
 type WodCalendarProps = {
-  // WOD 목록은 바깥(page.tsx)에서 넘겨받습니다.
+  // 프로그램 목록은 바깥(page.tsx)에서 넘겨받습니다.
   // 이 컴포넌트는 데이터가 파일에서 왔는지 DB에서 왔는지 모르기 때문에, 나중에 DB로 바꿔도 수정할 필요가 없습니다.
   wods: Wod[];
   holidays?: Record<string, string>; // 공휴일 { "2026-10-03": "개천절", ... }. 서버가 API에서 가져와 넘겨줍니다.
@@ -16,7 +16,7 @@ type WodCalendarProps = {
 };
 
 export default function WodCalendar({ wods, holidays = {}, isAdmin = false }: WodCalendarProps) {
-  // 날짜별로 WOD를 묶어 둡니다. { "2026-10-26": [Wod, Wod], ... } (Java의 Map<String, List<Wod>>)
+  // 날짜별로 프로그램을 묶어 둡니다. { "2026-10-26": [Wod, Wod], ... } (Java의 Map<String, List<Wod>>)
   // useMemo = wods가 바뀔 때만 다시 계산 (화면이 다시 그려질 때마다 매번 계산하지 않도록)
   const wodsByDate = useMemo(() => {
     const map = new Map<string, Wod[]>();
@@ -34,7 +34,7 @@ export default function WodCalendar({ wods, holidays = {}, isAdmin = false }: Wo
   const [pickedView, setPickedView] = useState<{ year: number; month: number } | null>(null);
   const [pickedDate, setPickedDate] = useState<string | null>(null);
 
-  // 오늘을 아직 모를 때(빌드 시점) 보여줄 달: 가장 최근 WOD가 있는 달
+  // 오늘을 아직 모를 때(빌드 시점) 보여줄 달: 가장 최근 프로그램이 있는 달
   // "YYYY-MM-DD" 문자열은 글자 순서 = 날짜 순서라서 문자열 비교로 가장 늦은 날짜를 찾을 수 있습니다.
   const latestKey = wods.reduce((max, wod) => (wod.date > max ? wod.date : max), "");
   const fallbackKey = today ?? latestKey;
@@ -125,7 +125,7 @@ export default function WodCalendar({ wods, holidays = {}, isAdmin = false }: Wo
                 type="button"
                 onClick={() => setPickedDate(key)}
                 aria-pressed={isSelected}
-                aria-label={`${view.month + 1}월 ${day}일${holiday ? `, ${holiday}` : ""}${dayWods.length > 0 ? `, WOD ${dayWods.length}개` : ""}`}
+                aria-label={`${view.month + 1}월 ${day}일${holiday ? `, ${holiday}` : ""}${dayWods.length > 0 ? `, 프로그램 ${dayWods.length}개` : ""}`}
                 className={`flex min-h-16 flex-col items-center gap-1 rounded-md border p-1 text-sm sm:min-h-20 ${
                   isSelected
                     ? "border-accent bg-accent text-white"
@@ -150,7 +150,7 @@ export default function WodCalendar({ wods, holidays = {}, isAdmin = false }: Wo
                     {holiday}
                   </span>
                 )}
-                {/* 그날 있는 WOD 종류를 작은 표시로. 모바일은 점, PC(sm 이상)는 글자 */}
+                {/* 그날 있는 프로그램 종류를 작은 표시로. 모바일은 점, PC(sm 이상)는 글자 */}
                 <span className="flex flex-wrap justify-center gap-0.5">
                   {dayWods.map((wod, wodIndex) => (
                     <WodMark key={wodIndex} type={wod.type} inverted={isSelected} />
@@ -176,7 +176,7 @@ export default function WodCalendar({ wods, holidays = {}, isAdmin = false }: Wo
         </div>
       </div>
 
-      {/* 선택한 날짜의 WOD 상세 */}
+      {/* 선택한 날짜의 프로그램 상세 */}
       <WodDetail
         date={selected}
         wods={selected ? (wodsByDate.get(selected) ?? []) : []}
@@ -200,7 +200,7 @@ function useToday(): string | null {
   );
 }
 
-// 날짜 칸 안의 WOD 종류 표시
+// 날짜 칸 안의 프로그램 종류 표시
 function WodMark({ type, inverted }: { type: Wod["type"]; inverted: boolean }) {
   const { color, short: shortLabel } = wodTypeStyles[type];
   return (

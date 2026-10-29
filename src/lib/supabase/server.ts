@@ -19,7 +19,7 @@ export function readSupabaseEnv(): { url: string; key: string } {
   return { url, key };
 }
 
-// 로그인과 상관없는 공개 데이터(WOD 읽기 등)를 조회할 때 쓰는 접속 도구
+// 로그인과 상관없는 공개 데이터(프로그램 읽기 등)를 조회할 때 쓰는 접속 도구
 export function createServerSupabase(): SupabaseClient {
   const { url, key } = readSupabaseEnv();
   return createClient(url, key, {

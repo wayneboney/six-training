@@ -29,7 +29,7 @@ export default async function AccountLinks() {
     <div className="flex items-center gap-3">
       {member.role === "admin" && (
         <Link
-          href="/admin/wods"
+          href="/admin/programs"
           className="rounded-md bg-accent px-3 py-1 text-sm font-bold text-white hover:opacity-90"
         >
           관리자
