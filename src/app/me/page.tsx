@@ -13,6 +13,7 @@ import { hasContentAccess, requireMember } from "@/lib/auth/member";
 import { addDaysToKey, diffDays, seoulTodayKey } from "@/lib/date";
 import { formatHoldRange } from "@/lib/members/format";
 import { createAuthSupabase } from "@/lib/supabase/auth";
+import PageBanner from "@/components/PageBanner";
 
 export const metadata: Metadata = {
   title: "내 정보",
@@ -22,14 +23,14 @@ export const metadata: Metadata = {
 // /me  (로그인한 회원 전용)
 export default function MePage() {
   return (
-    <div className="mx-auto w-full max-w-xl px-4 py-12">
-      <h1 className="text-2xl font-black">내 정보</h1>
-      <div className="mt-8">
+    <>
+      <PageBanner eyebrow="MY PAGE" title="내 정보" />
+      <div className="mx-auto w-full max-w-xl px-4 py-12">
         <Suspense fallback={<p className="text-muted">불러오는 중…</p>}>
           <MyInfo />
         </Suspense>
       </div>
-    </div>
+    </>
   );
 }
 

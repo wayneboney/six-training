@@ -4,6 +4,7 @@ import PriceList from "@/components/PriceList";
 import Section from "@/components/Section";
 import Timetable from "@/components/timetable/Timetable";
 import { gym, googleMapEmbedUrl, instagramUrl } from "@/data/gym";
+import PageBanner from "@/components/PageBanner";
 
 // 탭 제목이 layout.tsx의 template 규칙에 따라 "박스 소개 | SIX Training"이 됩니다.
 export const metadata: Metadata = {
@@ -17,13 +18,7 @@ export default function AboutPage() {
     // <>...</> = 여러 요소를 감싸기만 하고 실제 HTML 태그는 만들지 않는 빈 묶음(Fragment)
     <>
       {/* 상단 소개 영역 */}
-      <div className="border-b border-line bg-surface">
-        <div className="mx-auto max-w-5xl px-4 py-16">
-          <p className="text-sm font-bold tracking-widest text-accent">SINCE {gym.foundedYear}</p>
-          <h1 className="mt-2 text-3xl font-black sm:text-5xl">박스 소개</h1>
-          <p className="mt-4 max-w-2xl text-muted">{gym.intro}</p>
-        </div>
-      </div>
+      <PageBanner eyebrow={`SINCE ${gym.foundedYear}`} title="박스 소개" description={gym.intro} />
 
       <Section title="SIX Training의 특징">
         {/* grid sm:grid-cols-3 = 모바일은 1열, PC는 3열 */}

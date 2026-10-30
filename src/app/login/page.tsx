@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import MemberLoginForm from "@/components/auth/MemberLoginForm";
 import { getMemberIfSignedIn } from "@/lib/auth/member";
+import PageBanner from "@/components/PageBanner";
 
 export const metadata: Metadata = {
   title: "로그인",
@@ -11,14 +12,14 @@ export const metadata: Metadata = {
 // /login  (?error=link → 인증 메일 링크가 만료/사용된 경우)
 export default function LoginPage({ searchParams }: PageProps<"/login">) {
   return (
-    <div className="mx-auto w-full max-w-sm px-4 py-12">
-      <h1 className="text-2xl font-black">로그인</h1>
-      <div className="mt-8">
+    <>
+      <PageBanner eyebrow="MEMBER LOGIN" title="로그인" />
+      <div className="mx-auto w-full max-w-sm px-4 py-12">
         <Suspense fallback={<p className="text-muted">확인 중…</p>}>
           <LoginGate searchParams={searchParams} />
         </Suspense>
       </div>
-    </div>
+    </>
   );
 }
 

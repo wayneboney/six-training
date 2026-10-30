@@ -7,6 +7,7 @@ import { getAdminIfSignedIn } from "@/lib/auth/admin";
 import { requireContentAccess } from "@/lib/auth/member";
 import { getHolidays } from "@/lib/holidays/repository";
 import { getWods } from "@/lib/wods/repository";
+import PageBanner from "@/components/PageBanner";
 
 export const metadata: Metadata = {
   title: "Program",
@@ -22,13 +23,7 @@ const MONTHS_AFTER = 3;
 export default function WodPage() {
   return (
     <>
-      <div className="border-b border-line bg-surface">
-        <div className="mx-auto max-w-5xl px-4 py-16">
-          <p className="text-sm font-bold tracking-widest text-accent">WORKOUT OF THE DAY</p>
-          <h1 className="mt-2 text-3xl font-black sm:text-5xl">Program</h1>
-          <p className="mt-4 text-muted">날짜를 누르면 그날의 Program을 볼 수 있습니다.</p>
-        </div>
-      </div>
+      <PageBanner eyebrow="WORKOUT OF THE DAY" title="Program" description="날짜를 누르면 그날의 Program을 볼 수 있습니다." />
 
       <div className="mx-auto max-w-5xl px-4 py-12">
         {/* Suspense = 안쪽(WodSection)이 DB를 읽는 동안 fallback을 먼저 보여주고, 다 읽으면 바꿔 끼웁니다 */}

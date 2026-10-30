@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { PASSWORD_RESET_ENABLED } from "@/lib/auth/features";
 import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
 import { createAuthSupabase } from "@/lib/supabase/auth";
+import PageBanner from "@/components/PageBanner";
 
 export const metadata: Metadata = {
   title: "새 비밀번호 설정",
@@ -18,14 +19,14 @@ export default function ResetPasswordPage() {
     notFound();
   }
   return (
-    <div className="mx-auto w-full max-w-sm px-4 py-12">
-      <h1 className="text-2xl font-black">새 비밀번호 설정</h1>
-      <div className="mt-8">
+    <>
+      <PageBanner eyebrow="PASSWORD" title="새 비밀번호 설정" />
+      <div className="mx-auto w-full max-w-sm px-4 py-12">
         <Suspense fallback={<p className="text-muted">확인 중…</p>}>
           <ResetGate />
         </Suspense>
       </div>
-    </div>
+    </>
   );
 }
 
