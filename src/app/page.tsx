@@ -15,11 +15,6 @@ import { getWods } from "@/lib/wods/repository";
 export default function Home() {
   return (
     <>
-      {/* 내 예약: 예약이 있는 회원에게만 보이는 한 줄 요약 (없으면 아무것도 그리지 않음) */}
-      <Suspense fallback={null}>
-        <MyReservations />
-      </Suspense>
-
       <div className="mx-auto flex max-w-5xl flex-col items-start gap-6 px-4 py-20 sm:py-28">
         <p className="text-sm font-bold uppercase tracking-widest text-accent">CrossFit · HYROX</p>
 
@@ -47,6 +42,11 @@ export default function Home() {
             박스 둘러보기
           </Link>
         </div>
+
+        {/* 내 예약: 예약이 있는 회원에게만 보이는 한 줄 요약 (없으면 아무것도 그리지 않음). 슬로건과 버튼 아래에 둡니다 */}
+        <Suspense fallback={null}>
+          <MyReservations />
+        </Suspense>
       </div>
 
       {/* 오늘의 Program: 회원권이 유효한 회원(과 관리자)에게만 보입니다. 확인이 끝날 때까지는 아무것도 보여주지 않습니다. */}

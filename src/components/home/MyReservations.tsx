@@ -46,7 +46,7 @@ export default async function MyReservations() {
   const rest = list.length - shown.length;
 
   return (
-    <section aria-label="내 예약" className="mx-auto max-w-5xl px-4 pt-6">
+    <section aria-label="내 예약" className="w-full max-w-md">
       <div className="rounded-lg border border-line bg-surface px-4 py-3">
         <p className="text-xs font-bold text-muted">내 예약</p>
         <ul className="mt-1 divide-y divide-line">
