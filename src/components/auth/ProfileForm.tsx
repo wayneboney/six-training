@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import MemberActionForm from "@/components/admin/MemberActionForm";
 import ContactFields from "@/components/auth/ContactFields";
 import { formatPhone } from "@/lib/profile/contact";
-import Avatar from "@/components/Avatar";
+import AvatarZoom from "@/components/AvatarZoom";
 import { updateProfileAction, type ProfileActionState } from "@/app/me/profile-actions";
 import { NAME_MAX } from "@/lib/auth/validation";
 
@@ -136,7 +136,7 @@ export default function ProfileForm({ name, avatarUrl, phone, birthDate, gender 
   return (
     <MemberActionForm action={submit} submitLabel="저장" pendingLabel="저장 중…">
       <div className="flex items-center gap-4">
-        <Avatar url={shownUrl} name={name} size={72} />
+        <AvatarZoom url={shownUrl} name={name} size={72} />
         <div className="space-y-2">
           <div className="flex flex-wrap gap-2">
             <label

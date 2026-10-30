@@ -10,7 +10,7 @@ import {
   sendPasswordResetAction,
   updateMemberAction,
 } from "@/app/admin/members/actions";
-import Avatar from "@/components/Avatar";
+import AvatarZoom from "@/components/AvatarZoom";
 import AttendanceDates from "@/components/AttendanceDates";
 import AttendanceStats from "@/components/AttendanceStats";
 import MemberActionForm from "@/components/admin/MemberActionForm";
@@ -110,7 +110,7 @@ async function MemberDetailView({ params }: { params: PageProps<"/admin/members/
     <div className="space-y-8">
       {/* 기본 정보 */}
       <section className="flex items-center gap-4">
-        <Avatar url={member.avatarUrl} name={member.name} size={72} mark={member.role === "admin" ? "admin" : undefined} />
+        <AvatarZoom url={member.avatarUrl} name={member.name} size={72} mark={member.role === "admin" ? "admin" : undefined} />
         <div className="min-w-0">
           <h1 className="text-2xl font-black">
             {member.name}
