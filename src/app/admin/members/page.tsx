@@ -36,8 +36,7 @@ const PAGE_SIZE = 20; // 한 페이지에 보여줄 회원 수
 export default function MembersPage(props: PageProps<"/admin/members">) {
   return (
     <div>
-      <h1 className="text-2xl font-black">회원 관리</h1>
-      <div className="mt-8">
+      <div>
         <Suspense fallback={<p className="text-muted">불러오는 중…</p>}>
           <MemberList searchParams={props.searchParams} />
         </Suspense>

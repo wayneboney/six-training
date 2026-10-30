@@ -43,8 +43,7 @@ async function ScheduleAdmin() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-black">시간표 관리</h1>
-        <p className="mt-2 text-sm text-muted">
+        <p className="text-sm text-muted">
           수업 시간을 정하면 회원이 그 시간으로 예약하고, 박스 소개의 시간표에도 바로 반영됩니다.
           (순서: 시간표 설정 → Program 등록 → 회원 예약)
         </p>

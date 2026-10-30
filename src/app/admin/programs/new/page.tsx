@@ -16,8 +16,7 @@ export const metadata: Metadata = {
 export default function NewWodPage(props: PageProps<"/admin/programs/new">) {
   return (
     <div>
-      <h1 className="text-2xl font-black">Program 등록</h1>
-      <div className="mt-8">
+      <div>
         <Suspense fallback={<p className="text-muted">확인 중…</p>}>
           <NewWod searchParams={props.searchParams} />
         </Suspense>

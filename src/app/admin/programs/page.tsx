@@ -52,11 +52,9 @@ async function AdminHome({ searchParams }: { searchParams: PageProps<"/admin/pro
 
   return (
     <div>
-      <h1 className="text-2xl font-black">Program 관리</h1>
-
       {/* 완료 안내: 등록/수정 후 ?saved=1, 삭제 후 ?deleted=1을 붙여서 이 화면으로 돌아옵니다 */}
       {saved === "1" && (
-        <p role="status" className="mt-6 rounded-md bg-surface px-4 py-3 text-sm font-bold">
+        <p role="status" className="mb-6 rounded-md bg-surface px-4 py-3 text-sm font-bold">
           ✅ 저장되었습니다.
         </p>
       )}

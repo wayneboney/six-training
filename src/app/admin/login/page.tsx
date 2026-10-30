@@ -13,9 +13,7 @@ export const metadata: Metadata = {
 export default function AdminLoginPage() {
   return (
     <div className="mx-auto max-w-sm">
-      <h1 className="text-2xl font-black">관리자 로그인</h1>
-      <p className="mt-2 text-sm text-muted">코치 계정으로 로그인해 주세요.</p>
-      <div className="mt-8">
+      <div>
         {/* 로그인 여부는 요청할 때마다 쿠키를 읽어야 알 수 있어서 Suspense로 감쌉니다 */}
         <Suspense fallback={<p className="text-muted">확인 중…</p>}>
           <LoginGate />

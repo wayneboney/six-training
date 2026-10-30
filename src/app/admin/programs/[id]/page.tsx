@@ -20,8 +20,7 @@ export const metadata: Metadata = {
 export default function EditWodPage(props: PageProps<"/admin/programs/[id]">) {
   return (
     <div>
-      <h1 className="text-2xl font-black">Program 수정</h1>
-      <div className="mt-8">
+      <div>
         <Suspense fallback={<p className="text-muted">불러오는 중…</p>}>
           <EditWod params={props.params} />
         </Suspense>
