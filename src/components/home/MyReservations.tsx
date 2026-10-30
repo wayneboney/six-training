@@ -46,38 +46,42 @@ export default async function MyReservations() {
   const rest = list.length - shown.length;
 
   return (
-    <section aria-label="내 예약" className="w-full max-w-md">
-      <div className="rounded-lg border border-line bg-surface px-4 py-3">
-        <p className="text-xs font-bold text-muted">내 예약</p>
-        <ul className="mt-1 divide-y divide-line">
-          {shown.map((r) => (
-            <li key={r.id}>
-              {/* 줄 전체가 링크: 누르면 그 날짜의 수업 예약 화면으로 */}
-              <Link href={`/reserve?date=${r.classDate}`} className="flex items-center justify-between gap-3 py-2 hover:text-accent">
-                <span className="min-w-0 truncate text-sm">
-                  <span className={`font-bold ${r.classDate === today ? "text-accent" : ""}`}>{dayLabel(r.classDate, today)}</span>{" "}
-                  {r.startTime} {classLabelsKo[r.classType as keyof typeof classLabelsKo] ?? r.classType}
+    // 슬로건과 구분되도록 위에 얇은 선을 긋고, 아래 "오늘의 Program"과 같은 제목 모양(작은 영문 + 큰 제목)으로 맞춥니다.
+    <section aria-label="내 예약" className="w-full border-t border-line pt-6">
+      <p className="text-sm font-bold tracking-widest text-accent">MY CLASS</p>
+      <h2 className="mt-1 text-xl font-black sm:text-2xl">내 예약</h2>
+
+      <ul className="mt-4 w-full max-w-xl divide-y divide-line overflow-hidden rounded-lg border border-line">
+        {shown.map((r) => (
+          <li key={r.id}>
+            {/* 줄 전체가 링크: 누르면 그 날짜의 수업 예약 화면으로 */}
+            <Link
+              href={`/reserve?date=${r.classDate}`}
+              className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-surface"
+            >
+              <span className="min-w-0 truncate text-base">
+                <span className={`font-bold ${r.classDate === today ? "text-accent" : ""}`}>{dayLabel(r.classDate, today)}</span>{" "}
+                {r.startTime} {classLabelsKo[r.classType as keyof typeof classLabelsKo] ?? r.classType}
+              </span>
+              <span className="flex shrink-0 items-center gap-3 text-sm">
+                {r.status === "waiting" ? (
+                  <span className="rounded border border-line px-2 py-0.5 text-muted">대기</span>
+                ) : (
+                  <span className="rounded bg-accent px-2 py-0.5 font-bold text-white">예약</span>
+                )}
+                <span aria-hidden="true" className="text-lg text-muted">
+                  ›
                 </span>
-                <span className="flex shrink-0 items-center gap-2 text-xs">
-                  {r.status === "waiting" ? (
-                    <span className="rounded border border-line px-1.5 py-0.5 text-muted">대기</span>
-                  ) : (
-                    <span className="rounded bg-accent px-1.5 py-0.5 font-bold text-white">예약</span>
-                  )}
-                  <span aria-hidden="true" className="text-muted">
-                    ›
-                  </span>
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-        {rest > 0 && (
-          <Link href="/reserve" className="block pt-1 text-xs font-bold text-muted hover:text-accent">
-            외 {rest}건 · 수업 예약 보기 →
-          </Link>
-        )}
-      </div>
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+      {rest > 0 && (
+        <Link href="/reserve" className="mt-2 inline-block text-sm font-bold text-muted hover:text-accent">
+          외 {rest}건 · 수업 예약 보기 →
+        </Link>
+      )}
     </section>
   );
 }
