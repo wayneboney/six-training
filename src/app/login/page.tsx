@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default function LoginPage({ searchParams }: PageProps<"/login">) {
   return (
     <>
-      <PageBanner eyebrow="MEMBER LOGIN" title="로그인" />
+      <PageBanner eyebrow="MEMBER LOGIN" title="로그인" description="로그인하면 수업 예약과 오늘의 Program을 확인할 수 있습니다." />
       <div className="mx-auto w-full max-w-sm px-4 py-12">
         <Suspense fallback={<p className="text-muted">확인 중…</p>}>
           <LoginGate searchParams={searchParams} />

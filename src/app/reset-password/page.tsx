@@ -20,7 +20,7 @@ export default function ResetPasswordPage() {
   }
   return (
     <>
-      <PageBanner eyebrow="PASSWORD" title="새 비밀번호 설정" />
+      <PageBanner eyebrow="PASSWORD" title="새 비밀번호 설정" description="앞으로 사용할 새 비밀번호를 입력해 주세요." />
       <div className="mx-auto w-full max-w-sm px-4 py-12">
         <Suspense fallback={<p className="text-muted">확인 중…</p>}>
           <ResetGate />

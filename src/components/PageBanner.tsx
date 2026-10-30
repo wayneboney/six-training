@@ -16,7 +16,7 @@ export default function PageBanner({
       <div className={`mx-auto max-w-5xl px-4 ${compact ? "py-8" : "py-16"}`}>
         <p className="text-sm font-bold tracking-widest text-accent">{eyebrow}</p>
         <h1 className={`mt-2 font-black ${compact ? "text-2xl sm:text-3xl" : "text-3xl sm:text-5xl"}`}>{title}</h1>
-        {description && <p className="mt-4 max-w-2xl text-muted">{description}</p>}
+        {description && <p className={`max-w-2xl text-muted ${compact ? "mt-2 text-sm" : "mt-4"}`}>{description}</p>}
       </div>
     </div>
   );

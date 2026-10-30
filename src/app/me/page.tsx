@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 export default function MePage() {
   return (
     <>
-      <PageBanner eyebrow="MY PAGE" title="내 정보" />
+      <PageBanner eyebrow="MY PAGE" title="내 정보" description="회원권, 홀딩, 출석 현황을 확인하고 내 정보를 관리할 수 있습니다." />
       <div className="mx-auto w-full max-w-xl px-4 py-12">
         <Suspense fallback={<p className="text-muted">불러오는 중…</p>}>
           <MyInfo />

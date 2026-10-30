@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 export default function AdminLayout({ children }: LayoutProps<"/admin">) {
   return (
     <>
-      <PageBanner eyebrow="ADMIN" title="관리자" compact />
+      <PageBanner eyebrow="ADMIN" title="관리자" description="Program, 회원, 시간표를 관리합니다." compact />
       <div className="mx-auto w-full max-w-5xl px-4 py-12">
         {/* 현재 주소를 읽는 컴포넌트라 Suspense로 감쌉니다 (주소는 요청 시점에 정해지므로) */}
         <Suspense fallback={null}>
