@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import MyReservations from "@/components/home/MyReservations";
 import WodDetail from "@/components/wod/WodDetail";
 import { gym } from "@/data/gym";
 import type { Wod } from "@/data/wods";
@@ -14,6 +15,11 @@ import { getWods } from "@/lib/wods/repository";
 export default function Home() {
   return (
     <>
+      {/* 내 예약: 예약이 있는 회원에게만 보이는 한 줄 요약 (없으면 아무것도 그리지 않음) */}
+      <Suspense fallback={null}>
+        <MyReservations />
+      </Suspense>
+
       <div className="mx-auto flex max-w-5xl flex-col items-start gap-6 px-4 py-20 sm:py-28">
         <p className="text-sm font-bold uppercase tracking-widest text-accent">CrossFit · HYROX</p>
 
