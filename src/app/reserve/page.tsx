@@ -30,17 +30,24 @@ export const metadata = { title: "수업 예약" };
 // /reserve  (로그인한 회원 전용)   주소의 ?date=YYYY-MM-DD 로 보고 싶은 날을 고릅니다.
 export default function ReservePage(props: PageProps<"/reserve">) {
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-12">
-      <h1 className="text-2xl font-black">수업 예약</h1>
-      <p className="mt-2 text-sm text-muted">
-        이번 주 수업을 예약할 수 있습니다. 정원이 차면 대기로 등록되고, 자리가 나면 자동으로 예약됩니다.
-      </p>
-      <div className="mt-8">
+    <>
+      {/* 제목 영역: Program 화면과 같은 모양 (회색 배경 + 작은 영문 + 큰 제목) */}
+      <div className="border-b border-line bg-surface">
+        <div className="mx-auto max-w-5xl px-4 py-16">
+          <p className="text-sm font-bold tracking-widest text-accent">CLASS RESERVATION</p>
+          <h1 className="mt-2 text-3xl font-black sm:text-5xl">수업 예약</h1>
+          <p className="mt-4 text-muted">
+            이번 주 수업을 예약할 수 있습니다. 정원이 차면 대기로 등록되고, 자리가 나면 자동으로 예약됩니다.
+          </p>
+        </div>
+      </div>
+
+      <div className="mx-auto w-full max-w-3xl px-4 py-12">
         <Suspense fallback={<p className="text-muted">불러오는 중…</p>}>
           <ReserveContent searchParams={props.searchParams} />
         </Suspense>
       </div>
-    </div>
+    </>
   );
 }
 
