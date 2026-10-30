@@ -1,5 +1,6 @@
-// 홈 화면의 "내 예약" 한 줄 요약. 회원권이 유효한 일반회원이 앞으로 들을 예약(또는 대기)이 있을 때만 나타납니다.
-// 예약이 없거나, 관리자이거나, 조회에 실패하면 아무것도 그리지 않아서 홈 화면은 그대로입니다.
+// 홈 화면의 "내 예약" 요약. 회원권이 유효한 일반회원에게만 나타납니다.
+//   앞으로 들을 예약(또는 대기)이 있으면 목록, 없으면 "수업 예약하기" 버튼을 보여 줍니다.
+// 관리자이거나, 로그인 전이거나, 회원권이 유효하지 않거나, 조회에 실패하면 아무것도 그리지 않아서 홈 화면은 그대로입니다.
 import Link from "next/link";
 import { connection } from "next/server";
 import { classLabelsKo } from "@/data/timetable";
@@ -39,7 +40,19 @@ export default async function MyReservations() {
     return null;
   }
   if (list.length === 0) {
-    return null;
+    // 예약이 없으면 안내 문구와 함께 수업 예약 화면으로 가는 버튼을 보여 줍니다.
+    return (
+      <section aria-label="내 예약" className="w-full border-t border-line pt-6">
+        <p className="text-sm font-bold tracking-widest text-accent">MY CLASS</p>
+        <h2 className="mt-1 text-xl font-black sm:text-2xl">내 예약</h2>
+        <div className="mt-4 flex w-full max-w-xl flex-wrap items-center justify-between gap-3 rounded-lg border border-line px-4 py-3">
+          <p className="text-base text-muted">예약한 수업이 없습니다.</p>
+          <Link href="/reserve" className="shrink-0 rounded-md bg-accent px-4 py-2 text-sm font-bold text-white hover:opacity-90">
+            수업 예약하기
+          </Link>
+        </div>
+      </section>
+    );
   }
 
   const shown = list.slice(0, SHOW_MAX);
