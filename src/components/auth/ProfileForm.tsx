@@ -7,6 +7,7 @@ import MemberActionForm from "@/components/admin/MemberActionForm";
 import ContactFields from "@/components/auth/ContactFields";
 import { formatPhone } from "@/lib/profile/contact";
 import AvatarZoom from "@/components/AvatarZoom";
+import { medalOf } from "@/lib/mvp";
 import { updateProfileAction, type ProfileActionState } from "@/app/me/profile-actions";
 import { NAME_MAX } from "@/lib/auth/validation";
 
@@ -46,12 +47,13 @@ async function resizeAvatar(file: File): Promise<File> {
 type ProfileFormProps = {
   name: string;
   avatarUrl: string | null;
+  mvpRank?: number | null; // 지난달 MVP 순위(1~3). 프로필 사진에 메달로 표시
   phone: string | null;
   birthDate: string | null;
   gender: string | null;
 };
 
-export default function ProfileForm({ name, avatarUrl, phone, birthDate, gender }: ProfileFormProps) {
+export default function ProfileForm({ name, avatarUrl, mvpRank = null, phone, birthDate, gender }: ProfileFormProps) {
   const [newAvatar, setNewAvatar] = useState<File | null>(null); // 새로 고른(줄여 둔) 사진
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [removeAvatar, setRemoveAvatar] = useState(false); // 현재 사진을 지우기로 했는지
@@ -136,7 +138,7 @@ export default function ProfileForm({ name, avatarUrl, phone, birthDate, gender 
   return (
     <MemberActionForm action={submit} submitLabel="저장" pendingLabel="저장 중…">
       <div className="flex items-center gap-4">
-        <AvatarZoom url={shownUrl} name={name} size={72} />
+        <AvatarZoom url={shownUrl} name={name} size={72} mark={medalOf(mvpRank)} />
         <div className="space-y-2">
           <div className="flex flex-wrap gap-2">
             <label

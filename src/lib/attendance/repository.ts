@@ -1,6 +1,7 @@
 // 출석 일수 조회. 출석은 "출석한 날" 기준(하루에 수업을 여러 번 들어도 1일)이고, 수업/예약 기록을 지워도 줄어들지 않습니다. (DB의 attendances 표)
 // 출석 조회가 실패해도 화면 전체가 막히면 안 되므로, 실패하면 값 없이(null 또는 빈 목록) 돌려주고 로그만 남깁니다.
 import "server-only";
+import { cache } from "react";
 import { createAuthSupabase } from "@/lib/supabase/auth";
 
 export type AttendanceCount = { thisMonth: number; lastMonth: number; total: number };
@@ -70,3 +71,20 @@ export async function getMyAttendanceDates(limit = 120): Promise<string[]> {
     return [];
   }
 }
+
+// 로그인한 회원 본인의 지난달 MVP 순위(1~3). 순위 밖이거나 조회에 실패하면 null. (헤더 프로필 사진의 메달용)
+// cache() = 같은 요청 안에서 헤더와 페이지가 각각 불러도 DB에는 한 번만 묻습니다.
+export const getMyMvpRank = cache(async (): Promise<number | null> => {
+  try {
+    const supabase = await createAuthSupabase();
+    const { data, error } = await supabase.rpc("get_my_mvp_rank");
+    if (error) {
+      console.error("[me] MVP 순위 조회 실패", error);
+      return null;
+    }
+    return typeof data === "number" ? data : null;
+  } catch (error) {
+    console.error("[me] MVP 순위 조회 실패", error);
+    return null;
+  }
+});

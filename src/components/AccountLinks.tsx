@@ -3,7 +3,9 @@ import Avatar from "@/components/Avatar";
 import LogoutButton from "@/components/LogoutButton";
 import PowerIcon from "@/components/PowerIcon";
 import { connection } from "next/server";
+import { getMyMvpRank } from "@/lib/attendance/repository";
 import { getMemberIfSignedIn } from "@/lib/auth/member";
+import { medalOf } from "@/lib/mvp";
 
 // 헤더 오른쪽의 계정 링크. 로그인 여부는 요청마다 다르므로 Header에서 <Suspense>로 감싸 이 부분만 요청 시점에 채웁니다.
 //   로그인 안 함 → 전원 버튼 모양 [로그인]
@@ -25,6 +27,8 @@ export default async function AccountLinks() {
       </Link>
     );
   }
+  // 일반회원은 지난달 MVP 1~3위이면 프로필 사진 왼쪽 위에 메달이 붙습니다. (관리자는 역기 마크)
+  const mvpRank = member.role === "member" ? await getMyMvpRank() : null;
   return (
     <div className="flex items-center gap-3">
       {member.role === "admin" && (
@@ -42,7 +46,7 @@ export default async function AccountLinks() {
         aria-label={`${member.name}님, 내 정보로 이동`}
         className="flex items-center gap-2 hover:opacity-80 sm:border-l sm:border-line sm:pl-4"
       >
-        <Avatar url={member.avatarUrl} name={member.name} size={32} mark={member.role === "admin" ? "admin" : undefined} />
+        <Avatar url={member.avatarUrl} name={member.name} size={32} mark={member.role === "admin" ? "admin" : medalOf(mvpRank)} />
         <span className="max-w-[5rem] truncate text-sm font-bold sm:max-w-[12rem]">
           {member.name}님<span className="hidden font-normal text-muted sm:inline"> 환영합니다</span>
         </span>

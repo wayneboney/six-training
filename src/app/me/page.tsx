@@ -8,7 +8,7 @@ import AttendanceDates from "@/components/AttendanceDates";
 import AttendanceStats from "@/components/AttendanceStats";
 import MemberActionForm from "@/components/admin/MemberActionForm";
 import ProfileForm from "@/components/auth/ProfileForm";
-import { getMyAttendance, getMyAttendanceDates } from "@/lib/attendance/repository";
+import { getMyAttendance, getMyAttendanceDates, getMyMvpRank } from "@/lib/attendance/repository";
 import { hasContentAccess, requireMember } from "@/lib/auth/member";
 import { addDaysToKey, diffDays, seoulTodayKey } from "@/lib/date";
 import { formatHoldRange } from "@/lib/members/format";
@@ -285,6 +285,7 @@ async function MyInfo() {
           <ProfileForm
             name={member.name}
             avatarUrl={member.avatarUrl}
+            mvpRank={member.role === "member" ? await getMyMvpRank() : null}
             phone={member.phone}
             birthDate={member.birthDate}
             gender={member.gender}
